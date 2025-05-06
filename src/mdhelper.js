@@ -7,6 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import layouts from 'handlebars-layouts';
 import { fileURLToPath } from 'url';
+import registerTabs from './tabs.js';
+
 
 // Get package directory path
 const __filename = fileURLToPath(import.meta.url);
@@ -166,6 +168,7 @@ const marked = new Marked(
       }
     })
   );
+  registerTabs(marked);
 
 // Override renderer methods
 // heading renderer
@@ -227,6 +230,10 @@ function renderPage(page, {props, html}) {
       navbar: transformSidebarItems(sidebars.navbar)
   };
     const pageData = {
+        copyright: {
+            year: new Date().getFullYear(),
+            name: settings.site.title
+        },
         settings: settings,
         sidebars: transformedSidebars,
         sidebarsNavbar: transformedSidebarsNavbar.navbar,

@@ -62,6 +62,18 @@
     [data-theme="dark"] .prose a:hover {
       color: #93c5fd !important;
     }
+    [data-theme="dark"] .prose strong {
+      color: #f8fafc !important;
+    }
+    [data-theme="dark"] .prose em {
+      color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] .prose code {
+      color: #f8fafc !important;
+      background-color: #1e293b !important;
+      padding: 0.2em 0.4em !important;
+      border-radius: 0.25rem !important;
+    }
   </style>
   <script>
     // Check system preference
@@ -88,7 +100,13 @@
         </svg>
       </label>
     </div>
-    <div class="mx-2 flex-1 px-2"><a href="/index.html" class="hover:opacity-80">{{title}}</a></div>
+    <div class="mx-2 flex-1 px-2">
+      <a class="flex whitespace-nowrap" href="/index.html">
+          <img src="/okidokilogo.svg" alt="Okidoki Logo"
+            class="h-6 w-6 mr-1 [&_path]:stroke-green-500 [&_circle]:stroke-green-500" />
+          <span class="pl-1 text-xl font-bold">{{title}}</span>
+      </a>
+    </div>
     <div class="hidden flex-none lg:block">
       <ul class="menu menu-horizontal">
         <!-- Navbar menu content here -->          
@@ -102,9 +120,10 @@
   <div class="drawer lg:drawer-open">
     <input id="my-drawer-menu" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
+      
       <!-- Page content here -->
       {{#block "main"}}
-      {{/block}}
+      {{/block}}      
     </div>
     <div class="drawer-side">
       <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
@@ -126,6 +145,11 @@
       </ul>
     </div>
   </div>
+  <footer class="footer sm:footer-horizontal footer-center bg-base-200 text-base-content p-4">
+    <aside>
+      <p>Copyright © {{copyright.year}} - All right reserved by {{copyright.name}}</p>
+    </aside>
+  </footer>
 </body>
 
 </html>
