@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="{{keywords}}">
+  <title>{{title}}</title>
+  <link rel='canonical' href='{{baseUrl}}' />
+
+  <!-- Open Graph / Facebook -->
+  <meta property='og:type' content='website' />
+  <meta property='og:title' content='{{title}}' />
+  <meta property='og:description' content='RaptorDoc - Document your API like a pro' />
+  <meta property='og:image' content='{{baseUrl}}/og-image.png' />
+
+  <!-- Twitter -->
+  <meta property='twitter:card' content='summary_large_image' />
+  <meta property='twitter:title' content='{{title}}' />
+  <meta property='twitter:description' content='RaptorDoc - Document your API like a pro' />
+  <meta property='twitter:image' content='{{baseUrl}}/og-image.png' />
+  <link rel="stylesheet" href="https://unpkg.com/tailwindcss@1.4.6/dist/base.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tailwindcss@1.4.6/dist/components.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/@tailwindcss/typography@0.1.2/dist/typography.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tailwindcss@1.4.6/dist/utilities.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://unpkg.com/lunr/lunr.js" defer></script>
+  <!-- <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script> -->
+  <!-- <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}"  type="text/css" /> -->
+  <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
+</head>
+
+<body>
+  <div class="min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-base-100 shadow-lg fixed top-0 left-0 right-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="navbar">
+          <div class="navbar-start">
+            <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </label>
+            <a class="text-xl hidden lg:flex" href="/index.html">
+              <img src="/okidokilogo.svg" alt="Okidoki Logo"
+                class="h-6 w-6 mr-1 [&_path]:stroke-green-500 [&_circle]:stroke-green-500" />
+              <span class="pl-1">{{title}}</span>
+            </a>
+          </div>
+          <div class="navbar-center lg:flex">
+            <div class="w-full lg:min-w-[500px] lg:flex">
+              <div class="dropdown w-full">
+                <label class="input w-full">
+                  <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none"
+                      stroke="currentColor">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </g>
+                  </svg>
+                  <input role="button" type="search" class="grow" placeholder="Search tools" id="search-input"
+                    oninput="handleSearch(this.value)" />
+                  <kbd class="kbd kbd-sm">⌘</kbd>
+                  <kbd class="kbd kbd-sm">K</kbd>
+                </label>
+                <ul id="search-results"
+                  class="menu dropdown-content bg-base-100 rounded-box z-1 p-2 shadow-sm hidden w-full"></ul>
+              </div>
+            </div>
+
+          </div>
+          <div class="navbar-end">
+            <ul class="menu menu-horizontal px-1 hidden lg:flex">
+              <li><a href="/about.html" class="font-medium">About</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-2 lg:p-2 mt-16">
+      <div class="flex flex-row">
+        <!-- Left Sidebar -->
+        <div class="drawer flex-0 drawer-start lg:drawer-open">
+          <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+          <div class="drawer-content">
+            <!-- Page content here -->
+            
+          </div>
+          <div class="drawer-side h-[calc(100vh-4rem)] lg:sticky lg:top-16">
+            <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+            <ul class="menu menu-lg bg-base-200 text-base-content w-80 p-4">
+              <!-- Mobile-only menu items -->
+              <li><a href="/index.html">Home</a></li>
+              <li class="lg:hidden"><a href="/about.html">About</a></li>
+              <li class="lg:hidden">
+                <div class="divider"></div>
+              </li>
+
+              <!-- Sidebar content here -->
+
+              <!-- sidebars -->
+              {{#each sidebars}}
+              {{> menuNode this}}
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Main Content Area -->
+        {{#block "main"}}
+        {{/block}}
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class='footer footer-center p-10 text-base-content'>
+      <div>
+        <div class='mt-4'>
+          <p>Copyright © 2025 - All rights reserved</p>
+          <p class='mt-2'>
+            Powered by
+            <a href='https://codehooks.io' class='link link-primary'>Codehooks.io</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+
+</html>

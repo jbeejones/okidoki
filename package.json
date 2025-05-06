@@ -1,0 +1,43 @@
+{
+  "name": "okidoki",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": {
+    "okidoki": "./src/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "css": "npx @tailwindcss/cli -i ./src/templates/input.css -o ./dist/mystyles.css",
+    "bundle": "esbuild ./src/clientscript.js --bundle --minify --outfile=./dist/mybundle.js",
+    "build": "node src/index.js",
+    "start": "npx serve dist"
+  },
+  "keywords": [
+    "documentation",
+    "markdown",
+    "lunr",
+    "search",
+    "documentation generator"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Generate beautiful documentation from markdown",
+  "dependencies": {
+    "daisyui": "^5.0.6",
+    "handlebars": "^4.7.8",
+    "handlebars-layouts": "^3.1.4",
+    "highlight.js": "^11.11.1",
+    "js-yaml": "^4.1.0",
+    "lunr": "^2.3.9",
+    "marked": "^15.0.11",
+    "marked-highlight": "^2.2.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.14",
+    "@tailwindcss/typography": "^0.5.16",
+    "esbuild": "^0.25.1",
+    "tailwindcss": "^4.0.14"
+  }
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="{{keywords}}">
+  <title>{{title}}</title>
+  <link rel='canonical' href='{{baseUrl}}' />
+
+  <!-- Open Graph / Facebook -->
+  <meta property='og:type' content='website' />
+  <meta property='og:title' content='{{title}}' />
+  <meta property='og:description' content='RaptorDoc - Document your API like a pro' />
+  <meta property='og:image' content='{{baseUrl}}/og-image.png' />
+
+  <!-- Twitter -->
+  <meta property='twitter:card' content='summary_large_image' />
+  <meta property='twitter:title' content='{{title}}' />
+  <meta property='twitter:description' content='RaptorDoc - Document your API like a pro' />
+  <meta property='twitter:image' content='{{baseUrl}}/og-image.png' />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/typography@0.5.x/dist/typography.min.css" />
+  <script src="https://unpkg.com/lunr/lunr.js" defer></script>
+  <!-- <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script> -->
+  <!-- <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}"  type="text/css" /> -->
+  <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
+  <style>
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4,
+    [data-theme="dark"] .prose h5,
+    [data-theme="dark"] .prose h6 {
+      color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] .prose p {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .prose ul,
+    [data-theme="dark"] .prose ol {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .prose li {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .prose table {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .prose th {
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    [data-theme="dark"] .prose td {
+      border-color: #475569 !important;
+    }
+    [data-theme="dark"] .prose a {
+      color: #60a5fa !important;
+    }
+    [data-theme="dark"] .prose a:hover {
+      color: #93c5fd !important;
+    }
+  </style>
+  <script>
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+
+    // Listen for system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    });
+  </script>
+</head>
+
+<body class="bg-base-100" data-theme="system">
+  <!-- Navbar -->
+  <div class="navbar bg-base-200 w-full">
+    <div class="flex-none lg:hidden">
+      <label for="my-drawer-menu" aria-label="open sidebar" class="btn btn-square btn-ghost">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </label>
+    </div>
+    <div class="mx-2 flex-1 px-2"><a href="/index.html" class="hover:opacity-80">{{title}}</a></div>
+    <div class="hidden flex-none lg:block">
+      <ul class="menu menu-horizontal">
+        <!-- Navbar menu content here -->          
+          {{#each sidebarsNavbar}}
+            <li><a href="{{this.document}}">{{this.title}}</a></li>
+          {{/each}}
+      </ul>
+      <input type="text" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
+    </div>
+  </div>
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-menu" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+      <!-- Page content here -->
+      {{#block "main"}}
+      {{/block}}
+    </div>
+    <div class="drawer-side">
+      <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
+      <ul class="menu bg-base-200 min-h-full w-80 p-4">
+        <!-- Mobile menu items -->
+        <div class="lg:hidden mb-4">
+          <input type="text" placeholder="Search" class="input input-bordered w-full text-black mb-4" />
+          <li><a href="/index.html">Home</a></li>
+          <!-- Navbar menu content here -->          
+          {{#each sidebarsNavbar}}
+            <li><a href="{{this.document}}">{{this.title}}</a></li>
+          {{/each}}
+          <div class="divider"></div>
+        </div>
+        <!-- sidebars -->
+        {{#each sidebars}}
+        {{> menuNode this}}
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</body>
+
+</html>
