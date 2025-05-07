@@ -22,7 +22,7 @@ import Handlebars from 'handlebars';
  */
 //import { marked } from 'marked';
 function registerTabs(marked) {
-  Handlebars.registerHelper('tabs', function (options) {
+  Handlebars.registerHelper('code-examples', function (options) {
     // Initialize the tabs array at the root level
     options.data.root.tabs = [];
     
@@ -39,12 +39,12 @@ function registerTabs(marked) {
       const isChecked = index === 0 ? 'checked="checked"' : '';
       html.push(`<input type="radio" name="${tabId}" class="tab" aria-label="${tab.title}" ${isChecked}/>`);
       //const sanitizedContent = marked.parse(tab.content); 
-      const sanitizedContent = marked.parse(tab.content.replace(/\n\s*\n/g, '\n'));
-      html.push(`<div class="tab-content border-base-300 bg-base-100 p-0">${sanitizedContent}</div>`);
+      let sanitizedContent = tab.content;      
+      sanitizedContent = marked.parse(tab.content.replace(/\n\s*\n/g, '\n'));      
+      html.push(`<div class="tab-content border-base-300 bg-base-100 p-2">${sanitizedContent}</div>`);
     });
 
-    html.push(`</div>`);
-    console.log('code html', html);
+    html.push(`</div>`);    
     return new Handlebars.SafeString(html.join('\n'));
   });
 

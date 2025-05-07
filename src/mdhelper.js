@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import layouts from 'handlebars-layouts';
 import { fileURLToPath } from 'url';
+import registerHelpers from './hbshelpers.js';
 import registerTabs from './tabs.js';
 
 
@@ -88,71 +89,15 @@ handlebarsInstance.registerHelper(layouts(handlebarsInstance));
 // Register the layout partial
 handlebarsInstance.registerPartial('layout', layoutTemplate);
 
+// Register custom helpers
+registerHelpers(handlebarsInstance);
+
 // Define the page templates
 const templates = {
     layout: handlebarsInstance.compile(layoutTemplate),
     docpage: handlebarsInstance.compile(docpageTemplate)
 };
 
-// Register the equals Handlebars helper
-handlebarsInstance.registerHelper('eq', function(a, b, options) {
-    const ignoreCase = options.hash.ignoreCase || false;
-    if (ignoreCase && typeof a === 'string' && typeof b === 'string') {
-        return a.toLowerCase() === b.toLowerCase();
-    }
-    return a === b;
-});
-
-// Helpers
-handlebarsInstance.registerHelper('isArray', function(value, options) {
-    if (Array.isArray(value)) {
-        return options.fn(this);
-    }
-    return options.inverse(this);
-});
-
-handlebarsInstance.registerHelper('isObject', function(value, options) {
-    if (typeof value === 'object' && !Array.isArray(value)) {
-        return options.fn(this);
-    }
-    return options.inverse(this);
-});
-
-// Register menuNode partial
-handlebarsInstance.registerPartial('menuNode', `
-<ul>
-    {{#each this}}
-    <li>        
-        {{#isObject this}}
-            {{#if this.items}}
-                <details {{#if this.open}}open{{/if}}>
-                    <summary>{{this.title}}</summary>
-                    {{> menuNode this.items}}
-                </details>
-            {{else}}
-                {{#if this.url}}
-                    <a href="{{this.url}}">
-                        {{#if this.icon}}{{this.icon}} {{/if}}{{this.title}}
-                    </a>
-                {{else}}
-                    <a href="{{this.document}}">
-                        {{#if this.icon}}{{this.icon}} {{/if}}{{this.title}}
-                    </a>
-                {{/if}}
-            {{/if}}
-        {{else}}
-            <a href="{{this}}">
-                {{this}}
-            </a>
-        {{/isObject}}
-    </li>
-    {{/each}}
-</ul>
-`);
-
-handlebarsInstance.registerHelper('myfunc', (value, options)=>{
-    return new handlebars.SafeString('<p>This is a dynamic function, you passed in: ' + value + '</p>');
-});
 
 // Create a new renderer instance
 const renderer = {};
@@ -221,7 +166,7 @@ async function parseMarkdown(markdownContent) {
     return { props: mappedProps, md: markdownBody, html };
 }
 
-function renderPage(page, {props, html}) {
+function renderPage(template, {props, html, page}) {
     const { settings, sidebars } = loadConfig();
     const transformedSidebars = {
         menu: transformSidebarItems(sidebars.menu)        
@@ -229,6 +174,7 @@ function renderPage(page, {props, html}) {
     const transformedSidebarsNavbar = {
       navbar: transformSidebarItems(sidebars.navbar)
   };
+  console.log(`context: ${JSON.stringify(page, null, 2)}`);
     const pageData = {
         copyright: {
             year: new Date().getFullYear(),
@@ -240,7 +186,8 @@ function renderPage(page, {props, html}) {
         title: settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
         html,
-        props
+        props,
+        page
     };
     //console.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content

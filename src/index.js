@@ -149,6 +149,7 @@ if (!fs.existsSync('dist')) {
 const docs = await readMarkdownDocs()
 
 // Write HTML files to dist directory
+/*
 for (const doc of docs) {
     const htmlPath = path.join('dist', doc.path.replace('.md', '.html'));
     // Ensure parent directories exist
@@ -157,12 +158,14 @@ for (const doc of docs) {
     // Use renderPage to generate the complete HTML document
     const completeHtml = renderPage('docpage', {
         props: doc.props,
+        page: {path: doc.path},
         html: doc.html
     });
     
     fs.writeFileSync(htmlPath, completeHtml);
     logger.log(`Generated: ${htmlPath}`);
 }
+*/
 
 // Copy package dist files to user's dist directory
 const packageDistDir = path.join(packageDir, 'dist');
@@ -329,7 +332,8 @@ async function generateCommand(argv) {
             // Use renderPage to generate the complete HTML document
             const completeHtml = renderPage('docpage', {
                 props: doc.props,
-                html: doc.html
+                html: doc.html,
+                page: {path: doc.path}
             });
             //logger.log(`Complete HTML: ${completeHtml}`);
             fs.writeFileSync(htmlPath, completeHtml);
