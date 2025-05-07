@@ -21,7 +21,7 @@ import Handlebars from 'handlebars';
  * {{/tabs}}
  */
 //import { marked } from 'marked';
-function registerTabs(marked) {
+function registerTabs(md)  {
   Handlebars.registerHelper('code-examples', function (options) {
     // Initialize the tabs array at the root level
     options.data.root.tabs = [];
@@ -38,10 +38,9 @@ function registerTabs(marked) {
     tabs.forEach((tab, index) => {
       const isChecked = index === 0 ? 'checked="checked"' : '';
       html.push(`<input type="radio" name="${tabId}" class="tab" aria-label="${tab.title}" ${isChecked}/>`);
-      //const sanitizedContent = marked.parse(tab.content); 
-      let sanitizedContent = tab.content;      
-      sanitizedContent = marked.parse(tab.content.replace(/\n\s*\n/g, '\n'));      
-      html.push(`<div class="tab-content border-base-300 bg-base-100 p-2">${sanitizedContent}</div>`);
+      let sanitizedContent = md.render(tab.content);      
+      //sanitizedContent = md.render(tab.content.replace(/\n\s*\n/g, '\n'));      
+      html.push(`<div class="tab-content border-base-300 bg-base-100 pl-2 pr-2">${sanitizedContent}</div>`);
     });
 
     html.push(`</div>`);    

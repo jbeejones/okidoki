@@ -1,7 +1,8 @@
 import handlebars from 'handlebars';
 import yaml from 'js-yaml';
-import { Marked } from 'marked';
-import { markedHighlight } from "marked-highlight";
+import markdownit from 'markdown-it'
+//import { Marked } from 'marked';
+//import { markedHighlight } from "marked-highlight";
 import hljs from 'highlight.js';
 import fs from 'fs';
 import path from 'path';
@@ -20,10 +21,10 @@ function loadConfig() {
     try {
         const configPath = path.join(process.cwd(), 'okidoki.yaml');
         const settings = yaml.load(fs.readFileSync(configPath, 'utf8'));
-        
+
         const sidebarsYaml = fs.readFileSync(path.join(process.cwd(), 'sidebars.yaml'), 'utf8');
         const sidebars = yaml.load(sidebarsYaml);
-        
+
         return { settings, sidebars };
     } catch (error) {
         // Return default configuration if files don't exist
@@ -99,7 +100,25 @@ const templates = {
 };
 
 
+const md = markdownit({
+    html: true,
+    linkify: true,
+    typographer: true,
+    highlight: function (str, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return hljs.highlight(str, { language: lang }).value;
+            } catch (__) { }
+        }
+
+        return ''; // use external default escaping
+    }
+});
+// Register tabs helper
+registerTabs(md);
+
 // Create a new renderer instance
+/*
 const renderer = {};
     
 // Configure marked to use highlight.js
@@ -138,11 +157,12 @@ renderer.image = function(token) {
 
 // Set marked options
 marked.use({ renderer });
+*/
 // regex to extract frontmatter from markdown
 const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 
 // parse markdown and return props and html
-async function parseMarkdown(markdownContent) {    
+async function parseMarkdown(markdownContent) {
     const match = frontmatterRegex.exec(markdownContent);
 
     let props = {};
@@ -153,28 +173,28 @@ async function parseMarkdown(markdownContent) {
         props = yaml.load(yamlRaw) || {};
         markdownBody = markdownContent.slice(match[0].length);
     }
-    
+
     // Parse the markdown content
     const compiledBody = props.handlebars ? handlebars.compile(markdownBody) : markdownBody;
     const mappedProps = {};
     for (const [key, value] of Object.entries(props)) {
-        mappedProps[key] = typeof value === 'string' ? marked.parseInline(value) : value;
+        mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
     }
     //console.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
     //console.log(`compiledBody: ${compiledBody}`);
-    const html = marked.parse(props.handlebars ? compiledBody(mappedProps) : compiledBody);
+    const html = md.render(props.handlebars ? compiledBody(mappedProps) : compiledBody);
     return { props: mappedProps, md: markdownBody, html };
 }
 
-function renderPage(template, {props, html, page}) {
+function renderPage(template, { props, html, page }) {
     const { settings, sidebars } = loadConfig();
     const transformedSidebars = {
-        menu: transformSidebarItems(sidebars.menu)        
+        menu: transformSidebarItems(sidebars.menu)
     };
     const transformedSidebarsNavbar = {
-      navbar: transformSidebarItems(sidebars.navbar)
-  };
-  console.log(`context: ${JSON.stringify(page, null, 2)}`);
+        navbar: transformSidebarItems(sidebars.navbar)
+    };
+    //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
     const pageData = {
         copyright: {
             year: new Date().getFullYear(),
@@ -191,7 +211,7 @@ function renderPage(template, {props, html, page}) {
     };
     //console.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content
-    const content = templates.docpage({...pageData});
+    const content = templates.docpage({ ...pageData });
     return content;
 }
 
