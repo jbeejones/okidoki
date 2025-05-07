@@ -110,7 +110,7 @@
     <div class="hidden flex-none lg:block">
       <ul class="menu menu-horizontal">
         <!-- Navbar menu content here -->          
-          {{#each sidebarsNavbar}}
+          {{#each navbar}}
             <li><a href="{{this.document}}">{{this.title}}</a></li>
           {{/each}}
       </ul>
@@ -133,14 +133,14 @@
           <input type="text" placeholder="Search" class="input input-bordered w-full text-black mb-4" />
           <li><a href="/index.html">Home</a></li>
           <!-- Navbar menu content here -->          
-          {{#each sidebarsNavbar}}
+          {{#each navbar}}
             <li><a href="{{this.document}}">{{this.title}}</a></li>
           {{/each}}
           <div class="divider"></div>
         </div>
-        <!-- sidebars -->
+        <!-- sidebars -->        
         {{#each sidebars}}
-        {{> menuNode this}}
+        {{> menuNode this activeDocId=../page.path}}
         {{/each}}
       </ul>
     </div>

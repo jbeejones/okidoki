@@ -55,6 +55,8 @@ function copyDir(src, dest, options = {}) {
         }
     }
 }
+// global variable to store the document id
+let docID = 0;
 
 async function readMarkdownDocs(dir = 'docs') {
     const results = [];
@@ -77,12 +79,13 @@ async function readMarkdownDocs(dir = 'docs') {
             } else if (item.endsWith('.md')) {
                 logger.log(`Processing markdown file: ${fullPath}`);
                 const content = fs.readFileSync(fullPath, 'utf8');
-                const relativePath = path.relative('docs', fullPath);
+                const relativePath = '/'+path.relative('docs', fullPath).replace('.md', '.html');
                 
                 try {
                     const { props, md, html } = await parseMarkdown(content);    
                     //logger.log(`Created html: ${fullPath}, props: ${props}, md: ${md}, html: ${html}`);
                     results.push({
+                        id: docID++,
                         path: relativePath,
                         props,
                         markdown: md,
@@ -330,12 +333,14 @@ async function generateCommand(argv) {
             fs.mkdirSync(path.dirname(htmlPath), { recursive: true });
             
             // Use renderPage to generate the complete HTML document
-            const completeHtml = renderPage('docpage', {
+            const renderContext = {
+                id: doc.id,
                 props: doc.props,
                 html: doc.html,
                 page: {path: doc.path}
-            });
-            //logger.log(`Complete HTML: ${completeHtml}`);
+            };
+            const completeHtml = renderPage('docpage', renderContext);
+            logger.log(`Render context: ${JSON.stringify(renderContext, null, 2)}`);
             fs.writeFileSync(htmlPath, completeHtml);
             logger.log(`Generated: ${htmlPath}`);
         }

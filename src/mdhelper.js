@@ -186,7 +186,7 @@ async function parseMarkdown(markdownContent) {
     return { props: mappedProps, md: markdownBody, html };
 }
 
-function renderPage(template, { props, html, page }) {
+function renderPage(templateName, { props, html, page, id }) {
     const { settings, sidebars } = loadConfig();
     const transformedSidebars = {
         menu: transformSidebarItems(sidebars.menu)
@@ -194,6 +194,7 @@ function renderPage(template, { props, html, page }) {
     const transformedSidebarsNavbar = {
         navbar: transformSidebarItems(sidebars.navbar)
     };
+    //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
     //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
     const pageData = {
         copyright: {
@@ -202,14 +203,14 @@ function renderPage(template, { props, html, page }) {
         },
         settings: settings,
         sidebars: transformedSidebars,
-        sidebarsNavbar: transformedSidebarsNavbar.navbar,
+        navbar: transformedSidebarsNavbar.navbar,
         title: settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
         html,
         props,
         page
     };
-    //console.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
+    //console.log(`sidebars: ${JSON.stringify(pageData.sidebars, null, 2)}`);
     // First render the content
     const content = templates.docpage({ ...pageData });
     return content;
