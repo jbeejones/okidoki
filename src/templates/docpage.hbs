@@ -2,8 +2,10 @@
 {{#content "main"}}  
     <div class="breadcrumbs text-sm pl-2">
       <ul>
-        <li>Home</li>
-        <li>{{page.path}}</li>
+        <li><a href="/">Home</a></li>
+        {{#each breadcrumbs}}
+          <li>{{this}}</li>
+        {{/each}}
       </ul>
     </div>
   <!-- hack to make tables look good -->

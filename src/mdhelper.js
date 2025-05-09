@@ -20,9 +20,56 @@ const packageDir = path.dirname(path.dirname(__filename));
 
 // Configuration loading function
 function loadConfig() {
+    // Default configuration
+    const defaultConfig = {
+        settings: {
+            site: {
+                title: "Documentation",
+                description: "Documentation generated with Okidoki",
+                baseUrl: "/",
+                favicon: "/favicon.ico",
+                theme: {
+                    light: "bumblebee",
+                    dark: "night"
+                },
+                copyright: {
+                    name: "Your Company"
+                }
+            },
+            build: {
+                outputDir: "dist",
+                clean: true,
+                minify: true
+            },
+            search: {
+                enabled: true,
+                maxResults: 10,
+                minSearchLength: 2
+            }
+        },
+        sidebars: {
+            menu: [],
+            navbar: []
+        }
+    };
+
+    // Deep merge function
+    function deepMerge(target, source) {
+        const result = { ...target };
+        for (const key in source) {
+            if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
+                result[key] = deepMerge(target[key], source[key]);
+            } else {
+                result[key] = source[key];
+            }
+        }
+        return result;
+    }
+
     try {
         const configPath = path.join(process.cwd(), 'okidoki.yaml');
-        const settings = yaml.load(fs.readFileSync(configPath, 'utf8'));
+        const userSettings = yaml.load(fs.readFileSync(configPath, 'utf8'));
+        const settings = deepMerge(defaultConfig.settings, userSettings);
 
         const sidebarsYaml = fs.readFileSync(path.join(process.cwd(), 'sidebars.yaml'), 'utf8');
         const sidebars = yaml.load(sidebarsYaml);
@@ -30,22 +77,7 @@ function loadConfig() {
         return { settings, sidebars };
     } catch (error) {
         // Return default configuration if files don't exist
-        return {
-            settings: {
-                site: {
-                    title: "Documentation",
-                    description: "Documentation generated with Okidoki",
-                    theme: {
-                        light: "bumblebee",
-                        dark: "night"
-                    }
-                }
-            },
-            sidebars: {
-                menu: [],
-                navbar: []
-            }
-        };
+        return defaultConfig;
     }
 }
 
@@ -216,6 +248,7 @@ function renderPage(templateName, { props, html, page, id }) {
             year: new Date().getFullYear(),
             name: settings.site.title
         },
+        breadcrumbs: page.path.split('/').filter(Boolean),
         settings: settings,
         sidebars: transformedSidebars,
         navbar: transformedSidebarsNavbar.navbar,
