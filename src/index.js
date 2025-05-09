@@ -151,25 +151,6 @@ if (!fs.existsSync('dist')) {
 
 const docs = await readMarkdownDocs()
 
-// Write HTML files to dist directory
-/*
-for (const doc of docs) {
-    const htmlPath = path.join('dist', doc.path.replace('.md', '.html'));
-    // Ensure parent directories exist
-    fs.mkdirSync(path.dirname(htmlPath), { recursive: true });
-    
-    // Use renderPage to generate the complete HTML document
-    const completeHtml = renderPage('docpage', {
-        props: doc.props,
-        page: {path: doc.path},
-        html: doc.html
-    });
-    
-    fs.writeFileSync(htmlPath, completeHtml);
-    logger.log(`Generated: ${htmlPath}`);
-}
-*/
-
 // Copy package dist files to user's dist directory
 const packageDistDir = path.join(packageDir, 'dist');
 if (fs.existsSync(packageDistDir)) {
@@ -260,6 +241,12 @@ menu:
   - title: Test
     document: /test.md 
 
+navbar:
+  - title: Blog
+    document: /blog.md
+  - title: Help
+    document: /help.md
+
 # Footer links
 footer:
   - title: "Resources"
@@ -287,6 +274,7 @@ footer:
         logger.info('2. Update sidebars.yaml with your documentation structure');
         logger.info('3. Add your markdown files to the docs directory');
         logger.info('4. Run "okidoki generate" to build your documentation');
+        logger.info('5. Tip: Run "npx serve dist" to view your documentation web app');
     } catch (error) {
         logger.error(`Failed to initialize project: ${error.message}`);
         process.exit(1);

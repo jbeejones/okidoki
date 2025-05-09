@@ -24,51 +24,51 @@
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/typography@0.5.x/dist/typography.min.css" />
   <script src="https://unpkg.com/lunr/lunr.js" defer></script>
-  <!-- <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script> -->
+  <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
   <!-- <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}"  type="text/css" /> -->
   <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
   <style>
-    [data-theme="dark"] .prose h1,
-    [data-theme="dark"] .prose h2,
-    [data-theme="dark"] .prose h3,
-    [data-theme="dark"] .prose h4,
-    [data-theme="dark"] .prose h5,
-    [data-theme="dark"] .prose h6 {
+    [data-theme="{{settings.site.theme.dark}}"] .prose h1,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h2,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h3,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h4,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h5,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h6 {
       color: #e2e8f0 !important;
     }
-    [data-theme="dark"] .prose p {
+    [data-theme="{{settings.site.theme.dark}}"] .prose p {
       color: #cbd5e1 !important;
     }
-    [data-theme="dark"] .prose ul,
-    [data-theme="dark"] .prose ol {
+    [data-theme="{{settings.site.theme.dark}}"] .prose ul,
+    [data-theme="{{settings.site.theme.dark}}"] .prose ol {
       color: #cbd5e1 !important;
     }
-    [data-theme="dark"] .prose li {
+    [data-theme="{{settings.site.theme.dark}}"] .prose li {
       color: #cbd5e1 !important;
     }
-    [data-theme="dark"] .prose table {
+    [data-theme="{{settings.site.theme.dark}}"] .prose table {
       color: #cbd5e1 !important;
     }
-    [data-theme="dark"] .prose th {
+    [data-theme="{{settings.site.theme.dark}}"] .prose th {
       color: #e2e8f0 !important;
       border-color: #475569 !important;
     }
-    [data-theme="dark"] .prose td {
+    [data-theme="{{settings.site.theme.dark}}"] .prose td {
       border-color: #475569 !important;
     }
-    [data-theme="dark"] .prose a {
+    [data-theme="{{settings.site.theme.dark}}"] .prose a {
       color: #60a5fa !important;
     }
-    [data-theme="dark"] .prose a:hover {
+    [data-theme="{{settings.site.theme.dark}}"] .prose a:hover {
       color: #93c5fd !important;
     }
-    [data-theme="dark"] .prose strong {
+    [data-theme="{{settings.site.theme.dark}}"] .prose strong {
       color: #f8fafc !important;
     }
-    [data-theme="dark"] .prose em {
+    [data-theme="{{settings.site.theme.dark}}"] .prose em {
       color: #e2e8f0 !important;
     }
-    [data-theme="dark"] .prose code {
+    [data-theme="{{settings.site.theme.dark}}"] .prose code {
       color: #f8fafc !important;
       background-color: #1e293b !important;
       padding: 0.2em 0.4em !important;
@@ -76,23 +76,27 @@
     }
   </style>
   <script>
+    // Define themes for light and dark modes
+    const lightTheme = '{{settings.site.theme.light}}';
+    const darkTheme = '{{settings.site.theme.dark}}';
+
     // Check system preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', darkTheme);
     } else {
-      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.setAttribute('data-theme', lightTheme);
     }
 
     // Listen for system preference changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', e.matches ? darkTheme : lightTheme);
     });
   </script>
 </head>
 
-<body class="bg-base-100" data-theme="system">
+<body class="bg-base-100" >
   <!-- Navbar -->
-  <div class="navbar bg-base-200 w-full">
+  <div class="navbar bg-base-100 w-full sticky top-0 z-40">
     <div class="flex-none lg:hidden">
       <label for="my-drawer-menu" aria-label="open sidebar" class="btn btn-square btn-ghost">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
@@ -120,14 +124,15 @@
   <div class="drawer lg:drawer-open">
     <input id="my-drawer-menu" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
-      
       <!-- Page content here -->
-      {{#block "main"}}
-      {{/block}}      
+      <div class="lg:pl-80">
+        {{#block "main"}}
+        {{/block}}
+      </div>      
     </div>
-    <div class="drawer-side">
+    <div class="drawer-side z-50">
       <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
-      <ul class="menu bg-base-200 min-h-full w-80 p-4">
+      <ul id="sidebar-menu" class="menu menu-md bg-base-100 min-h-full w-80 p-4 lg:pt-0 lg:overflow-y-auto lg:fixed lg:top-12 lg:h-[calc(100vh-3rem)]">
         <!-- Mobile menu items -->
         <div class="lg:hidden mb-4">
           <input type="text" placeholder="Search" class="input input-bordered w-full text-black mb-4" />
@@ -140,12 +145,13 @@
         </div>
         <!-- sidebars -->        
         {{#each sidebars}}
-        {{> menuNode this activeDocId=../page.path}}
+          {{menuNode this activeDocId=../page.path}}
         {{/each}}
+        
       </ul>
     </div>
   </div>
-  <footer class="footer sm:footer-horizontal footer-center bg-base-200 text-base-content p-4">
+  <footer class="footer sm:footer-horizontal footer-center text-base-content p-4">
     <aside>
       <p>Copyright © {{copyright.year}} - All right reserved by {{copyright.name}}</p>
     </aside>

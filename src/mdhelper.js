@@ -1,6 +1,8 @@
 import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 import markdownit from 'markdown-it'
+import markdownItAnchor from 'markdown-it-anchor';
+import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
 //import { markedHighlight } from "marked-highlight";
 import hljs from 'highlight.js';
@@ -32,7 +34,11 @@ function loadConfig() {
             settings: {
                 site: {
                     title: "Documentation",
-                    description: "Documentation generated with Okidoki"
+                    description: "Documentation generated with Okidoki",
+                    theme: {
+                        light: "bumblebee",
+                        dark: "night"
+                    }
                 }
             },
             sidebars: {
@@ -46,12 +52,21 @@ function loadConfig() {
 // Transform document paths from .md to .html
 function transformDocumentPath(path) {
     if (!path) return path;
+    
+    // Split the path into base path and anchor
+    const [basePath, anchor] = path.split('#');
+    
+    // Transform the base path
+    let transformedPath = basePath;
     // If path already has .html extension, return as is
-    if (path.endsWith('.html')) return path;
+    if (transformedPath.endsWith('.html')) transformedPath = transformedPath;
     // If path has .md extension, replace with .html
-    if (path.endsWith('.md')) return path.replace('.md', '.html');
+    else if (transformedPath.endsWith('.md')) transformedPath = transformedPath.replace('.md', '.html');
     // If path has no extension, add .html
-    return `${path}.html`;
+    else transformedPath = `${transformedPath}.html`;
+    
+    // Reattach the anchor if it exists
+    return anchor ? `${transformedPath}#${anchor}` : transformedPath;
 }
 
 // Transform sidebar document paths
@@ -114,6 +129,8 @@ const md = markdownit({
         return ''; // use external default escaping
     }
 });
+
+md.use(markdownItAnchor, { slugify: s => slugify(s) })
 // Register tabs helper
 registerTabs(md);
 
@@ -180,8 +197,6 @@ async function parseMarkdown(markdownContent) {
     for (const [key, value] of Object.entries(props)) {
         mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
     }
-    //console.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
-    //console.log(`compiledBody: ${compiledBody}`);
     const html = md.render(props.handlebars ? compiledBody(mappedProps) : compiledBody);
     return { props: mappedProps, md: markdownBody, html };
 }

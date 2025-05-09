@@ -5,8 +5,17 @@ import lunr from 'lunr';
 const prebuiltIndex = {};
 const showHitsData = {};
 
+let idx;
+try {
+    if (prebuiltIndex && Object.keys(prebuiltIndex).length > 0) {
+        idx = lunr.Index.load(prebuiltIndex);
+    } else {
+        console.warn('Search index not available - search functionality disabled');
+    }
+} catch (e) {
+    console.warn('Failed to load search index:', e);
+}
 
-const idx = lunr.Index.load(prebuiltIndex);
 const searchResults = document.getElementById('search-results');
 const MAX_RESULTS = 30;
 let results = [];
@@ -138,3 +147,38 @@ const resultsWithMetadata = searchResults.map(result => {
   };
 });
 */
+
+// Function to mark active menu items based on current URL
+function markActiveMenuItems() {
+    const currentPath = window.location.pathname + window.location.hash;
+    const menuItems = document.querySelectorAll('#sidebar-menu ul li a');
+    
+    menuItems.forEach(item => {
+        const href = item.getAttribute('href');
+        console.log(`menu href: ${href}`);
+        if (!href) return;
+        
+        // Remove .html extension for comparison
+        const normalizedHref = href.replace('.html', '');
+        const normalizedPath = currentPath.replace('.html', '');
+        
+        // Check if current path matches or is a child of the menu item's path
+        const isActive = normalizedPath === normalizedHref || 
+                        (normalizedPath.startsWith(normalizedHref) && normalizedHref !== '/');
+        
+        console.log(`isActive: ${isActive}`, normalizedPath, normalizedHref);
+        if (isActive) {
+            item.classList.add('menu-active');
+            // If the item is inside a details element, open it
+            const details = item.closest('details');
+            if (details) {
+                details.setAttribute('open', '');
+            }
+        } else {
+            item.classList.remove('menu-active');
+        }
+    });
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', markActiveMenuItems);

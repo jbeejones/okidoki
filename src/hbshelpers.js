@@ -24,34 +24,50 @@ function registerHelpers(handlebarsInstance) {
     });
 
     // Register menuNode partial
-    handlebarsInstance.registerPartial('menuNode', `
-<ul>
-    {{#each this}}
-    <li>        
-        {{#isObject this}}
-            {{#if this.items}}
-                <details {{#if this.open}}open{{/if}}>
-                    <summary>{{this.title}}</summary>
-                    {{> menuNode this.items activeDocId=../activeDocId}}
-                </details>
-            {{else}}
-                {{#if this.url}}
-                    <a href="{{this.url}}" class="{{#eq this.document ../activeDocId}}menu-active{{else}}{{/eq}}">
-                        {{this.title}}
-                    </a>
-                {{else}}
-                    <a href="{{this.document}}" class="{{#eq this.document ../activeDocId}}menu-active{{else}}{{/eq}}">
-                        {{this.title}}
-                    </a>
-                {{/if}}
-            {{/if}}
-        {{else}}
-            
-        {{/isObject}}
-    </li>
-    {{/each}}
-</ul>
-`);
+    handlebarsInstance.registerHelper('menuNode', function(context, options) {
+        
+        if (!context || !Array.isArray(context)) {
+            return '';
+        }
+
+        const activeDocId = options.hash.activeDocId;        
+        const buildMenuItem = (item) => {
+            if (!item || typeof item !== 'object') {
+                return '';
+            }
+
+            if (item.items) {
+                return `
+                    <details ${item.open ? 'open' : ''}>
+                        <summary>${item.title}</summary>
+                        ${buildMenuList(item.items)}
+                    </details>
+                `;
+            }
+
+            const href = item.url || item.document;
+            const isActive = false; //item.document === activeDocId;
+            return `
+                <a href="${href}" class="${isActive ? 'menu-active' : ''}">
+                    ${item.title}
+                </a>
+            `;
+        };
+
+        const buildMenuList = (items) => {
+            return `
+                <ul>
+                    ${items.map(item => `
+                        <li>
+                            ${buildMenuItem(item)}
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        };
+
+        return new handlebarsInstance.SafeString(buildMenuList(context));
+    });
 
     handlebarsInstance.registerHelper('myfunc', (value, options) => {
         return new handlebars.SafeString('<p>This is a dynamic function, you passed in: ' + value + '</p>');
