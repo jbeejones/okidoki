@@ -58,8 +58,13 @@ function copyDir(src, dest, options = {}) {
 // global variable to store the document id
 let docID = 0;
 
-async function readMarkdownDocs(dir = 'docs') {
+async function readMarkdownDocs(dir = 'docs', resetId = true) {
     const results = [];
+    
+    // Reset document ID for clean processing
+    if (resetId) {
+        docID = 0;
+    }
     
     // Create docs directory if it doesn't exist
     if (!fs.existsSync(dir)) {
@@ -102,67 +107,45 @@ async function readMarkdownDocs(dir = 'docs') {
     return results;
 }
 
-// Read and parse the JSON file
-/*
-const documents = JSON.parse(fs.readFileSync('build/database-listings.json', 'utf8'))
-const showHitsData = {}
 
-const idx = lunr(function () {
-     
-    this.ref('_id')
-    this.field('title')
-    this.field('content')
-    this.field('ingress')
-    this.field('category')
-    this.field('siteUrl')    
-    this.field('companyName')
-    this.field('details', {
-        extractor: doc => doc.details?.map(detail => `${detail.label} ${detail.value}`).join(' ')
-    })
-
+// Create lunr search index
+function createSearchIndex(documents) {
+    const searchDocs = [];
+    const searchData = {};
     
+    // Build lunr index
+    const idx = lunr(function () {
+        this.ref('id');
+        this.field('title');
+        this.field('content');
+        this.field('path');
+        
+        documents.forEach(function (doc) {
+            // Extract searchable content
+            const searchContent = {
+                id: doc.id,
+                title: doc.props.title || 'Untitled',
+                content: doc.markdown || '', // Use markdown content for searching
+                path: doc.path
+            };
+            
+            this.add(searchContent);
+            
+            // Store display data for search results
+            searchData[doc.id] = {
+                id: doc.id,
+                title: doc.props.title || 'Untitled',
+                description: doc.props.description || '',
+                path: doc.path,
+                content: doc.markdown ? doc.markdown.substring(0, 200) + '...' : '' // Preview text
+            };
+        }, this);
+    });
 
-    documents.forEach(function (doc) {        
-        this.add(doc)
-        showHitsData[doc._id] = {
-            title: doc.title,
-            siteUrl: doc.siteUrl,
-            altImageUrl: doc.altImageUrl,
-            content: doc.content,
-            category: doc.category,
-            categorySlug: doc.categorySlug,
-            slug: doc.slug,
-            companyName: doc.companyName,
-            ingress: doc.ingress,
-            details: doc.details
-        }
-    }, this)
-})
-
-const serialized = JSON.stringify(idx)
-fs.writeFileSync('src/web/js/lunr-index.json', serialized)
-fs.writeFileSync('src/web/js/show-hits-data.json', JSON.stringify(showHitsData))
-*/
-
-// Create dist directory if it doesn't exist
-if (!fs.existsSync('dist')) {
-    fs.mkdirSync('dist');
+    return { index: idx, data: searchData };
 }
 
-const docs = await readMarkdownDocs()
-
-// Copy package dist files to user's dist directory
-const packageDistDir = path.join(packageDir, 'dist');
-if (fs.existsSync(packageDistDir)) {
-    copyDir(packageDistDir, 'dist');
-}
-// copy all files and subfolders from docs to dist
-// Copy all files and subfolders from docs to dist, except .md files
-copyDir('docs', 'dist', {
-    filter: (src) => !src.endsWith('.md')
-});
-
-console.log('Documentation generated successfully!');
+// Top-level processing removed - handled by commands
 
 async function initCommand(argv) {
     const { output } = argv;
@@ -175,8 +158,10 @@ async function initCommand(argv) {
             logger.info('Created docs directory');
         }
 
-        // Create example markdown file
-        const exampleContent = `---
+        // Create example markdown file only if it doesn't exist
+        const indexPath = 'docs/index.md';
+        if (!fs.existsSync(indexPath)) {
+            const exampleContent = `---
 title: Welcome to Okidoki
 description: Your documentation is now ready
 ---
@@ -191,11 +176,16 @@ This is an example documentation page. Edit this file to get started with your d
 - Search functionality
 - Beautiful UI
 `;
-        fs.writeFileSync('docs/index.md', exampleContent);
-        logger.info('Created example documentation file');
+            fs.writeFileSync(indexPath, exampleContent);
+            logger.info('Created example documentation file');
+        } else {
+            logger.info('Documentation file already exists, skipping example creation');
+        }
 
-        // Create okidoki.yaml configuration
-        const okidokiConfig = `# Okidoki Configuration
+        // Create okidoki.yaml configuration only if it doesn't exist
+        const configPath = 'okidoki.yaml';
+        if (!fs.existsSync(configPath)) {
+            const okidokiConfig = `# Okidoki Configuration
 
 # Site configuration
 site:
@@ -228,11 +218,16 @@ navigation:
   topNav: true
   footer: true
 `;
-        fs.writeFileSync('okidoki.yaml', okidokiConfig);
-        logger.info('Created okidoki.yaml configuration file');
+            fs.writeFileSync(configPath, okidokiConfig);
+            logger.info('Created okidoki.yaml configuration file');
+        } else {
+            logger.info('okidoki.yaml already exists, skipping configuration creation');
+        }
 
-        // Create sidebars.yaml for navigation
-        const sidebarsConfig = `# Sidebar Navigation Configuration
+        // Create sidebars.yaml for navigation only if it doesn't exist
+        const sidebarsPath = 'sidebars.yaml';
+        if (!fs.existsSync(sidebarsPath)) {
+            const sidebarsConfig = `# Sidebar Navigation Configuration
 
 # Main navigation items
 menu:
@@ -258,13 +253,18 @@ footer:
       - label: "Discussions"
         url: "https://github.com/yourusername/your-repo/discussions"
 `;
-        fs.writeFileSync('sidebars.yaml', sidebarsConfig);
-        logger.info('Created sidebars.yaml navigation file');
+            fs.writeFileSync(sidebarsPath, sidebarsConfig);
+            logger.info('Created sidebars.yaml navigation file');
+        } else {
+            logger.info('sidebars.yaml already exists, skipping navigation file creation');
+        }
 
-        // Copy default assets
+        // Copy default assets (excluding HTML files)
         const packageDistDir = path.join(packageDir, 'dist');
         if (fs.existsSync(packageDistDir)) {
-            copyDir(packageDistDir, output || 'dist');
+            copyDir(packageDistDir, output || 'dist', {
+                filter: (src) => !src.endsWith('.html')
+            });
             logger.info('Copied default assets');
         }
 
@@ -306,7 +306,7 @@ async function generateCommand(argv) {
             await initCommand({ output });
         }
 
-        const docs = await readMarkdownDocs(source);
+        let docs = await readMarkdownDocs(source);
 
         if (docs.length === 0) {
             logger.info('No markdown files found. Creating example content...');
@@ -314,6 +314,14 @@ async function generateCommand(argv) {
             // Read docs again after initialization
             docs = await readMarkdownDocs(source);
         }
+
+        // Create search index
+        const searchIndex = createSearchIndex(docs);
+
+        // Save search index and data as JSON files
+        fs.writeFileSync(path.join(output, 'lunr-index.json'), JSON.stringify(searchIndex.index));
+        fs.writeFileSync(path.join(output, 'search-data.json'), JSON.stringify(searchIndex.data));
+        logger.log('Created search index files');
 
         // Write HTML files to output directory
         for (const doc of docs) {
@@ -328,15 +336,17 @@ async function generateCommand(argv) {
                 page: {path: doc.path}
             };
             const completeHtml = renderPage('docpage', renderContext);
-            logger.log(`Render context: ${JSON.stringify(renderContext, null, 2)}`);
+            //logger.log(`Render context: ${JSON.stringify(renderContext, null, 2)}`);
             fs.writeFileSync(htmlPath, completeHtml);
-            logger.log(`Generated: ${htmlPath}`);
+            //logger.log(`Generated: ${htmlPath}`);
         }
 
-        // Copy package dist files to output directory
+        // Copy package dist files to output directory (excluding HTML files to avoid overwriting generated content)
         const packageDistDir = path.join(packageDir, 'dist');
         if (fs.existsSync(packageDistDir)) {
-            copyDir(packageDistDir, output);
+            copyDir(packageDistDir, output, {
+                filter: (src) => !src.endsWith('.html')
+            });
         }
 
         logger.info('Documentation generated successfully!');

@@ -1,0 +1,32 @@
+# Okidoki Configuration
+
+# Site configuration
+site:
+  title: "My Documentation"
+  description: "Documentation generated with Okidoki"
+  baseUrl: "/"
+  favicon: "/favicon.ico"
+
+# Build configuration
+build:
+  outputDir: "dist"
+  clean: true
+  minify: true
+
+# Search configuration
+search:
+  enabled: true
+  maxResults: 10
+  minSearchLength: 2
+
+# Theme configuration
+theme:
+  primaryColor: "#4F46E5"
+  darkMode: true
+  fontFamily: "Inter, system-ui, sans-serif"
+
+# Navigation configuration
+navigation:
+  sidebar: "sidebars.yaml"
+  topNav: true
+  footer: true

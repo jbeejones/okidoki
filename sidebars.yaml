@@ -1,0 +1,25 @@
+# Sidebar Navigation Configuration
+
+# Main navigation items
+menu:
+  - title: Getting Started
+    document: /start.md
+  - title: Test
+    document: /test.md 
+
+navbar:
+  - title: Blog
+    document: /blog.md
+  - title: Help
+    document: /help.md
+
+# Footer links
+footer:
+  - title: "Resources"
+    items:
+      - label: "GitHub"
+        url: "https://github.com/yourusername/your-repo"
+      - label: "Issues"
+        url: "https://github.com/yourusername/your-repo/issues"
+      - label: "Discussions"
+        url: "https://github.com/yourusername/your-repo/discussions"

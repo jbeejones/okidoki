@@ -207,6 +207,48 @@ renderer.image = function(token) {
 // Set marked options
 marked.use({ renderer });
 */
+
+
+function extractHeadings(markdown) {
+  const tokens = md.parse(markdown, {});
+  const toc = [];
+
+  let currentH1 = null;
+  let currentH2 = null;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+
+    if (token.type === 'heading_open') {
+      const level = parseInt(token.tag.slice(1), 10); // h1 => 1, h2 => 2, etc.
+      const titleToken = tokens[i + 1];
+      const content = titleToken.content;
+      const slug = slugify(content);
+
+      const node = {
+        level,
+        title: content,
+        slug,
+        children: []
+      };
+
+      if (level === 1) {
+        toc.push(node);
+        currentH1 = node;
+        currentH2 = null;
+      } else if (level === 2 && currentH1) {
+        currentH1.children.push(node);
+        currentH2 = node;
+      } else if (level === 3 && currentH2) {
+        currentH2.children.push(node);
+      }
+    }
+  }
+
+  return toc;
+}
+
+
 // regex to extract frontmatter from markdown
 const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 
@@ -229,6 +271,7 @@ async function parseMarkdown(markdownContent) {
     for (const [key, value] of Object.entries(props)) {
         mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
     }
+    //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     const html = md.render(props.handlebars ? compiledBody(mappedProps) : compiledBody);
     return { props: mappedProps, md: markdownBody, html };
 }

@@ -27,6 +27,10 @@
   <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
   <!-- <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}"  type="text/css" /> -->
   <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
   <style>
     [data-theme="{{settings.site.theme.dark}}"] .prose h1,
     [data-theme="{{settings.site.theme.dark}}"] .prose h2,
@@ -74,6 +78,107 @@
       padding: 0.2em 0.4em !important;
       border-radius: 0.25rem !important;
     }
+    
+    /* Search highlighting styles */
+    .search-highlight {
+      background-color: #fef08a !important; /* yellow-200 */
+      color: #854d0e !important; /* yellow-900 for contrast */
+      padding: 0.1em 0.2em !important;
+      border-radius: 0.2em !important;
+      font-weight: 500 !important;
+      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.3) !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .search-highlight {
+      background-color: #ca8a04 !important; /* yellow-600 for dark mode */
+      color: #fefce8 !important; /* yellow-50 for dark mode contrast */
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3) !important;
+    }
+    
+    /* Disable rubber band/overscroll effect to prevent menu layering issues */
+    html, body {
+      overscroll-behavior: none !important;
+      overscroll-behavior-x: none !important;
+      overscroll-behavior-y: none !important;
+    }
+    
+    /* Additional fix for webkit browsers */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ensure proper z-index layering for fixed elements */
+    .navbar {
+      z-index: 1000 !important;
+    }
+    
+    .drawer-side {
+      z-index: 999 !important;
+    }
+    
+    /* Prevent bounce scrolling on the drawer content */
+    .drawer-content {
+      overscroll-behavior: none !important;
+    }
+    
+    /* Force search results to display as single column */
+    #search-results,
+    #search-results-mobile,
+    #search-results-mobile-navbar {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    #search-results > li,
+    #search-results-mobile > li,
+    #search-results-mobile-navbar > li {
+      width: 100% !important;
+      display: block !important;
+      flex: none !important;
+    }
+    
+    #search-results > li > a,
+    #search-results-mobile > li > a,
+    #search-results-mobile-navbar > li > a {
+      width: 100% !important;
+      display: block !important;
+    }
+    
+    /* Search result focus and hover styles */
+    #search-results > li > a:focus,
+    #search-results-mobile > li > a:focus,
+    #search-results-mobile-navbar > li > a:focus {
+      background-color: rgb(var(--fallback-p,oklch(0.491 0.162 255.701))/0.2) !important;
+      outline: 2px solid rgb(var(--fallback-p,oklch(0.491 0.162 255.701))) !important;
+      outline-offset: -2px !important;
+      border-radius: 0.375rem !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] #search-results > li > a:focus,
+    [data-theme="{{settings.site.theme.dark}}"] #search-results-mobile > li > a:focus,
+    [data-theme="{{settings.site.theme.dark}}"] #search-results-mobile-navbar > li > a:focus {
+      background-color: rgb(var(--fallback-p,oklch(0.491 0.162 255.701))/0.3) !important;
+      outline: 2px solid rgb(var(--fallback-p,oklch(0.491 0.162 255.701))) !important;
+    }
+    
+    /* Safari-specific focus enhancement */
+    @supports (-webkit-appearance: none) {
+      #search-results > li > a:focus,
+      #search-results-mobile > li > a:focus,
+      #search-results-mobile-navbar > li > a:focus {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        box-shadow: 0 0 0 2px #3b82f6, inset 0 0 0 1px rgba(255,255,255,0.2) !important;
+      }
+      
+      [data-theme="{{settings.site.theme.dark}}"] #search-results > li > a:focus,
+      [data-theme="{{settings.site.theme.dark}}"] #search-results-mobile > li > a:focus,
+      [data-theme="{{settings.site.theme.dark}}"] #search-results-mobile-navbar > li > a:focus {
+        background-color: #60a5fa !important;
+        color: #1e293b !important;
+        box-shadow: 0 0 0 2px #60a5fa, inset 0 0 0 1px rgba(0,0,0,0.1) !important;
+      }
+    }
   </style>
   <script>
     // Define themes for light and dark modes
@@ -111,6 +216,24 @@
           <span class="pl-1 text-lg font-bold">{{title}}</span>
       </a>
     </div>
+    
+    <!-- Mobile search input - visible on mobile, hidden on desktop -->
+    <div class="flex-none lg:hidden mr-2">
+      <div class="dropdown dropdown-end">
+        <input 
+          id="search-mobile-navbar" 
+          type="text" 
+          placeholder="Search" 
+          class="input input-bordered input-sm w-32" 
+          oninput="handleSearch(this.value)" 
+          onfocus="if(window.searchResults && window.searchResults.length > 0) document.getElementById('search-results-mobile-navbar').classList.remove('hidden')"
+        />
+        <ul id="search-results-mobile-navbar" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto overflow-x-hidden">
+          <!-- Search results will be populated here -->
+        </ul>
+      </div>
+    </div>
+    
     <div class="hidden flex-none lg:block">
       <ul class="menu menu-lg menu-horizontal">
         <!-- Navbar menu content here -->          
@@ -118,7 +241,19 @@
             <li><a href="{{this.document}}">{{this.title}}</a></li>
           {{/each}}
       </ul>
-      <input type="text" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
+      <div class="dropdown dropdown-end">
+        <input 
+          id="search-desktop" 
+          type="text" 
+          placeholder="Search" 
+          class="input input-bordered w-24 md:w-auto" 
+          oninput="handleSearch(this.value)" 
+          onfocus="if(window.searchResults && window.searchResults.length > 0) document.getElementById('search-results').classList.remove('hidden')"
+        />
+        <ul id="search-results" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-96 p-2 shadow hidden max-h-96 overflow-y-auto overflow-x-hidden">
+          <!-- Search results will be populated here -->
+        </ul>
+      </div>
     </div>
   </div>
   <div class="drawer lg:drawer-open">
@@ -135,7 +270,19 @@
       <ul id="sidebar-menu" class="menu menu-md bg-base-100 min-h-full w-80 lg:mt-6 p-4 lg:pt-0 lg:pb-20 lg:overflow-y-auto lg:fixed lg:top-12 lg:h-[calc(100vh-3rem-4rem)]">
         <!-- Mobile menu items -->
         <div class="lg:hidden mb-4">
-          <input type="text" placeholder="Search" class="input input-bordered w-full text-black mb-4" />
+          <div class="dropdown dropdown-top w-full">
+            <input 
+              id="search-mobile" 
+              type="text" 
+              placeholder="Search" 
+              class="input input-bordered w-full mb-4" 
+              oninput="handleSearch(this.value)" 
+              onfocus="if(window.searchResults && window.searchResults.length > 0) document.getElementById('search-results-mobile').classList.remove('hidden')"
+            />
+            <ul id="search-results-mobile" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow hidden max-h-96 overflow-y-auto overflow-x-hidden">
+              <!-- Search results will be populated here -->
+            </ul>
+          </div>
           <li><a href="/index.html">Home</a></li>
           <!-- Navbar menu content here -->          
           {{#each navbar}}
