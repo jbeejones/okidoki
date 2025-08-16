@@ -179,6 +179,23 @@
         box-shadow: 0 0 0 2px #60a5fa, inset 0 0 0 1px rgba(0,0,0,0.1) !important;
       }
     }
+    
+    /* Fix sidebar positioning - adjust top offset to account for navbar height */
+    @media (min-width: 1024px) {
+      #sidebar-menu {
+        top: 4rem !important; /* 64px instead of 48px to account for navbar height */
+      }
+    }
+    
+    /* Fix navbar font sizes - make them smaller */
+    .navbar .btn,
+    .navbar a {
+      font-size: 0.875rem !important; /* text-sm equivalent */
+    }
+    
+    .navbar .font-bold {
+      font-size: 1rem !important; /* text-base for logo/title */
+    }
   </style>
   <script>
     // Define themes for light and dark modes

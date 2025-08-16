@@ -166,48 +166,6 @@ md.use(markdownItAnchor, { slugify: s => slugify(s) })
 // Register tabs helper
 registerTabs(md);
 
-// Create a new renderer instance
-/*
-const renderer = {};
-    
-// Configure marked to use highlight.js
-const marked = new Marked(
-    markedHighlight({
-      emptyLangClass: 'hljs',
-      langPrefix: 'hljs language-',
-      highlight(code, lang, info) {
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        return hljs.highlight(code, { language }).value;
-      }
-    })
-  );
-  registerTabs(marked);
-
-// Override renderer methods
-// heading renderer
-renderer.heading = function({ tokens, depth }) {
-    const text = this.parser.parseInline(tokens);
-    const escapedText = text.toLowerCase().replace(/[^\w]+/g, '-').replace(/-+$/, '');
-
-    return `
-            <h${depth}>
-              <a name="${escapedText}" class="anchor" href="#${escapedText}">
-                <span class="header-link"></span>
-              </a>
-              ${text}
-            </h${depth}>`;
-};
-
-// image renderer
-renderer.image = function(token) {
-    const titleAttr = token.title ? ` title="${token.title}"` : '';
-    return `<img src="${token.href}" alt="${token.text}"${titleAttr} class="max-w-full h-auto">`;
-};
-
-// Set marked options
-marked.use({ renderer });
-*/
-
 
 function extractHeadings(markdown) {
   const tokens = md.parse(markdown, {});

@@ -260,9 +260,9 @@ footer:
         }
 
         // Copy default assets (excluding HTML files)
-        const packageDistDir = path.join(packageDir, 'dist');
-        if (fs.existsSync(packageDistDir)) {
-            copyDir(packageDistDir, output || 'dist', {
+        const packageAssetsDir = path.join(packageDir, 'assets');
+        if (fs.existsSync(packageAssetsDir)) {
+            copyDir(packageAssetsDir, output, {
                 filter: (src) => !src.endsWith('.html')
             });
             logger.info('Copied default assets');
@@ -274,7 +274,7 @@ footer:
         logger.info('2. Update sidebars.yaml with your documentation structure');
         logger.info('3. Add your markdown files to the docs directory');
         logger.info('4. Run "okidoki generate" to build your documentation');
-        logger.info('5. Tip: Run "npx serve dist" to view your documentation web app');
+        logger.info(`5. Tip: Run "npx serve ${output}" to view your documentation web app`);
     } catch (error) {
         logger.error(`Failed to initialize project: ${error.message}`);
         process.exit(1);
@@ -341,10 +341,10 @@ async function generateCommand(argv) {
             //logger.log(`Generated: ${htmlPath}`);
         }
 
-        // Copy package dist files to output directory (excluding HTML files to avoid overwriting generated content)
-        const packageDistDir = path.join(packageDir, 'dist');
-        if (fs.existsSync(packageDistDir)) {
-            copyDir(packageDistDir, output, {
+        // Copy package assets files to output directory (excluding HTML files to avoid overwriting generated content)
+        const packageAssetsDir = path.join(packageDir, 'assets');
+        if (fs.existsSync(packageAssetsDir)) {
+            copyDir(packageAssetsDir, output, {
                 filter: (src) => !src.endsWith('.html')
             });
         }

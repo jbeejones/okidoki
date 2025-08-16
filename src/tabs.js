@@ -22,7 +22,7 @@ import Handlebars from 'handlebars';
  */
 //import { marked } from 'marked';
 function registerTabs(md)  {
-  Handlebars.registerHelper('code-examples', function (options) {
+  Handlebars.registerHelper('tabs', function (options) {
     // Initialize the tabs array at the root level
     options.data.root.tabs = [];
     
