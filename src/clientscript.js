@@ -5,26 +5,489 @@ let idx;
 let searchData = {};
 let searchResults = [];
 
-// Initialize search functionality
+// Cache keys for localStorage
+const CACHE_KEYS = {
+    INDEX: 'okidoki_lunr_index',
+    DATA: 'okidoki_search_data',
+    META: 'okidoki_search_meta',
+    INDEX_ETAG: 'okidoki_lunr_index_etag',
+    DATA_ETAG: 'okidoki_search_data_etag',
+    TIMESTAMP: 'okidoki_cache_timestamp'
+};
+
+// Cache expiry time (24 hours in milliseconds)
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+
+// Function to clear search cache from localStorage
+function clearSearchCache() {
+    console.log('🧹 Clearing search cache from localStorage...');
+    
+    const keysToRemove = Object.values(CACHE_KEYS);
+    let removedCount = 0;
+    
+    for (const key of keysToRemove) {
+        if (localStorage.getItem(key)) {
+            localStorage.removeItem(key);
+            removedCount++;
+        }
+    }
+    
+    console.log(`🧹 Cleared ${removedCount} cache entries`);
+}
+
+// Initialize search functionality with localStorage caching
 async function initializeSearch() {
     try {
-        // Load the prebuilt lunr index and search data
-        const [indexResponse, dataResponse] = await Promise.all([
-            fetch('/lunr-index.json'),
-            fetch('/search-data.json')
-        ]);
+        console.log('🔍 Initializing search...');
         
-        if (indexResponse.ok && dataResponse.ok) {
-            const prebuiltIndex = await indexResponse.json();
-            searchData = await dataResponse.json();
-            idx = lunr.Index.load(prebuiltIndex);
-        } else {
-            console.warn('Search index files not found - search functionality disabled');
+        // Try to load from cache first
+        const cachedData = await loadFromCache();
+        console.log('📦 Cache load result:', cachedData.success ? 'SUCCESS' : 'FAILED', cachedData.reason || '');
+        
+        if (cachedData.success) {
+            idx = cachedData.index;
+            searchData = cachedData.data;
+            console.log('✅ Search initialized from cache');
+            return;
         }
+        
+        // Cache miss or invalid - clear old cache and fetch from server
+        console.log('🌐 Cache miss - clearing old cache and fetching search data from server');
+        clearSearchCache();
+        await fetchAndCacheSearchData();
+        
     } catch (e) {
-        console.warn('Failed to load search index:', e);
+        console.warn('❌ Failed to initialize search:', e);
     }
 }
+
+// Load search data from localStorage cache
+async function loadFromCache() {
+    try {
+        console.log('📦 Attempting to load from cache...');
+        
+        // Check if localStorage is available
+        const localStorageAvailable = isLocalStorageAvailable();
+        console.log('💾 localStorage available:', localStorageAvailable);
+        
+        if (!localStorageAvailable) {
+            return { success: false, reason: 'localStorage not available' };
+        }
+        
+        // Try to get cached data
+        const cachedIndex = localStorage.getItem(CACHE_KEYS.INDEX);
+        const cachedData = localStorage.getItem(CACHE_KEYS.DATA);
+        const cachedMeta = localStorage.getItem(CACHE_KEYS.META);
+        const timestamp = localStorage.getItem(CACHE_KEYS.TIMESTAMP);
+        
+        console.log('📦 Cache check:', {
+            hasIndex: !!cachedIndex,
+            hasData: !!cachedData,
+            hasMeta: !!cachedMeta,
+            hasTimestamp: !!timestamp,
+            indexSize: cachedIndex ? `${(cachedIndex.length / 1024).toFixed(1)}KB` : 'none',
+            dataSize: cachedData ? `${(cachedData.length / 1024).toFixed(1)}KB` : 'none'
+        });
+        
+        if (!cachedIndex || !cachedData || !timestamp) {
+            return { success: false, reason: 'missing cached data' };
+        }
+        
+        // Check if we should validate cache with server
+        const shouldValidate = await shouldValidateCache(timestamp);
+        console.log('🔄 Should validate cache:', shouldValidate);
+        
+        if (shouldValidate) {
+            const isValid = await validateCacheWithServer();
+            console.log('✅ Cache validation result:', isValid ? 'VALID' : 'INVALID');
+            if (!isValid) {
+                console.log('🔄 Server files changed - cache invalid');
+                return { success: false, reason: 'server files changed' };
+            }
+        }
+        
+        console.log('📊 Parsing cached data...');
+        // Parse and validate cached data
+        const indexData = JSON.parse(cachedIndex);
+        const searchDataParsed = JSON.parse(cachedData);
+        const loadedIndex = lunr.Index.load(indexData);
+        
+        console.log('✅ Successfully loaded from cache');
+        return {
+            success: true,
+            index: loadedIndex,
+            data: searchDataParsed
+        };
+        
+    } catch (e) {
+        console.warn('❌ Failed to load from cache:', e);
+        return { success: false, reason: 'parse error: ' + e.message };
+    }
+}
+
+// Determine if we should validate cache with server
+async function shouldValidateCache(timestamp) {
+    const age = Date.now() - parseInt(timestamp);
+    const ageHours = age / (1000 * 60 * 60);
+    const expiryHours = CACHE_EXPIRY / (1000 * 60 * 60);
+    
+    console.log('⏰ Cache age check:', {
+        ageHours: ageHours.toFixed(2),
+        expiryHours,
+        expired: age > CACHE_EXPIRY
+    });
+    
+    // Always validate if cache is older than expiry time
+    if (age > CACHE_EXPIRY) {
+        console.log('⏰ Cache expired - validation required');
+        return true;
+    }
+    
+    // For content-hash based validation, check frequently since it's lightweight
+    // During development/testing: validate every 1 minute
+    // In production: you can increase this to 30-60 minutes
+    const contentHashValidationInterval = 1 * 60 * 1000; // 1 minute for testing
+    if (age > contentHashValidationInterval) {
+        console.log('🔄 Content hash validation interval reached - validation required');
+        return true;
+    }
+    
+    console.log('🎲 Cache is very fresh - skipping validation for now');
+    return false;
+}
+
+// Validate cache using ETags with HEAD requests (lightweight)
+async function validateCacheWithServer() {
+    try {
+        console.log('🔄 Validating cache with server using content hash...');
+        
+        // First try to get server metadata for content hash validation
+        const metaResponse = await fetch('/search-meta.json').catch(e => {
+            console.warn('📡 Meta request failed:', e.message);
+            return null;
+        });
+        
+        if (metaResponse && metaResponse.ok) {
+            console.log('📊 Got server metadata - using content hash validation');
+            const serverMeta = await metaResponse.json();
+            const cachedMeta = localStorage.getItem(CACHE_KEYS.META);
+            
+            console.log('🔍 Content hash validation:', {
+                hasServerMeta: !!serverMeta,
+                hasCachedMeta: !!cachedMeta
+            });
+            
+            if (cachedMeta) {
+                const parsedCachedMeta = JSON.parse(cachedMeta);
+                
+                console.log('🔍 Hash comparison:', {
+                    serverIndexHash: serverMeta.indexHash,
+                    cachedIndexHash: parsedCachedMeta.indexHash,
+                    serverDataHash: serverMeta.dataHash,
+                    cachedDataHash: parsedCachedMeta.dataHash
+                });
+                
+                // Compare content hashes - if either changed, cache is invalid
+                if (serverMeta.indexHash !== parsedCachedMeta.indexHash || 
+                    serverMeta.dataHash !== parsedCachedMeta.dataHash) {
+                    console.log('❌ Content hash mismatch - cache invalid');
+                    return false;
+                }
+                
+                console.log('✅ Content hash validation passed - cache is still valid');
+                return true;
+            } else {
+                console.log('❌ No cached metadata - assuming cache is invalid');
+                return false;
+            }
+        }
+        
+        // Fallback to ETag validation if metadata not available
+        console.log('🔄 Falling back to ETag validation...');
+        
+        const cachedIndexETag = localStorage.getItem(CACHE_KEYS.INDEX_ETAG);
+        const cachedDataETag = localStorage.getItem(CACHE_KEYS.DATA_ETAG);
+        
+        console.log('🏷️ Cached ETags:', { 
+            indexETag: cachedIndexETag, 
+            dataETag: cachedDataETag 
+        });
+        
+        // If we don't have ETags or metadata, invalidate cache to be safe
+        if (!cachedIndexETag && !cachedDataETag) {
+            console.log('🏷️ No ETags or metadata available - invalidating cache for safety');
+            return false; // Changed: be more aggressive about cache invalidation
+        }
+        
+        console.log('📡 Making HEAD requests for ETag validation...');
+        
+        // Use HEAD requests for lightweight validation
+        const [indexHead, dataHead] = await Promise.all([
+            fetch('/lunr-index.json', { method: 'HEAD' }).catch(e => {
+                console.warn('📡 Index HEAD request failed:', e.message);
+                return null;
+            }),
+            fetch('/search-data.json', { method: 'HEAD' }).catch(e => {
+                console.warn('📡 Data HEAD request failed:', e.message);
+                return null;
+            })
+        ]);
+        
+        console.log('📡 HEAD responses:', {
+            indexOk: indexHead?.ok,
+            dataOk: dataHead?.ok
+        });
+        
+        // Check if ETags match
+        if (indexHead && cachedIndexETag) {
+            const serverIndexETag = indexHead.headers.get('etag');
+            console.log('🏷️ Index ETag comparison:', { 
+                cached: cachedIndexETag, 
+                server: serverIndexETag 
+            });
+            
+            if (serverIndexETag && serverIndexETag !== cachedIndexETag) {
+                console.log('❌ Index ETag mismatch - cache invalid');
+                return false; // Index changed
+            }
+        }
+        
+        if (dataHead && cachedDataETag) {
+            const serverDataETag = dataHead.headers.get('etag');
+            console.log('🏷️ Data ETag comparison:', { 
+                cached: cachedDataETag, 
+                server: serverDataETag 
+            });
+            
+            if (serverDataETag && serverDataETag !== cachedDataETag) {
+                console.log('❌ Data ETag mismatch - cache invalid');
+                return false; // Data changed
+            }
+        }
+        
+        console.log('✅ ETag validation passed - cache is still valid');
+        return true; // Cache is still valid
+        
+    } catch (e) {
+        console.warn('❌ Failed to validate cache with server:', e);
+        console.log('🔄 Invalidating cache due to validation error for safety');
+        return false; // Changed: invalidate cache on error to be safe
+    }
+}
+
+// Fetch search data from server and cache it
+async function fetchAndCacheSearchData() {
+    try {
+        console.log('🌐 Fetching search data from server...');
+        
+        const [indexResponse, dataResponse, metaResponse] = await Promise.all([
+            fetch('/lunr-index.json'),
+            fetch('/search-data.json'),
+            fetch('/search-meta.json').catch(e => {
+                console.warn('📡 Meta fetch failed (this is ok for older builds):', e.message);
+                return null;
+            })
+        ]);
+        
+        console.log('📡 Fetch responses:', {
+            indexOk: indexResponse.ok,
+            indexStatus: indexResponse.status,
+            dataOk: dataResponse.ok,
+            dataStatus: dataResponse.status,
+            metaOk: metaResponse?.ok,
+            metaStatus: metaResponse?.status
+        });
+        
+        if (indexResponse.ok && dataResponse.ok) {
+            console.log('📊 Parsing response data...');
+            const prebuiltIndex = await indexResponse.json();
+            const fetchedSearchData = await dataResponse.json();
+            const fetchedMeta = metaResponse?.ok ? await metaResponse.json() : null;
+            
+            console.log('📊 Data parsed:', {
+                indexKeys: Object.keys(prebuiltIndex).length,
+                dataEntries: Object.keys(fetchedSearchData).length,
+                hasMeta: !!fetchedMeta
+            });
+            
+            // Load the index
+            console.log('🔍 Loading lunr index...');
+            idx = lunr.Index.load(prebuiltIndex);
+            searchData = fetchedSearchData;
+            
+            console.log('💾 Caching data...');
+            // Cache the data
+            await cacheSearchData(prebuiltIndex, fetchedSearchData, fetchedMeta, indexResponse, dataResponse, metaResponse);
+            
+            console.log('✅ Search data fetched and cached successfully');
+        } else {
+            console.warn('❌ Search index files not found - search functionality disabled');
+        }
+        
+    } catch (e) {
+        console.warn('❌ Failed to fetch search data:', e);
+    }
+}
+
+// Cache search data in localStorage
+async function cacheSearchData(indexData, searchData, metaData, indexResponse, dataResponse, metaResponse) {
+    try {
+        console.log('💾 Starting cache storage...');
+        
+        const localStorageAvailable = isLocalStorageAvailable();
+        console.log('💾 localStorage check for caching:', localStorageAvailable);
+        
+        if (!localStorageAvailable) {
+            console.warn('❌ localStorage not available - skipping cache');
+            return;
+        }
+        
+        console.log('💾 Storing data in localStorage...');
+        
+        // Store the data
+        const indexJson = JSON.stringify(indexData);
+        const dataJson = JSON.stringify(searchData);
+        const metaJson = metaData ? JSON.stringify(metaData) : null;
+        const timestamp = Date.now().toString();
+        
+        console.log('💾 Data sizes before storage:', {
+            indexSize: `${(indexJson.length / 1024).toFixed(1)}KB`,
+            dataSize: `${(dataJson.length / 1024).toFixed(1)}KB`,
+            metaSize: metaJson ? `${(metaJson.length / 1024).toFixed(1)}KB` : 'none',
+            totalSize: `${((indexJson.length + dataJson.length + (metaJson?.length || 0)) / 1024).toFixed(1)}KB`
+        });
+        
+        localStorage.setItem(CACHE_KEYS.INDEX, indexJson);
+        localStorage.setItem(CACHE_KEYS.DATA, dataJson);
+        localStorage.setItem(CACHE_KEYS.TIMESTAMP, timestamp);
+        
+        // Store metadata if available
+        if (metaJson) {
+            localStorage.setItem(CACHE_KEYS.META, metaJson);
+            console.log('💾 Metadata stored successfully');
+        }
+        
+        console.log('💾 Basic data stored successfully');
+        
+        // Store ETags if available for better cache invalidation
+        const indexETag = indexResponse.headers.get('etag');
+        const dataETag = dataResponse.headers.get('etag');
+        
+        console.log('🏷️ ETags:', { indexETag, dataETag });
+        
+        if (indexETag) {
+            localStorage.setItem(CACHE_KEYS.INDEX_ETAG, indexETag);
+        }
+        if (dataETag) {
+            localStorage.setItem(CACHE_KEYS.DATA_ETAG, dataETag);
+        }
+        
+        console.log('✅ Search data cached successfully');
+        
+        // Verify the cache was stored
+        const verification = {
+            hasIndex: !!localStorage.getItem(CACHE_KEYS.INDEX),
+            hasData: !!localStorage.getItem(CACHE_KEYS.DATA),
+            hasTimestamp: !!localStorage.getItem(CACHE_KEYS.TIMESTAMP)
+        };
+        console.log('✅ Cache verification:', verification);
+        
+    } catch (e) {
+        console.error('❌ Failed to cache search data:', e);
+        
+        // Handle localStorage quota exceeded or other errors
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            console.warn('💾 localStorage quota exceeded - clearing old cache data');
+            clearSearchCache();
+        } else {
+            console.warn('💾 Cache storage failed:', e.name, e.message);
+        }
+    }
+}
+
+// Check if localStorage is available and functional
+function isLocalStorageAvailable() {
+    try {
+        const test = '__localStorage_test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Expose cache management functions globally for debugging
+window.clearSearchCache = clearSearchCache;
+
+// Additional cache management utilities for debugging
+window.getSearchCacheInfo = function() {
+    if (!isLocalStorageAvailable()) {
+        return { error: 'localStorage not available' };
+    }
+    
+    const timestamp = localStorage.getItem(CACHE_KEYS.TIMESTAMP);
+    const indexSize = localStorage.getItem(CACHE_KEYS.INDEX)?.length || 0;
+    const dataSize = localStorage.getItem(CACHE_KEYS.DATA)?.length || 0;
+    const indexETag = localStorage.getItem(CACHE_KEYS.INDEX_ETAG);
+    const dataETag = localStorage.getItem(CACHE_KEYS.DATA_ETAG);
+    
+    return {
+        cached: !!timestamp,
+        timestamp: timestamp ? new Date(parseInt(timestamp)).toISOString() : null,
+        age: timestamp ? Date.now() - parseInt(timestamp) : null,
+        ageHours: timestamp ? ((Date.now() - parseInt(timestamp)) / (1000 * 60 * 60)).toFixed(2) : null,
+        indexSize: `${(indexSize / 1024).toFixed(2)} KB`,
+        dataSize: `${(dataSize / 1024).toFixed(2)} KB`,
+        totalSize: `${((indexSize + dataSize) / 1024).toFixed(2)} KB`,
+        indexETag,
+        dataETag,
+        expiryHours: CACHE_EXPIRY / (1000 * 60 * 60)
+    };
+};
+
+// Test cache validation manually
+window.testCacheValidation = async function() {
+    console.log('🧪 Testing cache validation manually...');
+    const isValid = await validateCacheWithServer();
+    console.log('🧪 Manual validation result:', isValid ? 'VALID' : 'INVALID');
+    return isValid;
+};
+
+// Force refresh search cache
+window.forceRefreshSearchCache = async function() {
+    console.log('Force refreshing search cache...');
+    clearSearchCache();
+    await initializeSearch();
+    console.log('Search cache refreshed');
+    return window.getSearchCacheInfo();
+};
+
+// Simple debugging utility to inspect localStorage
+window.debugLocalStorage = function() {
+    console.log('🔍 localStorage Debug Info:');
+    console.log('localStorage available:', isLocalStorageAvailable());
+    
+    if (!isLocalStorageAvailable()) {
+        return { error: 'localStorage not available' };
+    }
+    
+    const allKeys = Object.keys(localStorage).filter(key => key.startsWith('okidoki_'));
+    console.log('Okidoki cache keys found:', allKeys);
+    
+    allKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        const size = value ? value.length : 0;
+        console.log(`- ${key}: ${size} chars (${(size/1024).toFixed(1)}KB)`);
+        
+        // Show first 100 chars if it's not too long
+        if (size > 0 && size < 1000) {
+            console.log(`  Value: ${value.substring(0, 100)}${size > 100 ? '...' : ''}`);
+        }
+    });
+    
+    return { keys: allKeys, available: true };
+};
 
 // Function to check and apply highlighting from URL parameter or sessionStorage
 function checkAndApplyUrlHighlighting() {

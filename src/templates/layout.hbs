@@ -4,6 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Cache Control Directives -->
+  <meta http-equiv="Cache-Control" content="public, max-age=3600, must-revalidate">
+  <meta http-equiv="Expires" content="Thu, 01 Jan 2025 12:00:00 GMT">
+  <meta http-equiv="Pragma" content="cache">
+  <meta http-equiv="Last-Modified" content="Mon, 01 Jan 2024 12:00:00 GMT">
+  
   <meta name="keywords" content="{{keywords}}">
   <title>{{title}}</title>
   <link rel='canonical' href='{{baseUrl}}' />
@@ -227,9 +234,9 @@
       </label>
     </div>
     <div class="mx-2 flex-1 px-2">
-      <a class="flex whitespace-nowrap" href="/index.html">
-          <img src="/okidokilogo.svg" alt="Okidoki Logo"
-            class="h-6 w-6 mr-1 [&_path]:stroke-green-500 [&_circle]:stroke-green-500" />
+      <a class="flex items-center whitespace-nowrap" href="/index.html">
+          <img src="/okidokilogo.png" alt="Okidoki Logo"
+            class="h-12 w-12 mr-1 [&_path]:stroke-green-500 [&_circle]:stroke-green-500" />
           <span class="pl-1 text-lg font-bold">{{title}}</span>
       </a>
     </div>

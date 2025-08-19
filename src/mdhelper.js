@@ -12,14 +12,22 @@ import layouts from 'handlebars-layouts';
 import { fileURLToPath } from 'url';
 import registerHelpers from './hbshelpers.js';
 import registerTabs from './tabs.js';
+import logger from './logger.js';
 
 
 // Get package directory path
 const __filename = fileURLToPath(import.meta.url);
 const packageDir = path.dirname(path.dirname(__filename));
 
+// Cache for configuration
+let configCache = null;
+
 // Configuration loading function
 function loadConfig() {
+    // Return cached config if already loaded
+    if (configCache) {
+        return configCache;
+    }
     // Default configuration
     const defaultConfig = {
         settings: {
@@ -45,6 +53,8 @@ function loadConfig() {
                 enabled: true,
                 maxResults: 10,
                 minSearchLength: 2
+            },
+            globals: {
             }
         },
         sidebars: {
@@ -74,10 +84,12 @@ function loadConfig() {
         const sidebarsYaml = fs.readFileSync(path.join(process.cwd(), 'sidebars.yaml'), 'utf8');
         const sidebars = yaml.load(sidebarsYaml);
 
-        return { settings, sidebars };
+        configCache = { settings, sidebars };
+        return configCache;
     } catch (error) {
         // Return default configuration if files don't exist
-        return defaultConfig;
+        configCache = defaultConfig;
+        return configCache;
     }
 }
 
@@ -212,6 +224,7 @@ const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 
 // parse markdown and return props and html
 async function parseMarkdown(markdownContent) {
+    const { settings, sidebars } = loadConfig();
     const match = frontmatterRegex.exec(markdownContent);
 
     let props = {};
@@ -229,6 +242,7 @@ async function parseMarkdown(markdownContent) {
     for (const [key, value] of Object.entries(props)) {
         mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
     }
+    mappedProps.globals = settings.globals;
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     const html = md.render(props.handlebars ? compiledBody(mappedProps) : compiledBody);
     return { props: mappedProps, md: markdownBody, html };
@@ -259,7 +273,7 @@ function renderPage(templateName, { props, html, page, id }) {
         props,
         page
     };
-    //console.log(`sidebars: ${JSON.stringify(pageData.sidebars, null, 2)}`);
+    logger.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content
     const content = templates.docpage({ ...pageData });
     return content;

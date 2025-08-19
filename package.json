@@ -8,10 +8,13 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "css": "npx @tailwindcss/cli -i ./src/templates/input.css -o ./dist/mystyles.css",
-    "bundle": "esbuild ./src/clientscript.js --bundle --outfile=./dist/mybundle.js",
-    "build": "node src/index.js",
-    "start": "npx serve dist"
+    "css": "npx @tailwindcss/cli -i ./src/templates/input.css -o ./assets/mystyles.css",
+    "bundle": "esbuild ./src/clientscript.js --bundle --outfile=./assets/mybundle.js",
+    "build": "npm run bundle && node src/index.js generate",
+    "generate": "node src/index.js generate",
+    "start": "npx serve assets",
+    "dev": "nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec \"npm run generate\"",
+    "dev:serve": "npm run generate && concurrently \"nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec 'npm run generate'\" \"npx serve dist\""
   },
   "keywords": [
     "documentation",
@@ -40,6 +43,8 @@
     "@tailwindcss/cli": "^4.0.14",
     "@tailwindcss/typography": "^0.5.16",
     "esbuild": "^0.25.1",
-    "tailwindcss": "^4.0.14"
+    "tailwindcss": "^4.0.14",
+    "nodemon": "^3.1.4",
+    "concurrently": "^9.1.0"
   }
 }

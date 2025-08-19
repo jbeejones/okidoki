@@ -7,6 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseMarkdown, renderPage } from './mdhelper.js';
+import crypto from 'crypto';
+import logger from './logger.js';
 /*
 * Read the docs folder recursively.
 * Convert the markdown to html.
@@ -18,14 +20,7 @@ import { parseMarkdown, renderPage } from './mdhelper.js';
 const __filename = fileURLToPath(import.meta.url);
 const packageDir = path.dirname(path.dirname(__filename));
 
-// Logger utility
-const logger = {
-    verbose: false,
-    setVerbose: (value) => { logger.verbose = value; },
-    log: (message) => { if (logger.verbose) console.log(message); },
-    info: (message) => console.log(message),
-    error: (message) => console.error('Error:', message)
-};
+
 
 // Function to copy directory recursively
 function copyDir(src, dest, options = {}) {
@@ -147,8 +142,58 @@ function createSearchIndex(documents) {
 
 // Top-level processing removed - handled by commands
 
+// Function to copy all image files from source directory to output directory
+function copyAllImages(sourceDir, outputDir) {
+    let copiedCount = 0;
+    
+    function processDirectory(currentDir) {
+        const items = fs.readdirSync(currentDir);
+        
+        for (const item of items) {
+            const fullPath = path.join(currentDir, item);
+            const stat = fs.statSync(fullPath);
+            
+            if (stat.isDirectory()) {
+                processDirectory(fullPath);
+            } else {
+                // Check if it's an image file
+                const ext = path.extname(item).toLowerCase();
+                const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.tiff'];
+                
+                if (imageExtensions.includes(ext)) {
+                    // Calculate relative path from source directory
+                    const relativePath = path.relative(sourceDir, fullPath);
+                    const destPath = path.join(outputDir, relativePath);
+                    
+                    // Create destination directory if it doesn't exist
+                    const destDir = path.dirname(destPath);
+                    if (!fs.existsSync(destDir)) {
+                        fs.mkdirSync(destDir, { recursive: true });
+                    }
+                    
+                    // Copy the image file
+                    fs.copyFileSync(fullPath, destPath);
+                    copiedCount++;
+                    logger.log(`Copied image: ${relativePath}`);
+                }
+            }
+        }
+    }
+    
+    if (fs.existsSync(sourceDir)) {
+        processDirectory(sourceDir);
+    }
+    
+    return copiedCount;
+}
+
+// Function to generate content hash for cache invalidation
+function generateContentHash(data) {
+    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex').substring(0, 16);
+}
+
 async function initCommand(argv) {
-    const { output } = argv;
+    const { output, dev } = argv;
     logger.info('Initializing documentation project...');
     
     try {
@@ -259,6 +304,33 @@ footer:
             logger.info('sidebars.yaml already exists, skipping navigation file creation');
         }
 
+        // Create development package.json if --dev flag is used
+        if (dev) {
+            const packageJsonPath = 'package.json';
+            if (!fs.existsSync(packageJsonPath)) {
+                const packageJson = {
+                    "name": "my-documentation",
+                    "version": "1.0.0",
+                    "description": "Documentation project using OkiDoki",
+                    "scripts": {
+                        "dev": "nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec \"okidoki generate\"",
+                        "dev:serve": "okidoki generate && concurrently \"nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec 'okidoki generate'\" \"npx serve dist\"",
+                        "build": "okidoki generate",
+                        "serve": "npx serve dist"
+                    },
+                    "devDependencies": {
+                        "nodemon": "^3.1.4",
+                        "concurrently": "^9.1.0"
+                    }
+                };
+                fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+                logger.info('Created package.json with development scripts');
+                logger.info('Run "npm install" to install development dependencies');
+            } else {
+                logger.info('package.json already exists, skipping development setup');
+            }
+        }
+
         // Copy default assets (excluding HTML files)
         const packageAssetsDir = path.join(packageDir, 'assets');
         if (fs.existsSync(packageAssetsDir)) {
@@ -274,7 +346,20 @@ footer:
         logger.info('2. Update sidebars.yaml with your documentation structure');
         logger.info('3. Add your markdown files to the docs directory');
         logger.info('4. Run "okidoki generate" to build your documentation');
-        logger.info(`5. Tip: Run "npx serve ${output}" to view your documentation web app`);
+        
+        if (dev) {
+            logger.info('\nDevelopment workflow:');
+            logger.info('1. Run "npm install" to install development dependencies');
+            logger.info('2. Use "npm run dev:serve" for development with auto-reload');
+            logger.info('3. Use "npm run dev" to watch and regenerate only');
+        } else {
+            logger.info('\nFor development with auto-reload:');
+            logger.info('- Install nodemon globally: "npm install -g nodemon"');
+            logger.info('- Then run: "nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec \\"okidoki generate && npx serve dist\\""');
+            logger.info('- Or use: "okidoki init --dev" to create npm scripts');
+        }
+        
+        logger.info(`\nTip: Run "npx serve ${output}" to view your documentation web app`);
     } catch (error) {
         logger.error(`Failed to initialize project: ${error.message}`);
         process.exit(1);
@@ -318,10 +403,25 @@ async function generateCommand(argv) {
         // Create search index
         const searchIndex = createSearchIndex(docs);
 
-        // Save search index and data as JSON files
+        // Generate content hashes for cache invalidation
+        const indexHash = generateContentHash(searchIndex.index);
+        const dataHash = generateContentHash(searchIndex.data);
+        const buildTimestamp = Date.now();
+        
+        // Create search metadata for cache invalidation
+        const searchMeta = {
+            version: '1.0',
+            buildTimestamp,
+            indexHash,
+            dataHash,
+            totalDocs: docs.length
+        };
+
+        // Save search index, data, and metadata as JSON files
         fs.writeFileSync(path.join(output, 'lunr-index.json'), JSON.stringify(searchIndex.index));
         fs.writeFileSync(path.join(output, 'search-data.json'), JSON.stringify(searchIndex.data));
-        logger.log('Created search index files');
+        fs.writeFileSync(path.join(output, 'search-meta.json'), JSON.stringify(searchMeta, null, 2));
+        logger.log('Created search index files with metadata for cache invalidation');
 
         // Write HTML files to output directory
         for (const doc of docs) {
@@ -335,6 +435,7 @@ async function generateCommand(argv) {
                 html: doc.html,
                 page: {path: doc.path}
             };
+            logger.log(`Render page: ${doc.path}`);
             const completeHtml = renderPage('docpage', renderContext);
             //logger.log(`Render context: ${JSON.stringify(renderContext, null, 2)}`);
             fs.writeFileSync(htmlPath, completeHtml);
@@ -345,11 +446,24 @@ async function generateCommand(argv) {
         const packageAssetsDir = path.join(packageDir, 'assets');
         if (fs.existsSync(packageAssetsDir)) {
             copyDir(packageAssetsDir, output, {
-                filter: (src) => !src.endsWith('.html')
+                filter: (src) => {
+                    if (!src.endsWith('.html')) return true;
+                    // Allow status code HTML files (e.g., 404.html, 500.html)
+                    const fileName = path.basename(src);
+                    return /^\d{3}\.html$/.test(fileName);
+                }
             });
         }
+        
+        // Copy all image files from source directory to output directory
+        const copiedImageCount = copyAllImages(source, output);
+        if (copiedImageCount > 0) {
+            logger.log(`Successfully copied ${copiedImageCount} image files`);
+        } else {
+            logger.log('No image files found in source directory');
+        }
 
-        logger.info('Documentation generated successfully!');
+        logger.info(`Documentation generated successfully! (${docs.length} documents)`);
     } catch (error) {
         logger.error(`Failed to generate documentation: ${error.message}`);
         process.exit(1);
@@ -364,6 +478,12 @@ yargs(hideBin(process.argv))
             description: 'Output directory',
             type: 'string',
             default: 'dist'
+        },
+        dev: {
+            alias: 'd',
+            description: 'Create a package.json with development scripts (nodemon, concurrently)',
+            type: 'boolean',
+            default: false
         }
     }, initCommand)
     .command('generate', 'Generate documentation from markdown files', {
@@ -387,6 +507,17 @@ yargs(hideBin(process.argv))
         }
     }, generateCommand)
     .demandCommand(1, 'You need to specify a command')
+    .strict()
+    .fail((msg, err, yargs) => {
+        if (err) {
+            logger.error(err.message);
+        } else {
+            logger.error(msg);
+        }
+        console.error('\nUsage:');
+        yargs.showHelp();
+        process.exit(1);
+    })
     .help()
     .argv;
 
