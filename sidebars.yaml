@@ -4,6 +4,10 @@
 menu:
   - title: Getting Started
     document: /start.md
+  - title: Feature Demo
+    document: /demo.md
+  - title: Markdown Examples
+    document: /markdown-examples.md
   - title: Test
     document: /test.md 
 

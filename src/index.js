@@ -92,7 +92,8 @@ async function readMarkdownDocs(dir = 'docs', resetId = true) {
                         html: html
                     });
                 } catch (error) {
-                    logger.error(`Failed to process ${fullPath}: ${error.message}`);
+                    console.error(`Failed to process ${fullPath}: ${error.message}`);
+                    process.exit(1);
                 }
             }
         }

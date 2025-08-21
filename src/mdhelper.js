@@ -176,7 +176,7 @@ const md = markdownit({
 
 md.use(markdownItAnchor, { slugify: s => slugify(s) })
 // Register tabs helper
-registerTabs(md);
+registerTabs(md, handlebarsInstance);
 
 
 function extractHeadings(markdown) {
@@ -227,7 +227,7 @@ async function parseMarkdown(markdownContent) {
     const { settings, sidebars } = loadConfig();
     const match = frontmatterRegex.exec(markdownContent);
 
-    let props = {};
+    let props = { };
     let markdownBody = markdownContent;
 
     if (match) {
@@ -235,17 +235,25 @@ async function parseMarkdown(markdownContent) {
         props = yaml.load(yamlRaw) || {};
         markdownBody = markdownContent.slice(match[0].length);
     }
+    props = { ...settings, ...props };
 
     // Parse the markdown content
-    const compiledBody = props.handlebars ? handlebars.compile(markdownBody) : markdownBody;
-    const mappedProps = {};
+    const compiledBody = props.handlebars ? handlebarsInstance.compile(markdownBody) : markdownBody;
+    const mappedProps = { };
     for (const [key, value] of Object.entries(props)) {
         mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
     }
-    mappedProps.globals = settings.globals;
+    logger.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
-    const html = md.render(props.handlebars ? compiledBody(mappedProps) : compiledBody);
-    return { props: mappedProps, md: markdownBody, html };
+    
+    if (props.handlebars) {
+        const handlebarsResult = compiledBody(mappedProps);
+        const html = md.render(handlebarsResult);
+        return { props: mappedProps, md: markdownBody, html };
+    } else {
+        const html = md.render(compiledBody);
+        return { props: mappedProps, md: markdownBody, html };
+    }
 }
 
 function renderPage(templateName, { props, html, page, id }) {
@@ -273,7 +281,7 @@ function renderPage(templateName, { props, html, page, id }) {
         props,
         page
     };
-    logger.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
+    //logger.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content
     const content = templates.docpage({ ...pageData });
     return content;
