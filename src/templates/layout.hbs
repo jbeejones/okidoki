@@ -26,13 +26,9 @@
   <meta property='twitter:title' content='{{title}}' />
   <meta property='twitter:description' content='RaptorDoc - Document your API like a pro' />
   <meta property='twitter:image' content='{{baseUrl}}/og-image.png' />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/typography@0.5.x/dist/typography.min.css" />
+  <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}" type="text/css" />
   <script src="https://unpkg.com/lunr/lunr.js" defer></script>
   <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
-  <!-- <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}"  type="text/css" /> -->
   <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -84,6 +80,45 @@
       background-color: #1e293b !important;
       padding: 0.2em 0.4em !important;
       border-radius: 0.25rem !important;
+    }
+    
+    /* Fix code block styling in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .prose pre {
+      background-color: #0d1117 !important;
+      color: #c9d1d9 !important;
+      line-height: 1.45 !important; /* Better line height for code */
+      border: 1px solid #30363d !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .prose pre code {
+      background-color: transparent !important;
+      color: inherit !important;
+      padding: 0 !important; /* Remove padding since pre already has it */
+      line-height: inherit !important;
+      font-size: inherit !important;
+    }
+    
+    /* Ensure highlight.js styles work properly in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .hljs {
+      background: #0d1117 !important;
+      color: #c9d1d9 !important;
+      line-height: 1.45 !important;
+    }
+    
+    /* Fix line height for code blocks in light mode too */
+    [data-theme="{{settings.site.theme.light}}"] .prose pre {
+      line-height: 1.45 !important; /* Better line height for code */
+    }
+    
+    [data-theme="{{settings.site.theme.light}}"] .prose pre code {
+      line-height: inherit !important;
+    }
+    
+
+    
+    /* General hljs line-height fix for both themes */
+    .hljs {
+      line-height: 1.45 !important;
     }
     
     /* Search highlighting styles */

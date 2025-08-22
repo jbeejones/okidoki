@@ -2,10 +2,13 @@
 
 # Site configuration
 site:
-  title: "My Documentation"
-  description: "Documentation generated with Okidoki"
+  title: "My Docs"
+  description: "Docs generated with Okidoki"
   baseUrl: "/"
   favicon: "/favicon.ico"
+  theme:
+    light: "fantasy"
+    dark: "forest"
 
 # Build configuration
 build:
@@ -19,11 +22,11 @@ search:
   maxResults: 10
   minSearchLength: 2
 
-# Theme configuration
-theme:
-  primaryColor: "#4F46E5"
-  darkMode: true
-  fontFamily: "Inter, system-ui, sans-serif"
+# Theme configuration (legacy structure - now moved under site.theme)
+# theme:
+#   primaryColor: "#4F46E5"
+#   darkMode: true
+#   fontFamily: "Inter, system-ui, sans-serif"
 
 # Navigation configuration
 navigation:

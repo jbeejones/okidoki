@@ -42,7 +42,8 @@ function loadConfig() {
                 },
                 copyright: {
                     name: "Your Company"
-                }
+                },
+                assets: null // Custom assets directory path, defaults to "assets" folder if exists
             },
             build: {
                 outputDir: "dist",
@@ -320,4 +321,4 @@ function renderPage(templateName, { props, html, page, id }) {
     return content;
 }
 
-export { parseMarkdown, renderPage }; 
+export { parseMarkdown, renderPage, loadConfig }; 

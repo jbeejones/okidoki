@@ -6,7 +6,7 @@ import lunr from 'lunr';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseMarkdown, renderPage } from './mdhelper.js';
+import { parseMarkdown, renderPage, loadConfig } from './mdhelper.js';
 import crypto from 'crypto';
 import logger from './logger.js';
 /*
@@ -454,6 +454,28 @@ async function generateCommand(argv) {
                     return /^\d{3}\.html$/.test(fileName);
                 }
             });
+            logger.info('Copied default assets');
+        }
+        
+        // Copy user custom assets to override defaults
+        const { settings } = loadConfig();
+        let userAssetsDir = null;
+        
+        // Check for configured custom assets directory
+        if (settings.site.assets) {
+            userAssetsDir = path.resolve(settings.site.assets);
+        } else {
+            // Check for default "assets" folder in project root
+            const defaultAssetsDir = path.join(process.cwd(), 'assets');
+            if (fs.existsSync(defaultAssetsDir)) {
+                userAssetsDir = defaultAssetsDir;
+            }
+        }
+        
+        // Copy user assets if directory exists
+        if (userAssetsDir && fs.existsSync(userAssetsDir)) {
+            copyDir(userAssetsDir, output);
+            logger.info(`Copied custom assets from: ${path.relative(process.cwd(), userAssetsDir)}`);
         }
         
         // Copy all image files from source directory to output directory

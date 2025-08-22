@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "css": "npx @tailwindcss/cli -i ./src/templates/input.css -o ./assets/mystyles.css",
+    "css": "npx tailwindcss -i ./src/templates/input.css -o ./assets/mystyles.css",
     "bundle": "esbuild ./src/clientscript.js --bundle --outfile=./assets/mybundle.js",
     "build": "npm run bundle && node src/index.js generate",
     "generate": "node src/index.js generate",
@@ -28,7 +28,7 @@
   "description": "Generate beautiful documentation from markdown",
   "dependencies": {
     "@sindresorhus/slugify": "^2.2.1",
-    "daisyui": "^5.0.6",
+    "daisyui": "^4.12.24",
     "handlebars": "^4.7.8",
     "handlebars-layouts": "^3.1.4",
     "highlight.js": "^11.11.1",
@@ -40,11 +40,10 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.0.14",
     "@tailwindcss/typography": "^0.5.16",
+    "concurrently": "^9.1.0",
     "esbuild": "^0.25.1",
-    "tailwindcss": "^4.0.14",
     "nodemon": "^3.1.4",
-    "concurrently": "^9.1.0"
+    "tailwindcss": "^3.4.17"
   }
 }
