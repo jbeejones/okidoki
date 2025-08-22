@@ -156,6 +156,30 @@
   }
 }
 @layer utilities;
+@layer components {
+  .tabs .tab-content {
+    padding: 1rem !important;
+  }
+  .tabs .tab-content pre {
+    margin: 0.5rem 0 !important;
+  }
+  .tabs .tab-content pre code {
+    padding: 0.75rem !important;
+  }
+  .tabs {
+    margin-bottom: 1.5rem !important;
+  }
+  .alert {
+    padding: 0.75rem 1rem !important;
+    min-height: auto !important;
+  }
+  .alert span {
+    line-height: 1.4 !important;
+  }
+  .alert span p {
+    margin: 0 !important;
+  }
+}
 @layer base {
   :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light] {
     color-scheme: light;

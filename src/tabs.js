@@ -71,7 +71,7 @@ function registerTabs(md, handlebarsInstance)  {
     tabs.forEach((tab, index) => {
       const isChecked = index === 0 ? 'checked="checked"' : '';
       html.push(`<input type="radio" name="${tabId}" class="tab" aria-label="${tab.title}" ${isChecked}/>`);
-      html.push(`<div class="tab-content border-base-300 bg-base-100 p-6">`);
+      html.push(`<div class="tab-content border-base-300 bg-base-100 p-2">`);
       // Only normalize indentation - let the main markdown pipeline handle all processing
       const normalizedContent = normalizeIndentation(tab.content);
       html.push(`\n\n${normalizedContent}\n\n`);

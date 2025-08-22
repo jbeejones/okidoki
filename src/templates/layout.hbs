@@ -93,7 +93,88 @@
       padding: 0.1em 0.2em !important;
       border-radius: 0.2em !important;
       font-weight: 500 !important;
-      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.3) !important;
+    }
+    
+    /* Custom OkiDoki Component Overrides */
+    /* Fix excessive spacing around codeblocks in tabs */
+    .tabs .tab-content pre {
+      margin: 0 !important; /* Remove all margins from code blocks in tabs */
+    }
+    
+    .tabs .tab-content pre code {
+      margin: 0 !important; /* Remove any margins from code elements */
+    }
+    
+    /* Add bottom margin to tabs container */
+    .tabs {
+      margin-bottom: 1.5rem !important; /* Add space at bottom of tabs */
+    }
+    
+    /* Reduce alert box height for single-line content */
+    .alert {
+      padding: 0.75rem 1rem !important; /* Reduce from default padding */
+      min-height: auto !important; /* Remove minimum height constraint */
+      border: none !important; /* Remove gray border */
+      box-shadow: none !important; /* Remove any shadow effects */
+      outline: none !important; /* Remove any outline */
+    }
+    
+    /* More specific border removal for all alert types including base alert */
+    .alert,
+    .alert-success,
+    .alert-error,
+    .alert-warning,
+    .alert-info {
+      border: none !important;
+      border-width: 0 !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+      border-radius: 0.5rem !important; /* Keep rounded corners but no border */
+    }
+    
+    /* Remove any pseudo-element borders that DaisyUI might add */
+    .alert::before,
+    .alert::after,
+    .alert-success::before,
+    .alert-success::after,
+    .alert-error::before,
+    .alert-error::after,
+    .alert-warning::before,
+    .alert-warning::after,
+    .alert-info::before,
+    .alert-info::after {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    
+    .alert span {
+      line-height: 1.4 !important; /* Better line height for single lines */
+    }
+    
+    .alert span p {
+      margin: 0 !important; /* Remove paragraph margins inside alerts */
+    }
+    
+    /* Remove borders from ALL nested elements within alerts */
+    .alert *,
+    .alert p,
+    .alert ul,
+    .alert ol,
+    .alert li,
+    .alert code,
+    .alert pre,
+    .alert blockquote,
+    .alert h1, .alert h2, .alert h3, .alert h4, .alert h5, .alert h6,
+    .alert strong,
+    .alert em,
+    .alert a {
+      border: none !important;
+      border-width: 0 !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
     }
     
     [data-theme="{{settings.site.theme.dark}}"] .search-highlight {

@@ -6,3 +6,38 @@
     include: mockup-code;
 }
 @plugin "@tailwindcss/typography";
+
+/* Custom OkiDoki Component Overrides */
+@layer components {
+  /* Fix excessive padding around codeblocks in tabs */
+  .tabs .tab-content {
+    padding: 1rem !important; /* Reduce from default p-6 (1.5rem) to 1rem */
+  }
+  
+  .tabs .tab-content pre {
+    margin: 0.5rem 0 !important; /* Reduce vertical margins on code blocks */
+  }
+  
+  .tabs .tab-content pre code {
+    padding: 0.75rem !important; /* Reasonable padding inside code blocks */
+  }
+  
+  /* Add bottom margin to tabs container */
+  .tabs {
+    margin-bottom: 1.5rem !important; /* Add space at bottom of tabs */
+  }
+  
+  /* Reduce alert box height for single-line content */
+  .alert {
+    padding: 0.75rem 1rem !important; /* Reduce from default padding */
+    min-height: auto !important; /* Remove minimum height constraint */
+  }
+  
+  .alert span {
+    line-height: 1.4 !important; /* Better line height for single lines */
+  }
+  
+  .alert span p {
+    margin: 0 !important; /* Remove paragraph margins inside alerts */
+  }
+}

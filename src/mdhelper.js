@@ -175,6 +175,32 @@ const md = markdownit({
 });
 
 md.use(markdownItAnchor, { slugify: s => slugify(s) })
+
+// Custom renderer for links to convert .md to .html
+const defaultLinkOpen = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+  return self.renderToken(tokens, idx, options);
+};
+
+md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+  const token = tokens[idx];
+  const hrefIndex = token.attrIndex('href');
+  
+  if (hrefIndex >= 0) {
+    const href = token.attrs[hrefIndex][1];
+    
+    // Convert .md links to .html (for internal documentation links)
+    if (href.endsWith('.md')) {
+      token.attrs[hrefIndex][1] = href.replace(/\.md$/, '.html');
+    }
+    // Also handle .md links with hash fragments (e.g., file.md#section)
+    else if (href.includes('.md#')) {
+      token.attrs[hrefIndex][1] = href.replace(/\.md#/, '.html#');
+    }
+  }
+  
+  return defaultLinkOpen(tokens, idx, options, env, self);
+};
+
 // Register tabs helper
 registerTabs(md, handlebarsInstance);
 
@@ -247,9 +273,16 @@ async function parseMarkdown(markdownContent) {
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     
     if (props.handlebars) {
-        const handlebarsResult = compiledBody(mappedProps);
-        const html = md.render(handlebarsResult);
-        return { props: mappedProps, md: markdownBody, html };
+        try {
+            const handlebarsResult = compiledBody(mappedProps);
+            const html = md.render(handlebarsResult);
+            return { props: mappedProps, md: markdownBody, html };
+        } catch (error) {
+            console.error('Handlebars compilation error:', error);
+            // Fall back to non-handlebars processing
+            const html = md.render(markdownBody);
+            return { props: mappedProps, md: markdownBody, html };
+        }
     } else {
         const html = md.render(compiledBody);
         return { props: mappedProps, md: markdownBody, html };

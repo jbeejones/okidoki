@@ -297,7 +297,6 @@ print(f'Created user: {user}')
 {{#alert type="success"}}
 **Success Response**: User created with status code `201`
 {{/alert}}
-```
 
 🎨 [**See rendered API documentation example →**](demo.md#advanced-examples)
 
