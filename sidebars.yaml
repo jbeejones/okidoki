@@ -2,20 +2,20 @@
 
 # Main navigation items
 menu:
-  - title: Getting Started
-    document: /start.md
+  - title: About OkiDoki
+    document: /about.md
   - title: Feature Demo
     document: /demo.md
   - title: Markdown Examples
     document: /markdown-examples.md
-  - title: Test
-    document: /test.md 
+  - title: Admonitions Demo
+    document: /admonitions.md
 
 navbar:
-  - title: Blog
-    document: /blog.md
-  - title: Help
-    document: /help.md
+  - title: Documentation
+    document: /index.html
+  - title: About
+    document: /about.html
 
 # Footer links
 footer:

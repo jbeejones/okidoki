@@ -2340,22 +2340,23 @@
     }
   });
   function markActiveMenuItems() {
-    const currentPath = window.location.pathname + window.location.hash;
+    const currentPath = window.location.pathname;
     const menuItems = document.querySelectorAll("#sidebar-menu ul li a");
     menuItems.forEach((item) => {
       const href = item.getAttribute("href");
       if (!href) return;
-      const normalizedHref = href.replace(".html", "");
-      const normalizedPath = currentPath.replace(".html", "");
-      const isActive = normalizedPath === normalizedHref || normalizedPath.startsWith(normalizedHref) && normalizedHref !== "/";
+      const normalizedHref = href.replace(/^\//, "").replace(/\.html$/, "");
+      const normalizedPath = currentPath.replace(/^\//, "").replace(/\.html$/, "");
+      const isHome = (normalizedPath === "" || normalizedPath === "index") && (normalizedHref === "" || normalizedHref === "index");
+      const isActive = isHome || normalizedPath === normalizedHref;
       if (isActive) {
-        item.classList.add("menu-active");
+        item.classList.add("active");
         const details = item.closest("details");
         if (details) {
           details.setAttribute("open", "");
         }
       } else {
-        item.classList.remove("menu-active");
+        item.classList.remove("active");
       }
     });
   }

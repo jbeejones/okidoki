@@ -204,7 +204,7 @@ But this HTML is preserved: <strong>Bold text</strong>
 
 OkiDoki supports all standard markdown syntax:
 
-```markdown
+````markdown
 # Headers
 ## H2 through H6
 
@@ -219,7 +219,7 @@ OkiDoki supports all standard markdown syntax:
 2. With sub-items
    1. Like this
 
-[Links](https://example.com) and ![Images](image.png)
+[Links](https://example.com) and images ![Images](/images/okidokilogi.png)
 
 > Blockquotes
 > > Nested quotes
@@ -228,11 +228,11 @@ OkiDoki supports all standard markdown syntax:
 |--------|-----|-----------|
 | With   | Any | Content   |
 
-\```javascript
+```javascript
 // Syntax highlighted code blocks
 const example = "Hello World!";
-\```
 ```
+````
 
 🎨 [**See rendered markdown examples →**](demo.md#standard-markdown-features)
 
@@ -240,9 +240,9 @@ const example = "Hello World!";
 
 Here's how all OkiDoki features work together for real API documentation:
 
-```handlebars
+````handlebars
 {{#alert type="info"}}
-**Base URL**: {{api_base_url}}
+**Base URL**: {{{api_base_url}}}
 
 **Authentication**: Bearer token required for all endpoints.
 {{/alert}}
@@ -259,7 +259,7 @@ Create a new user in the system.
 
 {{#tabs}}
   {{#tab title="JavaScript"}}
-```javascript
+\```javascript
 const newUser = await fetch('{{api_base_url}}/users', {
     method: 'POST',
     headers: {
@@ -274,7 +274,7 @@ const newUser = await fetch('{{api_base_url}}/users', {
 
 const user = await newUser.json();
 console.log('Created user:', user);
-```
+\```
   {{/tab}}
   {{#tab title="Python"}}
 ```python
@@ -290,13 +290,14 @@ response = requests.post('{{api_base_url}}/users',
 
 user = response.json()
 print(f'Created user: {user}')
-```
+
   {{/tab}}
 {{/tabs}}
 
 {{#alert type="success"}}
 **Success Response**: User created with status code `201`
 {{/alert}}
+````
 
 🎨 [**See rendered API documentation example →**](demo.md#advanced-examples)
 

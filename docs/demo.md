@@ -39,103 +39,6 @@ If you have global variables defined, they would be accessible like: `{{globals.
 
 📄 [**View source code for variables →**](markdown-examples.md#frontmatter-variables)
 
-## Standard Markdown Features
-
-### Headers
-
-# Header 1
-## Header 2  
-### Header 3
-#### Header 4
-##### Header 5
-###### Header 6
-
-### Text Formatting
-
-This is **bold text**, this is *italic text*, this is ***bold and italic***, and this is ~~strikethrough~~.
-
-You can also use `inline code` within sentences.
-
-### Lists
-
-#### Unordered Lists
-- First item
-- Second item
-  - Nested item
-  - Another nested item
-    - Deep nested item
-- Third item
-
-#### Ordered Lists
-1. First step
-2. Second step
-   1. Substep A
-   2. Substep B
-3. Third step
-
-#### Task Lists
-- [x] Completed task
-- [ ] Incomplete task
-- [ ] Another incomplete task
-
-### Links and Images
-
-Here's a [link to OkiDoki](https://github.com/your-repo/okidoki) and here's an image:
-
-![OkiDoki Logo](./images/okidokilogo.png)
-
-### Blockquotes
-
-> This is a blockquote. It can contain multiple lines
-> and even **formatted text**.
->
-> > This is a nested blockquote.
-
-### Horizontal Rule
-
----
-
-### Tables
-
-| Feature | Status | Notes |
-|---------|---------|-------|
-| Tabs Helper | ✅ Complete | Multi-language code examples |
-| Alert Helper | ✅ Complete | Success, info, warning, error styles |
-| Badge Helper | ✅ Complete | Various badge types |
-| Global Variables | ✅ Complete | From okidoki.yaml |
-| Frontmatter | ✅ Complete | YAML metadata support |
-
-## Code Examples
-
-### Single Language Code Block
-
-```javascript
-// JavaScript example
-const greeting = "Hello, OkiDoki!";
-console.log(greeting);
-
-function generateDocs() {
-    return "Documentation generated successfully!";
-}
-```
-
-```python
-# Python example
-greeting = "Hello, OkiDoki!"
-print(greeting)
-
-def generate_docs():
-    return "Documentation generated successfully!"
-```
-
-```bash
-# Bash example
-echo "Hello, OkiDoki!"
-okidoki generate
-```
-
-📄 [**View source code for standard markdown →**](markdown-examples.md#standard-markdown-features)
-
 ## OkiDoki Handlebars Helpers
 
 ### Multi-Language Tabs
@@ -224,26 +127,38 @@ func main() {
 Alerts help highlight important information:
 
 {{#alert type="success"}}
-This is a success alert! Perfect for showing positive outcomes.
+This is a **success alert**! You can use *markdown* inside alerts, including [links](https://example.com) and `inline code`.
 {{/alert}}
 
 {{#alert type="info"}}
-This is an info alert. Great for providing additional context or tips.
+This is an **info alert** with a code example:
+
+```javascript
+const info = "Alerts support markdown!";
+console.log(info);
+```
 {{/alert}}
 
-{{#alert type="warning"}}
-This is a warning alert. Use it to highlight important caveats or potential issues.
+{{#alert}}
+⚠️ **Warning**: This alert contains:
+- A bullet list
+- *Italic text* 
+- **Bold text**
 {{/alert}}
 
 {{#alert type="error"}}
-This is an error alert. Use it to highlight critical issues or requirements.
+❌ **Error**: Critical issue detected!
+
+Please check your [configuration file](config.yaml) and ensure all required fields are present.
 {{/alert}}
 
 You can also use alerts with inline syntax:
 
-{{alert "Quick success message!" "success"}}
-
-{{alert "Important information to note" "info"}}
+{{alert "Quick **markdown** message with `code`!" "success"}}
+{{alert "Simple info message" "info"}}
+{{alert "Warning message" "warning"}}
+{{alert "Error message" "error"}}
+{{alert "Default alert"}}
 
 ### Badge Components
 
@@ -286,6 +201,40 @@ But this HTML is preserved: <strong>Bold text</strong>
 
 📄 [**View source code for handlebars helpers →**](markdown-examples.md#alert-components)
 
+## Standard Markdown Features
+
+OkiDoki supports all standard markdown syntax:
+
+# Headers
+## H2 through H6
+
+**Bold text** and *italic text* and ***both***
+~~Strikethrough~~ and `inline code`
+
+- Unordered lists
+  - Nested items
+- Task lists: - [x] Done - [ ] Todo
+
+1. Ordered lists
+2. With sub-items
+   1. Like this
+
+[Links](https://example.com) and images ![Images](/images/okidokilogo.png)
+
+> Blockquotes
+> > Nested quotes
+
+| Tables | Are | Supported |
+|--------|-----|-----------|
+| With   | Any | Content   |
+
+```javascript
+// Syntax highlighted code blocks
+const example = "Hello World!";
+```
+
+📄 [**View source code for standard markdown →**](markdown-examples.md#standard-markdown-features)
+
 ## Advanced Examples
 
 ### API Documentation Example
@@ -293,37 +242,33 @@ But this HTML is preserved: <strong>Bold text</strong>
 Here's how you might document an API endpoint using OkiDoki features:
 
 {{#alert type="info"}}
-**Base URL**: {{api_base_url}}
+**Base URL**: {{{api_base_url}}}
+
+**Authentication**: Bearer token required for all endpoints.
 {{/alert}}
 
-#### Create User Endpoint
-
-{{badge "POST" "primary"}} `/users`
+### Create User {{badge "POST" "primary"}}
 
 Create a new user in the system.
 
-**Parameters:**
+{{#alert type="warning"}}
+**Rate Limit**: 100 requests per minute per API key.
+{{/alert}}
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | ✅ | User's full name |
-| email | string | ✅ | User's email address |
-| role | string | ❌ | User role (default: 'user') |
-
-**Example Request:**
+**Endpoint**: `/users`
 
 {{#tabs}}
   {{#tab title="JavaScript"}}
-```js
+```javascript
 const newUser = await fetch('{{api_base_url}}/users', {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_API_KEY'
     },
     body: JSON.stringify({
         name: 'John Doe',
-        email: 'john@example.com',
-        role: 'admin'
+        email: 'john@example.com'
     })
 });
 
@@ -335,48 +280,28 @@ console.log('Created user:', user);
 ```python
 import requests
 
-response = requests.post('{{api_base_url}}/users', json={
-    'name': 'John Doe',
-    'email': 'john@example.com',
-    'role': 'admin'
-})
+response = requests.post('{{api_base_url}}/users', 
+    headers={'Authorization': 'Bearer YOUR_API_KEY'},
+    json={
+        'name': 'John Doe',
+        'email': 'john@example.com'
+    }
+)
 
 user = response.json()
 print(f'Created user: {user}')
 ```
   {{/tab}}
-  {{#tab title="cURL"}}
-```bash
-curl -X POST '{{api_base_url}}/users' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "admin"
-  }'
-```
-  {{/tab}}
 {{/tabs}}
 
-**Response:**
-
-```json
-{
-    "id": 123,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "admin",
-    "created_at": "2024-01-15T10:30:00Z"
-}
-```
 
 {{#alert type="success"}}
-**Success!** User created with ID: 123
+**Success Response**: User created with status code `201`
 {{/alert}}
 
 ### Installation Guide Example
 
-{{#alert type="warning"}}
+{{#alert}}
 Make sure you have Node.js 18+ installed before proceeding.
 {{/alert}}
 

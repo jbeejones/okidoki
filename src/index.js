@@ -104,6 +104,43 @@ async function readMarkdownDocs(dir = 'docs', resetId = true) {
 }
 
 
+// Helper function to generate a fallback title for documents
+function generateFallbackTitle(doc) {
+    // 1. Try frontmatter title first
+    if (doc.props.title) {
+        return doc.props.title;
+    }
+    
+    // 2. Try to extract first heading from markdown content
+    if (doc.markdown) {
+        const headingMatch = doc.markdown.match(/^#+\s+(.+)$/m);
+        if (headingMatch) {
+            return headingMatch[1].trim();
+        }
+    }
+    
+    // 3. Derive title from filename
+    if (doc.path) {
+        const filename = doc.path.split('/').pop(); // Get filename
+        const nameWithoutExt = filename.replace(/\.(html|md)$/, ''); // Remove extension
+        
+        // Handle special cases
+        if (nameWithoutExt === 'index') {
+            return 'Home';
+        }
+        
+        // Convert filename to readable title
+        const title = nameWithoutExt
+            .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
+            .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+        
+        return title;
+    }
+    
+    // 4. Final fallback
+    return 'Untitled';
+}
+
 // Create lunr search index
 function createSearchIndex(documents) {
     const searchDocs = [];
@@ -117,10 +154,12 @@ function createSearchIndex(documents) {
         this.field('path');
         
         documents.forEach(function (doc) {
+            const fallbackTitle = generateFallbackTitle(doc);
+            
             // Extract searchable content
             const searchContent = {
                 id: doc.id,
-                title: doc.props.title || 'Untitled',
+                title: fallbackTitle,
                 content: doc.markdown || '', // Use markdown content for searching
                 path: doc.path
             };
@@ -130,7 +169,7 @@ function createSearchIndex(documents) {
             // Store display data for search results
             searchData[doc.id] = {
                 id: doc.id,
-                title: doc.props.title || 'Untitled',
+                title: fallbackTitle,
                 description: doc.props.description || '',
                 path: doc.path,
                 content: doc.markdown ? doc.markdown.substring(0, 200) + '...' : '' // Preview text

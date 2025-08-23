@@ -2,6 +2,7 @@ import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 import markdownit from 'markdown-it'
 import markdownItAnchor from 'markdown-it-anchor';
+import markdownItContainer from 'markdown-it-container';
 import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
 //import { markedHighlight } from "marked-highlight";
@@ -176,6 +177,48 @@ const md = markdownit({
 });
 
 md.use(markdownItAnchor, { slugify: s => slugify(s) })
+
+// Add admonition support using markdown-it-container
+// Map admonition types to DaisyUI alert classes
+const admonitionTypes = {
+    'info': 'info',
+    'tip': 'success', 
+    'warning': 'warning',
+    'danger': 'error'
+};
+
+// Create a container for each admonition type
+Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
+    md.use(markdownItContainer, admonitionType, {
+        render: function (tokens, idx) {
+            const token = tokens[idx];
+            
+            if (token.nesting === 1) {
+                // Opening tag
+                let iconSvg = '';
+                switch (alertType) {
+                    case 'success':
+                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle></svg>';
+                        break;
+                    case 'info':
+                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+                        break;
+                    case 'warning':
+                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+                        break;
+                    case 'error':
+                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+                        break;
+                }
+                
+                return `<div role="alert" class="alert alert-${alertType} mb-2">${iconSvg}<span>`;
+            } else {
+                // Closing tag
+                return '</span></div>\n\n';
+            }
+        }
+    });
+});
 
 // Custom renderer for links to convert .md to .html
 const defaultLinkOpen = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {

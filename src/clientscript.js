@@ -801,30 +801,33 @@ document.addEventListener('click', function(event) {
 
 // Function to mark active menu items based on current URL
 function markActiveMenuItems() {
-    const currentPath = window.location.pathname + window.location.hash;
+    const currentPath = window.location.pathname;
     const menuItems = document.querySelectorAll('#sidebar-menu ul li a');
     
     menuItems.forEach(item => {
         const href = item.getAttribute('href');
         if (!href) return;
         
-        // Remove .html extension for comparison
-        const normalizedHref = href.replace('.html', '');
-        const normalizedPath = currentPath.replace('.html', '');
+        // Normalize paths for comparison
+        const normalizedHref = href.replace(/^\//, '').replace(/\.html$/, '');
+        const normalizedPath = currentPath.replace(/^\//, '').replace(/\.html$/, '');
         
-        // Check if current path matches or is a child of the menu item's path
-        const isActive = normalizedPath === normalizedHref || 
-                        (normalizedPath.startsWith(normalizedHref) && normalizedHref !== '/');
+        // Handle index/home page
+        const isHome = (normalizedPath === '' || normalizedPath === 'index') && 
+                      (normalizedHref === '' || normalizedHref === 'index');
+        
+        // Check for exact match or if it's the home page
+        const isActive = isHome || normalizedPath === normalizedHref;
         
         if (isActive) {
-            item.classList.add('menu-active');
+            item.classList.add('active');
             // If the item is inside a details element, open it
             const details = item.closest('details');
             if (details) {
                 details.setAttribute('open', '');
             }
         } else {
-            item.classList.remove('menu-active');
+            item.classList.remove('active');
         }
     });
 }
