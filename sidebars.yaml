@@ -10,6 +10,8 @@ menu:
     document: /markdown-examples.md
   - title: Admonitions Demo
     document: /admonitions.md
+  - title: Tabs Demo
+    document: /tabs-demo.md
 
 navbar:
   - title: Documentation

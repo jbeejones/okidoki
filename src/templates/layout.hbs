@@ -131,13 +131,39 @@
     }
     
     /* Custom OkiDoki Component Overrides */
-    /* Fix excessive spacing around codeblocks in tabs */
+    /* SURGICAL FIX: PRESERVE INDENTATION + SYNTAX HIGHLIGHTING */
     .tabs .tab-content pre {
-      margin: 0 !important; /* Remove all margins from code blocks in tabs */
+      display: block !important;
+      margin: 0 !important;
+      padding: 0.75rem !important;
+      background-color: #1f2937 !important;
+      border-radius: 0.375rem !important;
+      white-space: pre !important;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo, monospace !important;
+      font-size: 0.875rem !important;
+      line-height: 1.45 !important;
+      overflow-x: auto !important;
     }
     
     .tabs .tab-content pre code {
-      margin: 0 !important; /* Remove any margins from code elements */
+      display: inline !important;
+      background: transparent !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      white-space: pre !important;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo, monospace !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+      /* DON'T override color - let highlight.js handle it */
+    }
+    
+    /* Preserve whitespace on ALL nested elements but KEEP their colors */
+    .tabs .tab-content pre code *,
+    .tabs .tab-content pre code span {
+      white-space: pre !important;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo, monospace !important;
+      /* DON'T override color properties - preserve highlight.js colors */
     }
     
     /* Add bottom margin to tabs container */

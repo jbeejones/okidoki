@@ -192,25 +192,25 @@ Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
     md.use(markdownItContainer, admonitionType, {
         render: function (tokens, idx) {
             const token = tokens[idx];
-            
+
             if (token.nesting === 1) {
                 // Opening tag
                 let iconSvg = '';
                 switch (alertType) {
-                    case 'success':
-                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle></svg>';
+                    case 'success': // Official DaisyUI success icon
+                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                         break;
-                    case 'info':
-                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+                    case 'info': // Official DaisyUI info icon
+                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
                         break;
-                    case 'warning':
-                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+                    case 'warning': // Official DaisyUI warning icon
+                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
                         break;
-                    case 'error':
-                        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+                    case 'error': // Official DaisyUI error icon
+                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                         break;
                 }
-                
+
                 return `<div role="alert" class="alert alert-${alertType} mb-2">${iconSvg}<span>`;
             } else {
                 // Closing tag
@@ -219,6 +219,120 @@ Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
         }
     });
 });
+
+// Add tabs support by pre-processing markdown to convert :::tabs syntax to {{#tabs}} syntax
+const originalRender = md.render;
+md.render = function(src, env) {
+    // Pre-process: Convert :::tabs/:::tab syntax to Handlebars syntax
+    let processedSrc = src;
+    
+    // Helper function to process tab content while preserving code block integrity
+    function processTabContent(content) {
+        // Check if content is a single code block
+        const codeBlockMatch = content.trim().match(/^```(\w+)?\n([\s\S]*?)\n```$/);
+        
+        if (codeBlockMatch) {
+            // This is a single code block - process it directly to preserve empty lines
+            const language = codeBlockMatch[1] || '';
+            const code = codeBlockMatch[2];
+            
+            // Use highlight.js directly if language is specified
+            if (language && hljs.getLanguage(language)) {
+                try {
+                    const highlighted = hljs.highlight(code, { language }).value;
+                    return `<pre><code class="language-${language}">${highlighted}</code></pre>`;
+                } catch (e) {
+                    // Fall back to escaped plain code block
+                    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<pre><code class="language-${language}">${escaped}</code></pre>`;
+                }
+            } else {
+                // Escape HTML for plain code blocks
+                const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `<pre><code>${escaped}</code></pre>`;
+            }
+        } else {
+            // Mixed content or regular markdown - use normal processing
+            return originalRender.call(md, content);
+        }
+    }
+
+    // Convert tabs syntax - match complete :::tabs...:::  blocks individually
+    // Use non-greedy matching to find each tabs block separately
+    processedSrc = processedSrc.replace(/:::tabs\n([\s\S]*?)\n:::\s*(?=\n\n|\n#|\n[^:]|$)/g, function(match, tabsContent) {
+        // Parse individual tabs by finding :::tab patterns (strict: no spaces)
+        const tabs = [];
+        const parts = tabsContent.split(/(?=:::tab [^\n]+)/);
+        
+        parts.forEach(part => {
+            const trimmedPart = part.trim();
+            if (trimmedPart.startsWith(':::tab ')) {
+                const lines = trimmedPart.split('\n');
+                const titleLine = lines[0];
+                const title = titleLine.replace(':::tab ', '').trim();
+                
+                // Find content up to the closing :::
+                const contentLines = lines.slice(1);
+                let endIdx = contentLines.indexOf(':::');
+                if (endIdx === -1) endIdx = contentLines.length;
+                
+                // Be more careful about preserving the exact content structure
+                const content = contentLines.slice(0, endIdx).join('\n');
+                
+                // Only trim leading/trailing empty lines, preserving internal structure
+                const trimmedContent = content.replace(/^\n+/, '').replace(/\n+$/, '');
+                
+                if (trimmedContent) {
+                    tabs.push({ title, content: trimmedContent });
+                }
+            }
+        });
+        
+        if (tabs.length === 0) {
+            return match;
+        }
+        
+        // Generate DaisyUI tabs HTML directly with proper formatting
+        const tabsId = `tabs_${Math.random().toString(36).substring(2, 11)}`;
+        let result = `<div class="tabs tabs-bordered">\n`;
+        
+        tabs.forEach((tab, index) => {
+            const isChecked = index === 0 ? 'checked="checked"' : '';
+            result += `<input type="radio" name="${tabsId}" class="tab" aria-label="${tab.title}" ${isChecked}/>\n`;
+            result += `<div class="tab-content border-base-300 bg-base-100 p-2">\n`;
+            
+            // Use a placeholder-based approach to prevent re-processing of code blocks
+            const placeholder = `__TAB_CONTENT_${Math.random().toString(36).substring(2)}__`;
+            const processedContent = processTabContent(tab.content);
+            
+            // Store the processed content and use a placeholder
+            if (!md.__tabContentCache) md.__tabContentCache = {};
+            md.__tabContentCache[placeholder] = processedContent;
+            
+            result += placeholder;
+            
+            result += `\n</div>\n`;
+        });
+        
+        result += `</div>\n`;
+        
+        return result;
+    });
+    
+    // Call the original render with processed markdown
+    let finalHtml = originalRender.call(this, processedSrc, env);
+    
+    // Replace tab content placeholders with processed content
+    if (this.__tabContentCache) {
+        for (const [placeholder, content] of Object.entries(this.__tabContentCache)) {
+            finalHtml = finalHtml.replace(new RegExp(placeholder, 'g'), content);
+        }
+        // Clear the cache
+        delete this.__tabContentCache;
+    }
+    
+    return finalHtml;
+};
 
 // Custom renderer for links to convert .md to .html
 const defaultLinkOpen = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
