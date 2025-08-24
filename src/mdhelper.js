@@ -220,6 +220,132 @@ Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
     });
 });
 
+// Add badge support using markdown-it-container
+// Map badge types to DaisyUI badge classes
+const badgeTypes = {
+    'badge': 'badge',
+    'badge-neutral': 'badge badge-neutral',
+    'badge-primary': 'badge badge-primary',
+    'badge-secondary': 'badge badge-secondary', 
+    'badge-accent': 'badge badge-accent',
+    'badge-info': 'badge badge-info',
+    'badge-success': 'badge badge-success',
+    'badge-warning': 'badge badge-warning',
+    'badge-error': 'badge badge-error',
+    'badge-outline': 'badge badge-outline',
+    'badge-ghost': 'badge badge-ghost',
+    'badge-soft': 'badge badge-soft',
+    'badge-xs': 'badge badge-xs',
+    'badge-sm': 'badge badge-sm',
+    'badge-md': 'badge badge-md',
+    'badge-lg': 'badge badge-lg',
+    'badge-xl': 'badge badge-xl'
+};
+
+// Create a container for each badge type
+Object.entries(badgeTypes).forEach(([badgeType, badgeClasses]) => {
+    md.use(markdownItContainer, badgeType, {
+        render: function (tokens, idx) {
+            const token = tokens[idx];
+
+            if (token.nesting === 1) {
+                // Opening tag - render as inline span with badge classes
+                return `<span class="${badgeClasses}">`;
+            } else {
+                // Closing tag
+                return '</span>';
+            }
+        },
+        marker: ':'
+    });
+});
+
+// Add inline badge support
+function badge_inline(state, silent) {
+    const start = state.pos;
+    const max = state.posMax;
+    
+    // Check for opening :::
+    if (start + 3 >= max) return false;
+    if (state.src.slice(start, start + 3) !== ':::') return false;
+    
+    // Find the badge type
+    const typeStart = start + 3;
+    let typeEnd = typeStart;
+    while (typeEnd < max && state.src[typeEnd] !== ' ' && state.src[typeEnd] !== ':' && state.src[typeEnd] !== '\n') {
+        typeEnd++;
+    }
+    
+    if (typeEnd === typeStart) return false; // No badge type found
+    
+    const badgeType = state.src.slice(typeStart, typeEnd);
+    
+    // Check if this is a valid badge type
+    if (!badgeTypes[badgeType]) return false;
+    
+    // Skip whitespace after badge type
+    let contentStart = typeEnd;
+    while (contentStart < max && state.src[contentStart] === ' ') {
+        contentStart++;
+    }
+    
+    // Find closing ::: (must be on the same line for inline badges)
+    let pos = contentStart;
+    let foundEnd = false;
+    let contentEnd = contentStart;
+    
+    while (pos + 2 < max && state.src[pos] !== '\n') {
+        if (state.src.slice(pos, pos + 3) === ':::') {
+            contentEnd = pos;
+            foundEnd = true;
+            break;
+        }
+        pos++;
+    }
+    
+    if (!foundEnd) return false;
+    
+    const content = state.src.slice(contentStart, contentEnd).trim();
+    if (!content) return false;
+    
+    if (!silent) {
+        const token = state.push('badge_inline', 'span', 0);
+        token.content = content;
+        token.meta = { badgeType, badgeClasses: badgeTypes[badgeType] };
+    }
+    
+    state.pos = contentEnd + 3;
+    return true;
+}
+
+// Add the inline rule
+md.inline.ruler.before('emphasis', 'badge_inline', badge_inline);
+
+// Add renderer for inline badge tokens
+md.renderer.rules.badge_inline = function(tokens, idx) {
+    const token = tokens[idx];
+    const { badgeClasses } = token.meta;
+    const content = md.utils.escapeHtml(token.content);
+    return `<span class="${badgeClasses}">${content}</span>`;
+};
+
+// Post-process badges to remove paragraph wrapping from block-level badges
+const originalRenderBadge = md.render;
+md.render = function(src, env) {
+    let result = originalRenderBadge.call(this, src, env);
+    
+    // Clean up badge HTML - remove paragraph tags inside badge spans
+    // Escape special regex characters and join badge class names
+    const escapedBadgeClasses = Object.values(badgeTypes)
+        .map(className => className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|');
+    
+    const badgeRegex = new RegExp(`(<span class="(${escapedBadgeClasses})">)<p>(.*?)<\\/p>\\s*(<\\/span>)`, 'g');
+    result = result.replace(badgeRegex, '$1$3$4');
+    
+    return result;
+};
+
 // Add tabs support by pre-processing markdown to convert :::tabs syntax to {{#tabs}} syntax
 const originalRender = md.render;
 md.render = function(src, env) {

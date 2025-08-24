@@ -2495,6 +2495,92 @@ html {
   --tw-border-opacity: 0.2;
 }
 
+.diff {
+  position: relative;
+  display: grid;
+  width: 100%;
+  overflow: hidden;
+  direction: ltr;
+  container-type: inline-size;
+  grid-template-columns: auto 1fr;
+}
+
+.diff-resizer {
+  position: relative;
+  top: 50%;
+  z-index: 1;
+  height: 3rem;
+  width: 25rem;
+  min-width: 1rem;
+  max-width: calc(100cqi - 1rem);
+  resize: horizontal;
+  overflow: hidden;
+  opacity: 0;
+  transform-origin: 100% 100%;
+  scale: 4;
+  translate: 1.5rem -1.5rem;
+  clip-path: inset(calc(100% - 0.75rem) 0 0 calc(100% - 0.75rem));
+}
+
+.diff-resizer,
+.diff-item-1,
+.diff-item-2 {
+  position: relative;
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+
+.diff-item-1:after {
+  pointer-events: none;
+  position: absolute;
+  bottom: 0px;
+  right: 1px;
+  top: 50%;
+  z-index: 1;
+  height: 2rem;
+  width: 2rem;
+  --tw-content: '';
+  content: var(--tw-content);
+  translate: 50% -50%;
+  border-radius: 9999px;
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-border-opacity)));
+  background-color: var(--fallback-b1,oklch(var(--b1)/0.5));
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  outline-style: solid;
+  outline-offset: -3px;
+  outline-color: var(--fallback-bc,oklch(var(--bc)/0.05));
+  --tw-backdrop-blur: blur(8px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+.diff-item-2 {
+  overflow: hidden;
+  border-right-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-border-opacity)));
+}
+
+.diff-item-1 > *,
+.diff-item-2 > * {
+  pointer-events: none;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  top: 0px;
+  height: 100%;
+  width: 100cqi;
+  max-width: none;
+  -o-object-fit: cover;
+     object-fit: cover;
+  -o-object-position: center;
+     object-position: center;
+}
+
 .divider {
   display: flex;
   flex-direction: row;
@@ -3217,6 +3303,15 @@ input.tab:checked + .tab-content,
   color: var(--fallback-sc,oklch(var(--sc)/var(--tw-text-opacity)));
 }
 
+.badge-accent {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-a,oklch(var(--a)/var(--tw-border-opacity)));
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-a,oklch(var(--a)/var(--tw-bg-opacity)));
+  --tw-text-opacity: 1;
+  color: var(--fallback-ac,oklch(var(--ac)/var(--tw-text-opacity)));
+}
+
 .badge-info {
   border-color: transparent;
   --tw-bg-opacity: 1;
@@ -3249,6 +3344,27 @@ input.tab:checked + .tab-content,
   color: var(--fallback-erc,oklch(var(--erc)/var(--tw-text-opacity)));
 }
 
+.badge-ghost {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-border-opacity)));
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity)));
+  --tw-text-opacity: 1;
+  color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)));
+}
+
+.badge-outline {
+  border-color: currentColor;
+  --tw-border-opacity: 0.5;
+  background-color: transparent;
+  color: currentColor;
+}
+
+.badge-outline.badge-neutral {
+  --tw-text-opacity: 1;
+  color: var(--fallback-n,oklch(var(--n)/var(--tw-text-opacity)));
+}
+
 .badge-outline.badge-primary {
   --tw-text-opacity: 1;
   color: var(--fallback-p,oklch(var(--p)/var(--tw-text-opacity)));
@@ -3257,6 +3373,11 @@ input.tab:checked + .tab-content,
 .badge-outline.badge-secondary {
   --tw-text-opacity: 1;
   color: var(--fallback-s,oklch(var(--s)/var(--tw-text-opacity)));
+}
+
+.badge-outline.badge-accent {
+  --tw-text-opacity: 1;
+  color: var(--fallback-a,oklch(var(--a)/var(--tw-text-opacity)));
 }
 
 .badge-outline.badge-info {
@@ -4291,6 +4412,38 @@ input.tab:checked + .tab-content,
 
 .prose :where(tbody tr, thead):not(:where([class~="not-prose"] *)) {
   border-bottom-color: var(--fallback-bc,oklch(var(--bc)/0.2));
+}
+
+.badge-xs {
+  height: 0.75rem;
+  font-size: 0.75rem;
+  line-height: .75rem;
+  padding-left: 0.313rem;
+  padding-right: 0.313rem;
+}
+
+.badge-sm {
+  height: 1rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  padding-left: 0.438rem;
+  padding-right: 0.438rem;
+}
+
+.badge-md {
+  height: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding-left: 0.563rem;
+  padding-right: 0.563rem;
+}
+
+.badge-lg {
+  height: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  padding-left: 0.688rem;
+  padding-right: 0.688rem;
 }
 
 .btn-lg {
