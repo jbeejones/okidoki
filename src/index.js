@@ -406,7 +406,7 @@ site:
   description: "Documentation generated with Okidoki"
   baseUrl: "/"
   favicon: "/favicon.ico"
-  logo: "/okidokilogo.png"
+  logo: "/okidokilogo.svg"
   theme:
     light: "fantasy"
     dark: "forest"
