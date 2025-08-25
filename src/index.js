@@ -232,9 +232,137 @@ function generateContentHash(data) {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex').substring(0, 16);
 }
 
+// Function to process custom HTML files with Handlebars context
+async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) {
+    const { parseMarkdown, renderPage, loadConfig } = await import('./mdhelper.js');
+    const handlebars = await import('handlebars');
+    const { default: registerHelpers } = await import('./hbshelpers.js');
+    
+    function processDirectory(currentDir) {
+        const items = fs.readdirSync(currentDir);
+        
+        for (const item of items) {
+            const fullPath = path.join(currentDir, item);
+            const stat = fs.statSync(fullPath);
+            
+            if (stat.isDirectory()) {
+                processDirectory(fullPath);
+            } else if (item.endsWith('.html')) {
+                const relativePath = path.relative(assetsDir, fullPath);
+                const outputPath = path.join(outputDir, relativePath);
+                
+                // Create output directory if it doesn't exist
+                const outputDirPath = path.dirname(outputPath);
+                if (!fs.existsSync(outputDirPath)) {
+                    fs.mkdirSync(outputDirPath, { recursive: true });
+                }
+                
+                // Read the HTML file
+                const htmlContent = fs.readFileSync(fullPath, 'utf8');
+                
+                // Check if it contains Handlebars syntax
+                if (htmlContent.includes('{{')) {
+                    logger.log(`Processing custom HTML with Handlebars: ${relativePath}`);
+                    
+                    // Create context similar to regular page rendering
+                    const context = {
+                        copyright: {
+                            year: new Date().getFullYear(),
+                            name: settings.site.title
+                        },
+                        settings: settings,
+                        site: settings.site,
+                        baseUrl: settings.site.baseUrl || '/',
+                        title: settings.site.title,
+                        description: settings.site.description
+                    };
+                    
+                    // Create a temporary Handlebars instance for processing
+                    const hbsInstance = handlebars.default.create();
+                    registerHelpers(hbsInstance);
+                    
+                    try {
+                        const template = hbsInstance.compile(htmlContent);
+                        const processedHtml = template(context);
+                        
+                        // Handle include placeholders (similar to markdown processing)
+                        let finalHtml = processedHtml;
+                        if (global.okidokiIncludes && global.okidokiIncludes.size > 0) {
+                            for (const [token, content] of global.okidokiIncludes.entries()) {
+                                finalHtml = finalHtml.replace(new RegExp(`<p>${token}</p>`, 'g'), content);
+                                finalHtml = finalHtml.replace(new RegExp(token, 'g'), content);
+                            }
+                            global.okidokiIncludes.clear();
+                        }
+                        
+                        fs.writeFileSync(outputPath, finalHtml);
+                        logger.log(`Generated custom HTML: ${relativePath}`);
+                    } catch (error) {
+                        logger.error(`Error processing custom HTML ${relativePath}: ${error.message}`);
+                        // Fall back to copying the file as-is
+                        fs.copyFileSync(fullPath, outputPath);
+                    }
+                } else {
+                    // No Handlebars syntax, just copy the file
+                    fs.copyFileSync(fullPath, outputPath);
+                    logger.log(`Copied custom HTML: ${relativePath}`);
+                }
+            }
+        }
+    }
+    
+    processDirectory(assetsDir);
+}
+
+// Smart HTML minification function that preserves code blocks
+function minifyHtml(html) {
+    // First, extract and preserve all <pre> and <code> blocks
+    const preservedBlocks = [];
+    let blockIndex = 0;
+    
+    // Extract <pre> blocks (including content)
+    html = html.replace(/<pre[\s\S]*?<\/pre>/gi, (match) => {
+        const placeholder = `__PRESERVED_BLOCK_${blockIndex}__`;
+        preservedBlocks[blockIndex] = match;
+        blockIndex++;
+        return placeholder;
+    });
+    
+    // Extract standalone <code> blocks that aren't inside <pre>
+    html = html.replace(/<code[^>]*>[\s\S]*?<\/code>/gi, (match) => {
+        const placeholder = `__PRESERVED_BLOCK_${blockIndex}__`;
+        preservedBlocks[blockIndex] = match;
+        blockIndex++;
+        return placeholder;
+    });
+    
+    // Now apply minification to everything else
+    html = html
+        // Remove HTML comments
+        .replace(/<!--[\s\S]*?-->/g, '')
+        // Remove extra whitespace between tags (but not inside them)
+        .replace(/>\s+</g, '><')
+        // Remove leading/trailing whitespace from lines
+        .replace(/^\s+|\s+$/gm, '')
+        // Collapse multiple whitespace characters to single space
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    
+    // Restore preserved blocks
+    preservedBlocks.forEach((block, index) => {
+        html = html.replace(`__PRESERVED_BLOCK_${index}__`, block);
+    });
+    
+    return html;
+}
+
 async function initCommand(argv) {
-    const { output, dev } = argv;
+    const { dev } = argv;
     logger.info('Initializing documentation project...');
+    
+    // For init, we can't load config yet since we're creating it
+    // So use CLI arg or default to 'dist'
+    const output = argv.output || 'dist';
     
     try {
         // Create docs directory
@@ -278,6 +406,10 @@ site:
   description: "Documentation generated with Okidoki"
   baseUrl: "/"
   favicon: "/favicon.ico"
+  logo: "/okidokilogo.png"
+  theme:
+    light: "fantasy"
+    dark: "forest"
 
 # Build configuration
 build:
@@ -290,12 +422,11 @@ search:
   enabled: true
   maxResults: 10
   minSearchLength: 2
+  placeholder: "Search documentation..."
 
-# Theme configuration
-theme:
-  primaryColor: "#4F46E5"
-  darkMode: true
-  fontFamily: "Inter, system-ui, sans-serif"
+# Global variables
+globals:
+  version: "1.0.0"
 
 # Navigation configuration
 navigation:
@@ -407,7 +538,7 @@ footer:
 }
 
 async function generateCommand(argv) {
-    const { source, output, verbose } = argv;
+    const { source, verbose } = argv;
     logger.setVerbose(verbose);
     
     logger.info('Generating documentation from markdown files ...');
@@ -416,7 +547,28 @@ async function generateCommand(argv) {
         // Check if configuration files exist
         if (!fs.existsSync('okidoki.yaml') || !fs.existsSync('sidebars.yaml')) {
             logger.info('Configuration files not found. Running init first...');
-            await initCommand({ output });
+            await initCommand({ output: argv.output });
+        }
+
+        // Load configuration once at the top
+        const { settings, sidebars } = loadConfig();
+        
+        // Determine output directory: CLI arg -> config -> default  
+        const output = argv.output || settings.build.outputDir || 'dist';
+        
+        // Clean output directory if build.clean is enabled
+        if (settings.build.clean && fs.existsSync(output)) {
+            const items = fs.readdirSync(output);
+            for (const item of items) {
+                const itemPath = path.join(output, item);
+                const stat = fs.statSync(itemPath);
+                if (stat.isDirectory()) {
+                    fs.rmSync(itemPath, { recursive: true, force: true });
+                } else {
+                    fs.unlinkSync(itemPath);
+                }
+            }
+            logger.log(`Cleaned output directory: ${output}`);
         }
 
         // Create output directory if it doesn't exist
@@ -440,28 +592,32 @@ async function generateCommand(argv) {
             docs = await readMarkdownDocs(source);
         }
 
-        // Create search index
-        const searchIndex = createSearchIndex(docs);
+        // Create search index only if search is enabled
+        if (settings.search.enabled) {
+            const searchIndex = createSearchIndex(docs);
 
-        // Generate content hashes for cache invalidation
-        const indexHash = generateContentHash(searchIndex.index);
-        const dataHash = generateContentHash(searchIndex.data);
-        const buildTimestamp = Date.now();
-        
-        // Create search metadata for cache invalidation
-        const searchMeta = {
-            version: '1.0',
-            buildTimestamp,
-            indexHash,
-            dataHash,
-            totalDocs: docs.length
-        };
+            // Generate content hashes for cache invalidation
+            const indexHash = generateContentHash(searchIndex.index);
+            const dataHash = generateContentHash(searchIndex.data);
+            const buildTimestamp = Date.now();
+            
+            // Create search metadata for cache invalidation
+            const searchMeta = {
+                version: '1.0',
+                buildTimestamp,
+                indexHash,
+                dataHash,
+                totalDocs: docs.length
+            };
 
-        // Save search index, data, and metadata as JSON files
-        fs.writeFileSync(path.join(output, 'lunr-index.json'), JSON.stringify(searchIndex.index));
-        fs.writeFileSync(path.join(output, 'search-data.json'), JSON.stringify(searchIndex.data));
-        fs.writeFileSync(path.join(output, 'search-meta.json'), JSON.stringify(searchMeta, null, 2));
-        logger.log('Created search index files with metadata for cache invalidation');
+            // Save search index, data, and metadata as JSON files
+            fs.writeFileSync(path.join(output, 'lunr-index.json'), JSON.stringify(searchIndex.index));
+            fs.writeFileSync(path.join(output, 'search-data.json'), JSON.stringify(searchIndex.data));
+            fs.writeFileSync(path.join(output, 'search-meta.json'), JSON.stringify(searchMeta, null, 2));
+            logger.log('Created search index files with metadata for cache invalidation');
+        } else {
+            logger.log('Search disabled - skipping search index generation');
+        }
 
         // Write HTML files to output directory
         for (const doc of docs) {
@@ -476,7 +632,13 @@ async function generateCommand(argv) {
                 page: {path: doc.path}
             };
             logger.log(`Render page: ${doc.path}`);
-            const completeHtml = renderPage('docpage', renderContext);
+            let completeHtml = renderPage('docpage', renderContext);
+            
+            // Apply minification if enabled
+            if (settings.build.minify) {
+                completeHtml = minifyHtml(completeHtml);
+            }
+            
             //logger.log(`Render context: ${JSON.stringify(renderContext, null, 2)}`);
             fs.writeFileSync(htmlPath, completeHtml);
             //logger.log(`Generated: ${htmlPath}`);
@@ -497,7 +659,6 @@ async function generateCommand(argv) {
         }
         
         // Copy user custom assets to override defaults
-        const { settings } = loadConfig();
         let userAssetsDir = null;
         
         // Check for configured custom assets directory
@@ -511,10 +672,16 @@ async function generateCommand(argv) {
             }
         }
         
-        // Copy user assets if directory exists
+        // Process and copy user assets if directory exists
         if (userAssetsDir && fs.existsSync(userAssetsDir)) {
-            copyDir(userAssetsDir, output);
-            logger.info(`Copied custom assets from: ${path.relative(process.cwd(), userAssetsDir)}`);
+            // Process custom HTML files with Handlebars context
+            await processCustomHtmlFiles(userAssetsDir, output, settings, sidebars);
+            
+            // Copy other assets (non-HTML files)
+            copyDir(userAssetsDir, output, {
+                filter: (src) => !src.endsWith('.html')
+            });
+            logger.info(`Processed custom HTML and copied assets from: ${path.relative(process.cwd(), userAssetsDir)}`);
         }
         
         // Copy all image files from source directory to output directory
@@ -538,8 +705,7 @@ yargs(hideBin(process.argv))
         output: {
             alias: 'o',
             description: 'Output directory',
-            type: 'string',
-            default: 'dist'
+            type: 'string'
         },
         dev: {
             alias: 'd',
@@ -558,8 +724,7 @@ yargs(hideBin(process.argv))
         output: {
             alias: 'o',
             description: 'Output directory for generated files',
-            type: 'string',
-            default: 'dist'
+            type: 'string'
         },
         verbose: {
             alias: 'v',

@@ -663,6 +663,23 @@ window.handleSearch = function(query) {
     updateSearchResults('search-results-mobile-navbar', query);
 }
 
+// Hide search results when clicking outside
+function handleClickOutside(event) {
+    const dropdowns = document.querySelectorAll('.dropdown.dropdown-open');
+    dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove('dropdown-open');
+            const resultsContainer = dropdown.querySelector('[id*="search-results"]');
+            if (resultsContainer) {
+                resultsContainer.classList.add('hidden');
+            }
+        }
+    });
+}
+
+// Add click outside listener
+document.addEventListener('click', handleClickOutside);
+
 function updateSearchResults(resultsId, query) {
     const searchResultsContainer = document.getElementById(resultsId);
     
@@ -670,14 +687,24 @@ function updateSearchResults(resultsId, query) {
         return;
     }
     
-    if (query.length < 2) {
+    // Find the parent dropdown element
+    const dropdownParent = searchResultsContainer.closest('.dropdown');
+    
+    // Hide dropdown if query is too short or empty
+    if (!query || query.trim().length < 2) {
         searchResultsContainer.classList.add('hidden');
+        if (dropdownParent) {
+            dropdownParent.classList.remove('dropdown-open');
+        }
         return;
     }
 
     if (!idx) {
         searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">Search not available</li>';
         searchResultsContainer.classList.remove('hidden');
+        if (dropdownParent) {
+            dropdownParent.classList.add('dropdown-open');
+        }
         return;
     }
 
@@ -716,7 +743,12 @@ function updateSearchResults(resultsId, query) {
         window.searchResults = results; // Store for global access
         
         if (results.length === 0) {
-            searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">No results found</li>';
+            // Hide dropdown if no results found
+            searchResultsContainer.classList.add('hidden');
+            if (dropdownParent) {
+                dropdownParent.classList.remove('dropdown-open');
+            }
+            return;
         } else {
             const displayedResults = results.slice(0, MAX_RESULTS);
             
@@ -729,23 +761,10 @@ function updateSearchResults(resultsId, query) {
                     const urlWithSearch = `${doc.path}?highlight=${encodeURIComponent(cleanQuery)}`;
                     
                     return `
-                        <li class="overflow-hidden">
-                            <a href="${urlWithSearch}" 
-                               class="block p-3 hover:bg-base-200 rounded overflow-hidden" 
-                               tabindex="0"
-                               role="option"
-                               onclick="
-                                   // Safari-compatible sessionStorage handling
-                                   try {
-                                       sessionStorage.setItem('searchHighlight', '${cleanQuery.replace(/'/g, "\\'")}');
-                                   } catch (e) {
-                                       console.warn('Failed to store search highlight:', e);
-                                   }
-                               ">
-                                <div class="font-medium text-base-content truncate" style="max-width: 100%;">${doc.title}</div>
-                                ${doc.description ? `<div class="text-sm opacity-70 mt-1" style="word-break: break-word; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${doc.description}</div>` : ''}
-                                <div class="text-xs opacity-50 mt-1 truncate" style="max-width: 100%;">${doc.path}</div>
-                            </a>
+                        <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
+                            <div class="font-medium text-base-content">${doc.title}</div>
+                            ${doc.description ? `<div class="text-sm opacity-70 mt-1">${doc.description}</div>` : ''}
+                            <div class="text-xs opacity-50 mt-1">${doc.path}</div>
                         </li>
                     `;
                 }).join('') + 
@@ -756,11 +775,122 @@ function updateSearchResults(resultsId, query) {
                 ` : '');
         }
         searchResultsContainer.classList.remove('hidden');
+        if (dropdownParent) {
+            dropdownParent.classList.add('dropdown-open');
+        }
+        
+        // Add click handlers and keyboard navigation
+        setupSearchResultInteractions(searchResultsContainer, cleanQuery);
 
     } catch (e) {
         console.error('Search error:', e);
         searchResultsContainer.classList.add('hidden');
+        if (dropdownParent) {
+            dropdownParent.classList.remove('dropdown-open');
+        }
     }
+}
+
+// Setup interactions for search results
+function setupSearchResultInteractions(container, query) {
+    const items = container.querySelectorAll('li[data-url]');
+    let selectedIndex = -1;
+    
+    // Store the input element that triggered this search
+    const inputElement = container.parentElement.querySelector('input');
+    const dropdownParent = container.closest('.dropdown');
+    
+    // Click handlers
+    items.forEach((item) => {
+        item.addEventListener('click', () => {
+            const url = item.getAttribute('data-url');
+            try {
+                sessionStorage.setItem('searchHighlight', query);
+            } catch (e) {
+                console.warn('Failed to store search highlight:', e);
+            }
+            window.location.href = url;
+        });
+        
+        // Hover effects
+        item.addEventListener('mouseenter', () => {
+            clearSelected();
+            item.classList.add('bg-base-200');
+            selectedIndex = Array.from(items).indexOf(item);
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            if (selectedIndex !== Array.from(items).indexOf(item)) {
+                item.classList.remove('bg-base-200');
+            }
+        });
+    });
+    
+    // Keyboard navigation
+    function clearSelected() {
+        items.forEach(item => item.classList.remove('bg-base-200'));
+    }
+    
+    function selectItem(index) {
+        clearSelected();
+        if (index >= 0 && index < items.length) {
+            selectedIndex = index;
+            items[index].classList.add('bg-base-200');
+            items[index].scrollIntoView({ block: 'nearest' });
+        }
+    }
+    
+    // Keyboard handler - attach to the input element
+    const keyboardHandler = (e) => {
+        // Only handle if this container is visible and input is focused
+        if (!container.classList.contains('hidden') && document.activeElement === inputElement) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (selectedIndex < items.length - 1) {
+                    selectItem(selectedIndex + 1);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (selectedIndex > 0) {
+                    selectItem(selectedIndex - 1);
+                } else if (selectedIndex === 0) {
+                    clearSelected();
+                    selectedIndex = -1;
+                }
+            } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = items[selectedIndex].getAttribute('data-url');
+                try {
+                    sessionStorage.setItem('searchHighlight', query);
+                } catch (e) {
+                    console.warn('Failed to store search highlight:', e);
+                }
+                window.location.href = url;
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                container.classList.add('hidden');
+                if (dropdownParent) {
+                    dropdownParent.classList.remove('dropdown-open');
+                }
+                clearSelected();
+                selectedIndex = -1;
+            }
+        }
+    };
+    
+    // Remove old handler and add new one to input element
+    if (inputElement.searchKeyboardHandler) {
+        inputElement.removeEventListener('keydown', inputElement.searchKeyboardHandler);
+    }
+    inputElement.searchKeyboardHandler = keyboardHandler;
+    inputElement.addEventListener('keydown', keyboardHandler);
+    
+    // Also store reference for cleanup
+    container.keyboardHandler = keyboardHandler;
 }
 
 // Keyboard shortcuts and navigation

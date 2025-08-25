@@ -67,4 +67,12 @@
   .alert span p {
     margin: 0 !important; /* Remove paragraph margins inside alerts */
   }
+  
+  /* Override DaisyUI automatic dropdown focus behavior for search dropdowns */
+  .dropdown:focus-within [id*="search-results"].hidden,
+  .dropdown:focus [id*="search-results"].hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    transform: scale(0.95) !important;
+  }
 }

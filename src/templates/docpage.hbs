@@ -1,5 +1,6 @@
 {{#extend "layout"}}
 {{#content "main"}}  
+    {{#unless layout.hideBreadcrumbs}}
     <div class="breadcrumbs text-sm pl-4 mt-6 lg:mt-6">
       <ul>
         <li><a href="/">Home</a></li>
@@ -8,8 +9,9 @@
         {{/each}}
       </ul>
     </div>
+    {{/unless}}
   <!-- hack to make tables look good -->
-  <div class="prose dark:prose-invert !max-w-[920px] p-2 lg:m-2 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
+  <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-2 lg:m-2 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
     {{{html}}}    
   </div>
 {{/content}}

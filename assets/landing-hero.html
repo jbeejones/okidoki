@@ -1,0 +1,135 @@
+<div class="container mx-auto px-6 py-16 max-w-4xl">
+    
+    <!-- Hero -->
+    <div class="text-center mb-20">
+        <div class="mb-8">
+            <img src="/okidokilogo.png" alt="OkiDoki Logo" class="w-32 h-32 mx-auto mb-6">
+        </div>
+        <h1 class="text-5xl font-mono font-bold mb-6">
+            <span class="text-primary">{{site.title}}</span> Documentation
+        </h1>
+        <p class="text-xl text-base-content/80 mb-8 max-w-2xl mx-auto">
+            {{site.description}} - Simple, fast documentation generator that turns your markdown files into beautiful docs.
+        </p>
+        <div class="flex gap-4 justify-center">
+            <a href="{{site.baseUrl}}/index.html" class="btn btn-primary">Quick Start</a>
+            <a href="{{site.baseUrl}}/markdown-examples.html" class="btn btn-outline">Documentation</a>
+        </div>
+    </div>
+
+    <!-- Quick Example -->
+    <div class="mb-20">
+        <h2 class="text-2xl font-mono font-bold mb-6 text-center">Get running in 30 seconds</h2>
+        <div class="mockup-code">
+            <pre data-prefix="$"><code class="language-bash">npm install -g okidoki</code></pre>
+            <pre data-prefix="$"><code class="language-bash">mkdir mydocs && cd mydocs</code></pre>
+            <pre data-prefix="$"><code class="language-bash">okidoki init</code></pre>
+            <pre data-prefix="$"><code class="language-bash">okidoki generate</code></pre>
+            <pre data-prefix="$"><code class="language-bash">npx serve dist</code></pre>
+            <pre data-prefix="✓"><code class="text-success">Server running at http://localhost:3000</code></pre>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid md:grid-cols-3 gap-8 mb-20">
+        <div class="card bg-base-200 p-6 text-center">
+            <div class="text-2xl mb-3 font-mono">📝</div>
+            <h3 class="font-mono font-bold text-lg mb-2">Markdown First</h3>
+            <p class="text-sm text-base-content/70">Write in standard markdown. No proprietary formats.</p>
+        </div>
+        
+        <div class="card bg-base-200 p-6 text-center">
+            <div class="text-2xl mb-3 font-mono">⚡</div>
+            <h3 class="font-mono font-bold text-lg mb-2">Fast Search</h3>
+            <p class="text-sm text-base-content/70">Full-text search across all your documentation.</p>
+        </div>
+        
+        <div class="card bg-base-200 p-6 text-center">
+            <div class="text-2xl mb-3 font-mono">🎨</div>
+            <h3 class="font-mono font-bold text-lg mb-2">Clean Themes</h3>
+            <p class="text-sm text-base-content/70">Beautiful, responsive themes out of the box.</p>
+        </div>
+    </div>
+
+    <!-- Config Example -->
+    <div class="mb-20">
+        <h2 class="text-2xl font-mono font-bold mb-6">Simple Configuration</h2>
+        <div class="grid md:grid-cols-2 gap-8 items-stretch">
+            <div class="flex flex-col">
+                <h3 class="font-mono text-lg mb-3">okidoki.yaml</h3>
+                <div class="mockup-code text-sm flex-1">
+                    <pre><code class="language-yaml">site:
+    title: "{{site.title}}"
+    description: "{{site.description}}"
+    theme:
+        light: "fantasy"
+        dark: "forest"
+
+globals:
+    version: "{{globals.version}}"
+    api_url: "https://api.example.com"</code></pre>
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <h3 class="font-mono text-lg mb-3">sidebars.yaml</h3>
+                <div class="mockup-code text-sm flex-1">
+                    <pre><code class="language-yaml">menu:
+    - title: Getting Started
+        document: /index.md
+    - title: Examples
+        document: /markdown-examples.md
+    - title: Demos
+        document: /demo.md</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Links -->
+    <div class="text-center mb-20">
+        <h2 class="text-2xl font-mono font-bold mb-8">Documentation</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{{site.baseUrl}}/index.html" class="btn btn-outline btn-block">
+                <div class="text-center">
+                    <div class="font-mono font-bold">Start Guide</div>
+                    <div class="text-xs opacity-70">Setup & basics</div>
+                </div>
+            </a>
+            <a href="{{site.baseUrl}}/markdown-examples.html" class="btn btn-outline btn-block">
+                <div class="text-center">
+                    <div class="font-mono font-bold">Examples</div>
+                    <div class="text-xs opacity-70">Markdown samples</div>
+                </div>
+            </a>
+            <a href="{{site.baseUrl}}/demo.html" class="btn btn-outline btn-block">
+                <div class="text-center">
+                    <div class="font-mono font-bold">Demos</div>
+                    <div class="text-xs opacity-70">Feature showcase</div>
+                </div>
+            </a>
+            <a href="{{site.baseUrl}}/about.html" class="btn btn-outline btn-block">
+                <div class="text-center">
+                    <div class="font-mono font-bold">About</div>
+                    <div class="text-xs opacity-70">Project info</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-20">
+        <div class="stat">
+            <div class="stat-title font-mono">Version</div>
+            <div class="stat-value text-2xl">1.0.1</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title font-mono">Build Time</div>
+            <div class="stat-value text-2xl">&lt; 1s</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title font-mono">File Size</div>
+            <div class="stat-value text-2xl">~50KB</div>
+        </div>
+    </div>
+
+</div> 

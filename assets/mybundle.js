@@ -2238,18 +2238,38 @@
     updateSearchResults("search-results-mobile", query);
     updateSearchResults("search-results-mobile-navbar", query);
   };
+  function handleClickOutside(event) {
+    const dropdowns = document.querySelectorAll(".dropdown.dropdown-open");
+    dropdowns.forEach((dropdown) => {
+      if (!dropdown.contains(event.target)) {
+        dropdown.classList.remove("dropdown-open");
+        const resultsContainer = dropdown.querySelector('[id*="search-results"]');
+        if (resultsContainer) {
+          resultsContainer.classList.add("hidden");
+        }
+      }
+    });
+  }
+  document.addEventListener("click", handleClickOutside);
   function updateSearchResults(resultsId, query) {
     const searchResultsContainer = document.getElementById(resultsId);
     if (!searchResultsContainer) {
       return;
     }
-    if (query.length < 2) {
+    const dropdownParent = searchResultsContainer.closest(".dropdown");
+    if (!query || query.trim().length < 2) {
       searchResultsContainer.classList.add("hidden");
+      if (dropdownParent) {
+        dropdownParent.classList.remove("dropdown-open");
+      }
       return;
     }
     if (!idx) {
       searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">Search not available</li>';
       searchResultsContainer.classList.remove("hidden");
+      if (dropdownParent) {
+        dropdownParent.classList.add("dropdown-open");
+      }
       return;
     }
     try {
@@ -2275,7 +2295,11 @@
       }
       window.searchResults = results;
       if (results.length === 0) {
-        searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">No results found</li>';
+        searchResultsContainer.classList.add("hidden");
+        if (dropdownParent) {
+          dropdownParent.classList.remove("dropdown-open");
+        }
+        return;
       } else {
         const displayedResults = results.slice(0, MAX_RESULTS);
         searchResultsContainer.innerHTML = displayedResults.map((result) => {
@@ -2283,23 +2307,10 @@
           if (!doc) return "";
           const urlWithSearch = `${doc.path}?highlight=${encodeURIComponent(cleanQuery)}`;
           return `
-                        <li class="overflow-hidden">
-                            <a href="${urlWithSearch}" 
-                               class="block p-3 hover:bg-base-200 rounded overflow-hidden" 
-                               tabindex="0"
-                               role="option"
-                               onclick="
-                                   // Safari-compatible sessionStorage handling
-                                   try {
-                                       sessionStorage.setItem('searchHighlight', '${cleanQuery.replace(/'/g, "\\'")}');
-                                   } catch (e) {
-                                       console.warn('Failed to store search highlight:', e);
-                                   }
-                               ">
-                                <div class="font-medium text-base-content truncate" style="max-width: 100%;">${doc.title}</div>
-                                ${doc.description ? `<div class="text-sm opacity-70 mt-1" style="word-break: break-word; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${doc.description}</div>` : ""}
-                                <div class="text-xs opacity-50 mt-1 truncate" style="max-width: 100%;">${doc.path}</div>
-                            </a>
+                        <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
+                            <div class="font-medium text-base-content">${doc.title}</div>
+                            ${doc.description ? `<div class="text-sm opacity-70 mt-1">${doc.description}</div>` : ""}
+                            <div class="text-xs opacity-50 mt-1">${doc.path}</div>
                         </li>
                     `;
         }).join("") + (results.length > MAX_RESULTS ? `
@@ -2309,10 +2320,100 @@
                 ` : "");
       }
       searchResultsContainer.classList.remove("hidden");
+      if (dropdownParent) {
+        dropdownParent.classList.add("dropdown-open");
+      }
+      setupSearchResultInteractions(searchResultsContainer, cleanQuery);
     } catch (e) {
       console.error("Search error:", e);
       searchResultsContainer.classList.add("hidden");
+      if (dropdownParent) {
+        dropdownParent.classList.remove("dropdown-open");
+      }
     }
+  }
+  function setupSearchResultInteractions(container, query) {
+    const items = container.querySelectorAll("li[data-url]");
+    let selectedIndex = -1;
+    const inputElement = container.parentElement.querySelector("input");
+    const dropdownParent = container.closest(".dropdown");
+    items.forEach((item) => {
+      item.addEventListener("click", () => {
+        const url = item.getAttribute("data-url");
+        try {
+          sessionStorage.setItem("searchHighlight", query);
+        } catch (e) {
+          console.warn("Failed to store search highlight:", e);
+        }
+        window.location.href = url;
+      });
+      item.addEventListener("mouseenter", () => {
+        clearSelected();
+        item.classList.add("bg-base-200");
+        selectedIndex = Array.from(items).indexOf(item);
+      });
+      item.addEventListener("mouseleave", () => {
+        if (selectedIndex !== Array.from(items).indexOf(item)) {
+          item.classList.remove("bg-base-200");
+        }
+      });
+    });
+    function clearSelected() {
+      items.forEach((item) => item.classList.remove("bg-base-200"));
+    }
+    function selectItem(index) {
+      clearSelected();
+      if (index >= 0 && index < items.length) {
+        selectedIndex = index;
+        items[index].classList.add("bg-base-200");
+        items[index].scrollIntoView({ block: "nearest" });
+      }
+    }
+    const keyboardHandler = (e) => {
+      if (!container.classList.contains("hidden") && document.activeElement === inputElement) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (selectedIndex < items.length - 1) {
+            selectItem(selectedIndex + 1);
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (selectedIndex > 0) {
+            selectItem(selectedIndex - 1);
+          } else if (selectedIndex === 0) {
+            clearSelected();
+            selectedIndex = -1;
+          }
+        } else if (e.key === "Enter" && selectedIndex >= 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          const url = items[selectedIndex].getAttribute("data-url");
+          try {
+            sessionStorage.setItem("searchHighlight", query);
+          } catch (e2) {
+            console.warn("Failed to store search highlight:", e2);
+          }
+          window.location.href = url;
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+          container.classList.add("hidden");
+          if (dropdownParent) {
+            dropdownParent.classList.remove("dropdown-open");
+          }
+          clearSelected();
+          selectedIndex = -1;
+        }
+      }
+    };
+    if (inputElement.searchKeyboardHandler) {
+      inputElement.removeEventListener("keydown", inputElement.searchKeyboardHandler);
+    }
+    inputElement.searchKeyboardHandler = keyboardHandler;
+    inputElement.addEventListener("keydown", keyboardHandler);
+    container.keyboardHandler = keyboardHandler;
   }
   document.addEventListener("keydown", function(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === "k") {

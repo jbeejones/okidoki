@@ -37,6 +37,7 @@ function loadConfig() {
                 description: "Documentation generated with Okidoki",
                 baseUrl: "/",
                 favicon: "/favicon.ico",
+                logo: "/okidokilogo.png",
                 theme: {
                     light: "bumblebee",
                     dark: "night"
@@ -54,7 +55,8 @@ function loadConfig() {
             search: {
                 enabled: true,
                 maxResults: 10,
-                minSearchLength: 2
+                minSearchLength: 2,
+                placeholder: "Search documentation..."
             },
             globals: {
             }
@@ -559,7 +561,18 @@ async function parseMarkdown(markdownContent) {
     if (props.handlebars) {
         try {
             const handlebarsResult = compiledBody(mappedProps);
-            const html = md.render(handlebarsResult);
+            let html = md.render(handlebarsResult);
+            
+            // Replace include placeholders with actual HTML content (after markdown processing)
+            if (global.okidokiIncludes && global.okidokiIncludes.size > 0) {
+                for (const [token, content] of global.okidokiIncludes.entries()) {
+                    html = html.replace(new RegExp(`<p>${token}</p>`, 'g'), content);
+                    html = html.replace(new RegExp(token, 'g'), content);
+                }
+                // Clear the includes for this processing cycle
+                global.okidokiIncludes.clear();
+            }
+            
             return { props: mappedProps, md: markdownBody, html };
         } catch (error) {
             console.error('Handlebars compilation error:', error);
@@ -583,6 +596,33 @@ function renderPage(templateName, { props, html, page, id }) {
     };
     //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
     //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
+    // Find sidebar configuration for current page
+    const findSidebarConfig = (items, currentPath) => {
+        if (!items) return null;
+        for (const item of items) {
+            if (item.document && transformDocumentPath(item.document) === currentPath) {
+                return item;
+            }
+            if (item.items) {
+                const found = findSidebarConfig(item.items, currentPath);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    // Check both menu and navbar for matching configuration
+    const sidebarItem = findSidebarConfig(sidebars.menu, page.path) || 
+                       findSidebarConfig(sidebars.navbar, page.path);
+
+    // Determine layout configuration from frontmatter and/or sidebar config
+    const layoutConfig = {
+        hideMenu: props.hideMenu || props.hideSidebar || (sidebarItem && sidebarItem.hideMenu) || false,
+        hideBreadcrumbs: props.hideBreadcrumbs || (sidebarItem && sidebarItem.hideBreadcrumbs) || false,
+        hideFooter: props.hideFooter || (sidebarItem && sidebarItem.hideFooter) || false,
+        fullWidth: props.fullWidth || props.hideMenu || props.hideSidebar || (sidebarItem && (sidebarItem.fullWidth || sidebarItem.hideMenu)) || false
+    };
+
     const pageData = {
         copyright: {
             year: new Date().getFullYear(),
@@ -596,7 +636,8 @@ function renderPage(templateName, { props, html, page, id }) {
         baseUrl: settings.site.baseUrl || '/',
         html,
         props,
-        page
+        page,
+        layout: layoutConfig
     };
     //logger.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content

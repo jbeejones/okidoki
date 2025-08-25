@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fantasy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - {{site.title}}</title>
+    <link rel="stylesheet" href="/mystyles.css" type="text/css">
+    <script src="https://unpkg.com/lunr/lunr.js" defer></script>
+    <script src="/mybundle.js" defer></script>
+    <link rel="stylesheet" href="/github-dark.min.css" type="text/css">
+    <link rel="icon" href="{{site.favicon}}" type="image/x-icon">
+    
+    <script>
+        // Theme switching logic
+        const lightTheme = 'fantasy';
+        const darkTheme = 'forest';
+        
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', darkTheme);
+        } else {
+            document.documentElement.setAttribute('data-theme', lightTheme);
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            document.documentElement.setAttribute('data-theme', e.matches ? darkTheme : lightTheme);
+        });
+    </script>
+</head>
+<body class="bg-base-100">
+    
+    <!-- Custom Navigation -->
+    <div class="navbar bg-base-100 border-b border-base-300">
+        <div class="flex-1">
+            <a class="btn btn-ghost text-xl" href="/index.html">
+                <img src="{{site.logo}}" alt="{{site.title}}" class="w-8 h-8 mr-2">
+                {{site.title}}
+            </a>
+        </div>
+        
+        <!-- Desktop Search -->
+        <div class="flex-none hidden lg:flex mr-4">
+            {{include "search-desktop.html"}}
+        </div>
+        
+        <!-- Mobile Search -->
+        <div class="flex-none lg:hidden mr-2">
+            {{include "search-mobile.html"}}
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto max-w-6xl p-4">
+        
+        <!-- Hero Section -->
+        <div class="hero min-h-[50vh] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl my-8">
+            <div class="hero-content text-center">
+                <div class="max-w-md">
+                    <h1 class="text-5xl font-bold">{{title}}</h1>
+                    <p class="py-6">{{description}}</p>
+                    
+                    <!-- You can include custom components -->
+                    <div class="form-control w-full max-w-xs mx-auto mb-6">
+                        <label class="label">
+                            <span class="label-text">Try searching:</span>
+                        </label>
+                        {{include "search-mobile.html"}}
+                    </div>
+                    
+                    <div class="flex gap-4 justify-center">
+                        <a href="{{site.baseUrl}}/index.html" class="btn btn-primary">Documentation</a>
+                        <a href="{{site.baseUrl}}/about.html" class="btn btn-outline">About</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature Grid -->
+        <div class="grid md:grid-cols-3 gap-6 my-12">
+            <div class="card bg-base-200 shadow-xl">
+                <div class="card-body text-center">
+                    <h2 class="card-title justify-center">📝 Markdown</h2>
+                    <p>Write in simple Markdown with powerful extensions</p>
+                </div>
+            </div>
+            <div class="card bg-base-200 shadow-xl">
+                <div class="card-body text-center">
+                    <h2 class="card-title justify-center">🔍 Search</h2>
+                    <p>Full-text search across all your documentation</p>
+                </div>
+            </div>
+            <div class="card bg-base-200 shadow-xl">
+                <div class="card-body text-center">
+                    <h2 class="card-title justify-center">🎨 Themes</h2>
+                    <p>Beautiful themes that adapt automatically</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats shadow w-full my-8">
+            <div class="stat">
+                <div class="stat-title">Site Title</div>
+                <div class="stat-value text-2xl">{{site.title}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Base URL</div>
+                <div class="stat-value text-lg">{{site.baseUrl}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Current Page</div>
+                <div class="stat-value text-lg">{{title}}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer footer-center p-10 bg-base-200 text-base-content rounded mt-16">
+        <div class="grid grid-flow-col gap-4">
+            <a href="{{site.baseUrl}}/index.html" class="link link-hover">Documentation</a>
+            <a href="{{site.baseUrl}}/about.html" class="link link-hover">About</a>
+        </div>
+        <div>
+            <p>Copyright © 2025 - {{site.title}}</p>
+        </div>
+    </footer>
+    
+</body>
+</html> 

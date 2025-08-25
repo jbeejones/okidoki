@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fantasy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard DaisyUI Search - {{site.title}}</title>
+    <link rel="stylesheet" href="/mystyles.css">
+    <script src="https://unpkg.com/lunr/lunr.js" defer></script>
+    <script src="/mybundle.js" defer></script>
+</head>
+<body class="bg-base-100 p-8">
+    
+    <div class="navbar bg-base-200 mb-8 px-4 rounded">
+        <div class="flex-1">
+            <h1 class="text-xl font-bold">✨ Standard DaisyUI Search</h1>
+        </div>
+        <div class="flex-none">
+            {{include "search-desktop.html"}}
+        </div>
+    </div>
+    
+    <div class="alert alert-success mb-6">
+        <div>
+            <h3 class="font-bold">✅ Clean DaisyUI Dropdown - No Blue!</h3>
+            <p class="mt-2">This search uses <strong>standard DaisyUI dropdown</strong> without the menu class - no blue focus states, no CSS overrides needed!</p>
+        </div>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="card bg-base-200 p-6">
+            <h2 class="text-lg font-bold mb-4">🎯 What You Get</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li><strong>Standard DaisyUI dropdown</strong> - Official component structure</li>
+                <li><strong>No menu class</strong> - Eliminates blue focus states</li>
+                <li><strong>Proper accessibility</strong> - Built-in keyboard support</li>
+                <li><strong>Clean hover states</strong> - Simple gray highlighting</li>
+                <li><strong>Zero CSS overrides</strong> - Pure DaisyUI + Tailwind</li>
+            </ul>
+        </div>
+        
+        <div class="card bg-base-200 p-6">
+            <h2 class="text-lg font-bold mb-4">🔧 Implementation</h2>
+            <div class="mockup-code text-xs">
+                <pre><code>&lt;div class="dropdown dropdown-end"&gt;
+  &lt;input class="input input-bordered" /&gt;
+  &lt;ul class="dropdown-content bg-base-100 rounded-box"&gt;
+    &lt;li class="p-3 hover:bg-base-200"&gt;Search Result&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">🧪 Test Instructions</h2>
+        <div class="steps steps-vertical lg:steps-horizontal">
+            <div class="step step-primary">
+                <div class="text-left">
+                    <div class="font-bold">Search</div>
+                    <div class="text-sm">Type in the search box above</div>
+                </div>
+            </div>
+            <div class="step step-primary">
+                <div class="text-left">
+                    <div class="font-bold">Navigate</div>
+                    <div class="text-sm">Use arrow keys, Enter, Esc</div>
+                </div>
+            </div>
+            <div class="step step-primary">
+                <div class="text-left">
+                    <div class="font-bold">Observe</div>
+                    <div class="text-sm">Standard DaisyUI menu styling</div>
+                </div>
+            </div>
+            <div class="step step-primary">
+                <div class="text-left">
+                    <div class="font-bold">Consistent</div>
+                    <div class="text-sm">Same look across all pages</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert alert-info">
+        <div>
+            <h3 class="font-bold">💡 The Solution</h3>
+            <ul class="list-disc list-inside mt-2 text-sm">
+                <li><strong>Remove the menu class</strong> - That's what caused the blue!</li>
+                <li>Use <strong>simple Tailwind classes</strong> for styling</li>
+                <li><strong>No CSS overrides needed</strong> - Pure DaisyUI structure</li>
+                <li><strong>Clean and consistent</strong> hover states</li>
+            </ul>
+        </div>
+    </div>
+    
+</body>
+</html> 

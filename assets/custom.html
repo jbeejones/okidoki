@@ -1,0 +1,19 @@
+<div class="custom-content p-6 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold text-indigo-800 mb-4">Custom Content from {{site.title}}</h2>
+    <p class="text-gray-700 mb-4">This content is included from <code>assets/custom.html</code> using the include helper.</p>
+    
+    <div class="bg-white p-4 rounded">
+        <h3 class="text-lg font-semibold text-indigo-700 mb-2">Context Information:</h3>
+        <ul class="space-y-1 text-sm text-gray-600">
+            <li><strong>Site Title:</strong> {{site.title}}</li>
+            <li><strong>Base URL:</strong> {{site.baseUrl}}</li>
+            <li><strong>Page Title:</strong> {{title}}</li>
+            <li><strong>Page Description:</strong> {{description}}</li>
+            <li><strong>Handlebars Enabled:</strong> {{#if handlebars}}Yes{{else}}No{{/if}}</li>
+        </ul>
+    </div>
+    
+    <div class="mt-4 text-xs text-gray-500">
+        <p>This demonstrates how the include helper passes the full page context to included templates.</p>
+    </div>
+</div> 

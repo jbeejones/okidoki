@@ -1,6 +1,8 @@
 import handlebars from 'handlebars';
 import markdownit from 'markdown-it';
 import hljs from 'highlight.js';
+import fs from 'fs';
+import path from 'path';
 
 // Create a markdown parser instance similar to the one in mdhelper.js
 const md = markdownit({
@@ -16,6 +18,8 @@ const md = markdownit({
         return ''; // use external default escaping
     }
 });
+
+
 
 function registerHelpers(handlebarsInstance) {
     // Register the equals Handlebars helper
@@ -184,6 +188,139 @@ function registerHelpers(handlebarsInstance) {
         const badgeHtml = '<div class="badge badge-' + type + '">' + text + '</div>';
         
         return new handlebarsInstance.SafeString(badgeHtml);
+    });
+
+        // Global storage for include content (to be processed after markdown)
+    if (!global.okidokiIncludes) {
+        global.okidokiIncludes = new Map();
+    }
+
+    // Search component helper - generates search input and results HTML
+    handlebarsInstance.registerHelper('searchComponent', function(options) {
+        const variant = options.hash.variant || 'default';
+        const placeholder = options.hash.placeholder || 'Search documentation...';
+        const width = options.hash.width || 'auto';
+        
+        let inputId, resultsId, inputClasses, resultsClasses, containerClasses;
+        
+        switch(variant) {
+            case 'mobile-navbar':
+                inputId = 'search-mobile-navbar';
+                resultsId = 'search-results-mobile-navbar';
+                inputClasses = 'input input-bordered input-sm w-32';
+                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto';
+                containerClasses = 'dropdown dropdown-end';
+                break;
+                
+            case 'mobile-sidebar':
+                inputId = 'search-mobile';
+                resultsId = 'search-results-mobile';
+                inputClasses = 'input input-bordered w-full mb-4';
+                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-full p-2 shadow hidden max-h-96 overflow-y-auto';
+                containerClasses = 'dropdown dropdown-top w-full';
+                break;
+                
+            case 'desktop':
+            default:
+                inputId = 'search-desktop';
+                resultsId = 'search-results';
+                inputClasses = `input input-bordered ${width === 'auto' ? 'w-24 md:w-auto' : width}`;
+                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-96 p-2 shadow hidden max-h-96 overflow-y-auto';
+                containerClasses = 'dropdown dropdown-end';
+                break;
+        }
+        
+        const searchHtml = `
+<div class="${containerClasses}">
+    <input 
+        id="${inputId}" 
+        type="text" 
+        placeholder="${placeholder}" 
+        class="${inputClasses}" 
+        tabindex="0"
+        oninput="handleSearch(this.value)" 
+    />
+    <ul id="${resultsId}" class="${resultsClasses}">
+        <!-- Search results will be populated here -->
+    </ul>
+</div>`;
+        
+        return new handlebarsInstance.SafeString(searchHtml);
+    });
+
+    // Include helper - allows including HTML files from assets directory
+    handlebarsInstance.registerHelper('include', function (filename, context, options) {
+        try {
+            // Handle both block and inline helper usage
+            if (typeof context === 'object' && context.hash) {
+                // If only filename is provided: {{include "file.html"}}
+                options = context;
+                context = this; // Use current context
+            }
+            
+            // Default context to current scope if not provided
+            if (!context) {
+                context = this;
+            }
+            
+            // Look for assets directory - check multiple possible locations
+            let assetsDir = null;
+            
+            // 1. Check if there's a configured assets directory
+            if (this.settings && this.settings.site && this.settings.site.assets) {
+                assetsDir = path.resolve(this.settings.site.assets);
+            } else {
+                // 2. Check for default "assets" folder in project root
+                const defaultAssetsDir = path.join(process.cwd(), 'assets');
+                if (fs.existsSync(defaultAssetsDir)) {
+                    assetsDir = defaultAssetsDir;
+                }
+            }
+            
+            if (!assetsDir || !fs.existsSync(assetsDir)) {
+                console.warn(`Include helper: Assets directory not found. Looked for: ${assetsDir || 'assets'}`);
+                return '';
+            }
+            
+            // Construct the full file path
+            const filePath = path.join(assetsDir, filename);
+            
+            // Security check - ensure the file is within the assets directory
+            const resolvedPath = path.resolve(filePath);
+            const resolvedAssetsDir = path.resolve(assetsDir);
+            if (!resolvedPath.startsWith(resolvedAssetsDir)) {
+                console.warn(`Include helper: File ${filename} is outside assets directory`);
+                return '';
+            }
+            
+            // Check if file exists
+            if (!fs.existsSync(filePath)) {
+                console.warn(`Include helper: File not found: ${filePath}`);
+                return '';
+            }
+            
+            // Read the file content
+            let fileContent = fs.readFileSync(filePath, 'utf8');
+            
+            // If the included file contains handlebars syntax, compile and render it with the provided context
+            if (fileContent.includes('{{')) {
+                const template = handlebarsInstance.compile(fileContent);
+                fileContent = template(context);
+            }
+            
+            // Generate a unique placeholder token
+            const token = `OKIDOKI_INCLUDE_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Store the rendered content for later replacement
+            global.okidokiIncludes.set(token, fileContent);
+            
+            // Return the placeholder token (this will be processed by markdown, then replaced)
+            return new handlebarsInstance.SafeString(token);
+            
+        } catch (error) {
+            console.error(`Include helper error for file ${filename}:`, error.message);
+            return '';
+        }
     });
     
     
