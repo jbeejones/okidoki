@@ -13,6 +13,33 @@
   /* Force include DaisyUI components */
   .btn, .btn-primary, .btn-secondary { }
   .navbar, .menu, .drawer, .drawer-toggle { }
+  
+  /* Ensure consistent navbar height and fonts across all pages */
+  .navbar {
+    min-height: 4rem !important; /* 64px - matches documentation page */
+  }
+  
+  /* Fix menu-lg padding in navbar context - prevents extra height on desktop */
+  .navbar .menu-lg :where(li:not(.menu-title) > *:not(ul, details, .menu-title)),
+  .navbar .menu-lg :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
+    padding-top: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
+    padding-bottom: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
+  }
+  
+  /* Force consistent navbar padding for all elements */
+  .navbar * {
+    line-height: 1.5 !important; /* Consistent line height */
+  }
+  
+  /* Consistent navbar font sizes - using !important to match doc page specificity */
+  .navbar .btn,
+  .navbar a {
+    font-size: 0.875rem !important; /* text-sm equivalent */
+  }
+  
+  .navbar .font-bold {
+    font-size: 1rem !important; /* text-base for logo/title */
+  }
   .tab, .tab-content, .tabs, .tabs-bordered { }
   .badge, .badge-primary, .badge-success, .badge-info, .badge-warning, .badge-error { }
   
@@ -74,5 +101,48 @@
     visibility: hidden !important;
     opacity: 0 !important;
     transform: scale(0.95) !important;
+  }
+  
+  /* Theme switcher icon visibility based on DaisyUI themes */
+  /* Default: show sun, hide moon */
+  .theme-sun-icon {
+    opacity: 1;
+  }
+  
+  .theme-moon-icon {
+    opacity: 0;
+  }
+  
+  /* Dark themes: hide sun, show moon */
+  [data-theme="dark"] .theme-sun-icon,
+  [data-theme="forest"] .theme-sun-icon,
+  [data-theme="night"] .theme-sun-icon,
+  [data-theme="black"] .theme-sun-icon,
+  [data-theme="luxury"] .theme-sun-icon,
+  [data-theme="dracula"] .theme-sun-icon,
+  [data-theme="halloween"] .theme-sun-icon,
+  [data-theme="business"] .theme-sun-icon,
+  [data-theme="synthwave"] .theme-sun-icon,
+  [data-theme="cyberpunk"] .theme-sun-icon,
+  [data-theme="coffee"] .theme-sun-icon,
+  [data-theme="dim"] .theme-sun-icon,
+  [data-theme="sunset"] .theme-sun-icon {
+    opacity: 0;
+  }
+  
+  [data-theme="dark"] .theme-moon-icon,
+  [data-theme="forest"] .theme-moon-icon,
+  [data-theme="night"] .theme-moon-icon,
+  [data-theme="black"] .theme-moon-icon,
+  [data-theme="luxury"] .theme-moon-icon,
+  [data-theme="dracula"] .theme-moon-icon,
+  [data-theme="halloween"] .theme-moon-icon,
+  [data-theme="business"] .theme-moon-icon,
+  [data-theme="synthwave"] .theme-moon-icon,
+  [data-theme="cyberpunk"] .theme-moon-icon,
+  [data-theme="coffee"] .theme-moon-icon,
+  [data-theme="dim"] .theme-moon-icon,
+  [data-theme="sunset"] .theme-moon-icon {
+    opacity: 1;
   }
 }

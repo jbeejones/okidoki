@@ -124,6 +124,44 @@ Write the search HTML manually:
 </div>
 ```
 
+## 🎨 Theme Switcher Component
+
+OkiDoki includes a built-in theme switcher that allows users to manually switch between light and dark themes. You can easily add this to your custom pages:
+
+### Including the Theme Switcher
+
+```html
+<!-- Include the theme switcher component -->
+{{include "theme-switcher.html"}}
+```
+
+### Theme Switcher Features
+
+- **Manual Control**: Users can override system preferences
+- **Persistent**: Remembers user choice in localStorage
+- **System Integration**: Falls back to system preference if no manual selection
+- **DaisyUI Integration**: Uses the themes configured in your `okidoki.yaml`
+
+### Example in Navbar
+
+```html
+<div class="navbar bg-base-100 border-b">
+    <div class="flex-1">
+        <a href="/" class="btn btn-ghost text-xl">{{site.title}}</a>
+    </div>
+    <div class="flex-none gap-4">
+        {{include "search-desktop.html"}}
+        {{include "theme-switcher.html"}}
+    </div>
+</div>
+```
+
+The theme switcher automatically:
+- Uses your configured themes from `okidoki.yaml` (`settings.site.theme.light` and `settings.site.theme.dark`)
+- Syncs with the documentation pages
+- Closes the dropdown after selection
+- Provides visual feedback with sun/moon icons
+
 ## 📋 Complete Example
 
 Here's a complete custom page template:
@@ -142,31 +180,18 @@ Here's a complete custom page template:
     <script src="/mybundle.js" defer></script>
     <link rel="icon" href="{{site.favicon}}">
     
-    <!-- Theme switching -->
-    <script>
-        const lightTheme = 'fantasy';
-        const darkTheme = 'forest';
-        
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.setAttribute('data-theme', darkTheme);
-        } else {
-            document.documentElement.setAttribute('data-theme', lightTheme);
-        }
-        
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            document.documentElement.setAttribute('data-theme', e.matches ? darkTheme : lightTheme);
-        });
-    </script>
+    <!-- Theme switching is handled automatically by the included JavaScript -->
 </head>
 <body class="bg-base-100">
     
-    <!-- Navigation with search -->
+    <!-- Navigation with search and theme switcher -->
     <div class="navbar bg-base-100 border-b">
         <div class="flex-1">
             <a href="/" class="btn btn-ghost text-xl">{{site.title}}</a>
         </div>
-        <div class="flex-none">
+        <div class="flex-none gap-4">
             {{include "search-desktop.html"}}
+            {{include "theme-switcher.html"}}
         </div>
     </div>
     

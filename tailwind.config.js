@@ -54,7 +54,16 @@ module.exports = {
     'hover:bg-base-200',
     'bg-base-200',
     'border-base-300',
-    'last:border-b-0'
+    'last:border-b-0',
+    // Theme switcher classes
+    'theme-toggle-btn',
+    'theme-sun-icon',
+    'theme-moon-icon',
+    'text-base-content',
+    'transition-opacity',
+    'absolute',
+    'opacity-0',
+    'opacity-100'
   ],
   theme: {
     extend: {},
