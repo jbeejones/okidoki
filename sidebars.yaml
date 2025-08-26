@@ -30,8 +30,8 @@ footer:
   - title: "Resources"
     items:
       - label: "GitHub"
-        url: "https://github.com/yourusername/your-repo"
+        url: "https://github.com/jbeejones/okidoki"
       - label: "Issues"
-        url: "https://github.com/yourusername/your-repo/issues"
+        url: "https://github.com/jbeejones/okidoki/issues"
       - label: "Discussions"
-        url: "https://github.com/yourusername/your-repo/discussions"
+        url: "https://github.com/jbeejones/okidoki/discussions"

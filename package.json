@@ -16,12 +16,21 @@
     "dev": "nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec \"npm run generate\"",
     "dev:serve": "npm run generate && concurrently \"nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec 'npm run generate'\" \"npx serve dist\""
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbeejones/okidoki"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [
+    "okidoki",
     "documentation",
     "markdown",
     "lunr",
     "search",
-    "documentation generator"
+    "documentation generator",
+    "static site generator"
   ],
   "author": "",
   "license": "ISC",
@@ -46,5 +55,6 @@
     "esbuild": "^0.25.1",
     "nodemon": "^3.1.4",
     "tailwindcss": "^3.4.17"
-  }
+  },
+  "files": ["bin", "dist", "README.md", "LICENSE"]
 }
