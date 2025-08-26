@@ -2,7 +2,7 @@
 
 OkiDoki is a static site generator built for API and technical documentation. Write your docs in standard Markdown and generate fast, searchable documentation sites with minimal configuration. Built for developer workflows with sub-second build times and a lightweight output.
 
-Visit the full documentation at [Githib](https://jbeejones.github.io/okidoki)
+Visit the full documentation at [Github](https://jbeejones.github.io/okidoki)
 
 ## Installation
 
