@@ -18,21 +18,131 @@ const CACHE_KEYS = {
 // Cache expiry time (24 hours in milliseconds)
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
-// Function to clear search cache from localStorage
+// Clear search cache (localStorage and sessionStorage entries)
 function clearSearchCache() {
-    console.log('🧹 Clearing search cache from localStorage...');
-    
-    const keysToRemove = Object.values(CACHE_KEYS);
-    let removedCount = 0;
-    
-    for (const key of keysToRemove) {
-        if (localStorage.getItem(key)) {
-            localStorage.removeItem(key);
-            removedCount++;
-        }
+    console.log('🗑️ Clearing search cache...');
+    try {
+        localStorage.removeItem('okidoki_search_index');
+        localStorage.removeItem('okidoki_search_data');
+        localStorage.removeItem('okidoki_search_timestamp');
+        localStorage.removeItem('okidoki_search_etag');
+        console.log('✅ Search cache cleared');
+    } catch (e) {
+        console.warn('Failed to clear search cache:', e);
     }
+
+}
+
+// Search persistence functions
+function saveSearchState(query, results) {
+    try {
+        if (!query || query.trim().length < 2) {
+            // Clear saved state for empty/short queries
+            localStorage.removeItem('okidoki_last_search');
+            return;
+        }
+        
+        const searchState = {
+            query: query.trim(),
+            results: results,
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem('okidoki_last_search', JSON.stringify(searchState));
+        console.log('💾 Search state saved:', query);
+    } catch (e) {
+        console.warn('Failed to save search state:', e);
+    }
+}
+
+function clearSavedSearchState() {
+    try {
+        localStorage.removeItem('okidoki_last_search');
+        console.log('🗑️ Search state cleared');
+        
+        // Also clear all search inputs on current page
+        const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile, #search-mobile-navbar');
+        searchInputs.forEach(input => {
+            if (input && input.value.trim()) {
+                // Only clear if it's not the input that triggered this clear (to avoid infinite loops)
+                const activeElement = document.activeElement;
+                if (input !== activeElement) {
+                    input.value = '';
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('Failed to clear search state:', e);
+    }
+}
+
+function loadSearchState() {
+    try {
+        const saved = localStorage.getItem('okidoki_last_search');
+        if (!saved) return null;
+        
+        const searchState = JSON.parse(saved);
+        
+        // Check if saved state is not too old (24 hours)
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        if (Date.now() - searchState.timestamp > maxAge) {
+            localStorage.removeItem('okidoki_last_search');
+            return null;
+        }
+        
+        return searchState;
+    } catch (e) {
+        console.warn('Failed to load search state:', e);
+        localStorage.removeItem('okidoki_last_search');
+        return null;
+    }
+}
+
+function restoreSearchState() {
+    const savedState = loadSearchState();
+    if (!savedState || !idx) return;
     
-    console.log(`🧹 Cleared ${removedCount} cache entries`);
+    console.log('🔄 Restoring search state:', savedState.query);
+    
+    // Update all search input fields but don't show results immediately
+    const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile, #search-mobile-navbar');
+    searchInputs.forEach(input => {
+        if (input) {
+            input.value = savedState.query;
+            
+            // Only add event listeners if not already added
+            if (!input.hasAttribute('data-search-listeners-added')) {
+                input.setAttribute('data-search-listeners-added', 'true');
+                
+                // Add focus event listener to show cached results when user focuses on input
+                input.addEventListener('focus', function(e) {
+                    const currentSavedState = loadSearchState();
+                    if (currentSavedState && currentSavedState.query === e.target.value.trim() && e.target.value.trim().length >= 2) {
+                        // Show cached results when user focuses on input with saved query
+                        showCachedSearchResults(currentSavedState.query, currentSavedState.results);
+                    }
+                });
+                
+                // Also trigger on click for better UX
+                input.addEventListener('click', function(e) {
+                    const currentSavedState = loadSearchState();
+                    if (currentSavedState && currentSavedState.query === e.target.value.trim() && e.target.value.trim().length >= 2) {
+                        // Show cached results when user clicks on input with saved query
+                        showCachedSearchResults(currentSavedState.query, currentSavedState.results);
+                    }
+                });
+            }
+        }
+    });
+}
+
+function showCachedSearchResults(query, results) {
+    console.log('📋 Showing cached search results for:', query);
+    
+    // Show cached results for all containers
+    updateSearchResults('search-results', query, results);
+    updateSearchResults('search-results-mobile', query, results);
+    updateSearchResults('search-results-mobile-navbar', query, results);
 }
 
 // Initialize search functionality with localStorage caching
@@ -48,6 +158,9 @@ async function initializeSearch() {
             idx = cachedData.index;
             searchData = cachedData.data;
             console.log('✅ Search initialized from cache');
+            
+            // Restore any saved search state
+            restoreSearchState();
             return;
         }
         
@@ -55,6 +168,9 @@ async function initializeSearch() {
         console.log('🌐 Cache miss - clearing old cache and fetching search data from server');
         clearSearchCache();
         await fetchAndCacheSearchData();
+        
+        // Restore any saved search state after fetching data
+        restoreSearchState();
         
     } catch (e) {
         console.warn('❌ Failed to initialize search:', e);
@@ -658,9 +774,17 @@ function escapeRegex(string) {
 // Global search function
 window.handleSearch = function(query) {
     // Update all search results containers
-    updateSearchResults('search-results', query);
-    updateSearchResults('search-results-mobile', query);
-    updateSearchResults('search-results-mobile-navbar', query);
+    const results = updateSearchResults('search-results', query);
+    updateSearchResults('search-results-mobile', query, results);
+    updateSearchResults('search-results-mobile-navbar', query, results);
+    
+    // Save or clear search state based on query
+    if (query && query.trim().length >= 2 && results) {
+        saveSearchState(query, results);
+    } else {
+        // Clear saved state when input is empty or too short
+        clearSavedSearchState();
+    }
 }
 
 // Hide search results when clicking outside
@@ -680,11 +804,11 @@ function handleClickOutside(event) {
 // Add click outside listener
 document.addEventListener('click', handleClickOutside);
 
-function updateSearchResults(resultsId, query) {
+function updateSearchResults(resultsId, query, cachedResults = null) {
     const searchResultsContainer = document.getElementById(resultsId);
     
     if (!searchResultsContainer) {
-        return;
+        return null;
     }
     
     // Find the parent dropdown element
@@ -696,7 +820,7 @@ function updateSearchResults(resultsId, query) {
         if (dropdownParent) {
             dropdownParent.classList.remove('dropdown-open');
         }
-        return;
+        return null;
     }
 
     if (!idx) {
@@ -705,38 +829,44 @@ function updateSearchResults(resultsId, query) {
         if (dropdownParent) {
             dropdownParent.classList.add('dropdown-open');
         }
-        return;
+        return null;
     }
 
     try {
-        // Try multiple search strategies for better matching
         let results = [];
         const cleanQuery = query.trim();
         
-        // Strategy 1: Exact match
-        try {
-            results = idx.search(cleanQuery);
-        } catch (e) {
-            // Ignore exact search errors
-        }
-        
-        // Strategy 2: If no results, try wildcard on each word
-        if (results.length === 0) {
-            const wildcardQuery = cleanQuery.split(' ').map(word => `${word}*`).join(' ');
+        // Use cached results if provided, otherwise perform search
+        if (cachedResults) {
+            results = cachedResults;
+        } else {
+            // Try multiple search strategies for better matching
+            
+            // Strategy 1: Exact match
             try {
-                results = idx.search(wildcardQuery);
+                results = idx.search(cleanQuery);
             } catch (e) {
-                // Ignore wildcard search errors
+                // Ignore exact search errors
             }
-        }
-        
-        // Strategy 3: If still no results, try fuzzy matching
-        if (results.length === 0) {
-            const fuzzyQuery = cleanQuery.split(' ').map(word => `${word}~1`).join(' ');
-            try {
-                results = idx.search(fuzzyQuery);
-            } catch (e) {
-                // Ignore fuzzy search errors
+            
+            // Strategy 2: If no results, try wildcard on each word
+            if (results.length === 0) {
+                const wildcardQuery = cleanQuery.split(' ').map(word => `${word}*`).join(' ');
+                try {
+                    results = idx.search(wildcardQuery);
+                } catch (e) {
+                    // Ignore wildcard search errors
+                }
+            }
+            
+            // Strategy 3: If still no results, try fuzzy matching
+            if (results.length === 0) {
+                const fuzzyQuery = cleanQuery.split(' ').map(word => `${word}~1`).join(' ');
+                try {
+                    results = idx.search(fuzzyQuery);
+                } catch (e) {
+                    // Ignore fuzzy search errors
+                }
             }
         }
         
@@ -748,7 +878,7 @@ function updateSearchResults(resultsId, query) {
             if (dropdownParent) {
                 dropdownParent.classList.remove('dropdown-open');
             }
-            return;
+            return results;
         } else {
             const displayedResults = results.slice(0, MAX_RESULTS);
             
@@ -781,6 +911,8 @@ function updateSearchResults(resultsId, query) {
         
         // Add click handlers and keyboard navigation
         setupSearchResultInteractions(searchResultsContainer, cleanQuery);
+        
+        return results;
 
     } catch (e) {
         console.error('Search error:', e);
@@ -788,6 +920,7 @@ function updateSearchResults(resultsId, query) {
         if (dropdownParent) {
             dropdownParent.classList.remove('dropdown-open');
         }
+        return null;
     }
 }
 

@@ -3470,7 +3470,8 @@ html {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   align-items: center;
   justify-content: center;
   text-align: center;

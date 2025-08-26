@@ -1770,16 +1770,99 @@
   };
   var CACHE_EXPIRY = 24 * 60 * 60 * 1e3;
   function clearSearchCache() {
-    console.log("\u{1F9F9} Clearing search cache from localStorage...");
-    const keysToRemove = Object.values(CACHE_KEYS);
-    let removedCount = 0;
-    for (const key of keysToRemove) {
-      if (localStorage.getItem(key)) {
-        localStorage.removeItem(key);
-        removedCount++;
-      }
+    console.log("\u{1F5D1}\uFE0F Clearing search cache...");
+    try {
+      localStorage.removeItem("okidoki_search_index");
+      localStorage.removeItem("okidoki_search_data");
+      localStorage.removeItem("okidoki_search_timestamp");
+      localStorage.removeItem("okidoki_search_etag");
+      console.log("\u2705 Search cache cleared");
+    } catch (e) {
+      console.warn("Failed to clear search cache:", e);
     }
-    console.log(`\u{1F9F9} Cleared ${removedCount} cache entries`);
+  }
+  function saveSearchState(query, results) {
+    try {
+      if (!query || query.trim().length < 2) {
+        localStorage.removeItem("okidoki_last_search");
+        return;
+      }
+      const searchState = {
+        query: query.trim(),
+        results,
+        timestamp: Date.now()
+      };
+      localStorage.setItem("okidoki_last_search", JSON.stringify(searchState));
+      console.log("\u{1F4BE} Search state saved:", query);
+    } catch (e) {
+      console.warn("Failed to save search state:", e);
+    }
+  }
+  function clearSavedSearchState() {
+    try {
+      localStorage.removeItem("okidoki_last_search");
+      console.log("\u{1F5D1}\uFE0F Search state cleared");
+      const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile, #search-mobile-navbar");
+      searchInputs.forEach((input) => {
+        if (input && input.value.trim()) {
+          const activeElement = document.activeElement;
+          if (input !== activeElement) {
+            input.value = "";
+          }
+        }
+      });
+    } catch (e) {
+      console.warn("Failed to clear search state:", e);
+    }
+  }
+  function loadSearchState() {
+    try {
+      const saved = localStorage.getItem("okidoki_last_search");
+      if (!saved) return null;
+      const searchState = JSON.parse(saved);
+      const maxAge = 24 * 60 * 60 * 1e3;
+      if (Date.now() - searchState.timestamp > maxAge) {
+        localStorage.removeItem("okidoki_last_search");
+        return null;
+      }
+      return searchState;
+    } catch (e) {
+      console.warn("Failed to load search state:", e);
+      localStorage.removeItem("okidoki_last_search");
+      return null;
+    }
+  }
+  function restoreSearchState() {
+    const savedState = loadSearchState();
+    if (!savedState || !idx) return;
+    console.log("\u{1F504} Restoring search state:", savedState.query);
+    const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile, #search-mobile-navbar");
+    searchInputs.forEach((input) => {
+      if (input) {
+        input.value = savedState.query;
+        if (!input.hasAttribute("data-search-listeners-added")) {
+          input.setAttribute("data-search-listeners-added", "true");
+          input.addEventListener("focus", function(e) {
+            const currentSavedState = loadSearchState();
+            if (currentSavedState && currentSavedState.query === e.target.value.trim() && e.target.value.trim().length >= 2) {
+              showCachedSearchResults(currentSavedState.query, currentSavedState.results);
+            }
+          });
+          input.addEventListener("click", function(e) {
+            const currentSavedState = loadSearchState();
+            if (currentSavedState && currentSavedState.query === e.target.value.trim() && e.target.value.trim().length >= 2) {
+              showCachedSearchResults(currentSavedState.query, currentSavedState.results);
+            }
+          });
+        }
+      }
+    });
+  }
+  function showCachedSearchResults(query, results) {
+    console.log("\u{1F4CB} Showing cached search results for:", query);
+    updateSearchResults("search-results", query, results);
+    updateSearchResults("search-results-mobile", query, results);
+    updateSearchResults("search-results-mobile-navbar", query, results);
   }
   async function initializeSearch() {
     try {
@@ -1790,11 +1873,13 @@
         idx = cachedData.index;
         searchData = cachedData.data;
         console.log("\u2705 Search initialized from cache");
+        restoreSearchState();
         return;
       }
       console.log("\u{1F310} Cache miss - clearing old cache and fetching search data from server");
       clearSearchCache();
       await fetchAndCacheSearchData();
+      restoreSearchState();
     } catch (e) {
       console.warn("\u274C Failed to initialize search:", e);
     }
@@ -2234,9 +2319,14 @@
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
   window.handleSearch = function(query) {
-    updateSearchResults("search-results", query);
-    updateSearchResults("search-results-mobile", query);
-    updateSearchResults("search-results-mobile-navbar", query);
+    const results = updateSearchResults("search-results", query);
+    updateSearchResults("search-results-mobile", query, results);
+    updateSearchResults("search-results-mobile-navbar", query, results);
+    if (query && query.trim().length >= 2 && results) {
+      saveSearchState(query, results);
+    } else {
+      clearSavedSearchState();
+    }
   };
   function handleClickOutside(event) {
     const dropdowns = document.querySelectorAll(".dropdown.dropdown-open");
@@ -2251,10 +2341,10 @@
     });
   }
   document.addEventListener("click", handleClickOutside);
-  function updateSearchResults(resultsId, query) {
+  function updateSearchResults(resultsId, query, cachedResults = null) {
     const searchResultsContainer = document.getElementById(resultsId);
     if (!searchResultsContainer) {
-      return;
+      return null;
     }
     const dropdownParent = searchResultsContainer.closest(".dropdown");
     if (!query || query.trim().length < 2) {
@@ -2262,7 +2352,7 @@
       if (dropdownParent) {
         dropdownParent.classList.remove("dropdown-open");
       }
-      return;
+      return null;
     }
     if (!idx) {
       searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">Search not available</li>';
@@ -2270,27 +2360,31 @@
       if (dropdownParent) {
         dropdownParent.classList.add("dropdown-open");
       }
-      return;
+      return null;
     }
     try {
       let results = [];
       const cleanQuery = query.trim();
-      try {
-        results = idx.search(cleanQuery);
-      } catch (e) {
-      }
-      if (results.length === 0) {
-        const wildcardQuery = cleanQuery.split(" ").map((word) => `${word}*`).join(" ");
+      if (cachedResults) {
+        results = cachedResults;
+      } else {
         try {
-          results = idx.search(wildcardQuery);
+          results = idx.search(cleanQuery);
         } catch (e) {
         }
-      }
-      if (results.length === 0) {
-        const fuzzyQuery = cleanQuery.split(" ").map((word) => `${word}~1`).join(" ");
-        try {
-          results = idx.search(fuzzyQuery);
-        } catch (e) {
+        if (results.length === 0) {
+          const wildcardQuery = cleanQuery.split(" ").map((word) => `${word}*`).join(" ");
+          try {
+            results = idx.search(wildcardQuery);
+          } catch (e) {
+          }
+        }
+        if (results.length === 0) {
+          const fuzzyQuery = cleanQuery.split(" ").map((word) => `${word}~1`).join(" ");
+          try {
+            results = idx.search(fuzzyQuery);
+          } catch (e) {
+          }
         }
       }
       window.searchResults = results;
@@ -2299,7 +2393,7 @@
         if (dropdownParent) {
           dropdownParent.classList.remove("dropdown-open");
         }
-        return;
+        return results;
       } else {
         const displayedResults = results.slice(0, MAX_RESULTS);
         searchResultsContainer.innerHTML = displayedResults.map((result) => {
@@ -2324,12 +2418,14 @@
         dropdownParent.classList.add("dropdown-open");
       }
       setupSearchResultInteractions(searchResultsContainer, cleanQuery);
+      return results;
     } catch (e) {
       console.error("Search error:", e);
       searchResultsContainer.classList.add("hidden");
       if (dropdownParent) {
         dropdownParent.classList.remove("dropdown-open");
       }
+      return null;
     }
   }
   function setupSearchResultInteractions(container, query) {
