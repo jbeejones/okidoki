@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fantasy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footer Test - {{site.title}}</title>
+    <link rel="stylesheet" href="/mystyles.css">
+</head>
+<body class="bg-base-100">
+    
+    {{include "custom-navbar-perfect-match.html"}}
+
+    <div class="p-8">
+        <div class="alert alert-success mb-6">
+            <div>
+                <h3 class="font-bold">🦶 Footer Configuration Test!</h3>
+                <p class="mt-2">Footer should now render links from <code>sidebars.yaml</code> configuration below the copyright.</p>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">📋 Current Footer Config</h2>
+            <div class="mockup-code">
+                <pre><code># sidebars.yaml
+footer:
+  - title: "Resources"
+    items:
+      - label: "GitHub"
+        url: "https://github.com/yourusername/your-repo"
+      - label: "Issues"
+        url: "https://github.com/yourusername/your-repo/issues"
+      - label: "Discussions"
+        url: "https://github.com/yourusername/your-repo/discussions"</code></pre>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">🔍 What to Check</h2>
+            <div class="space-y-4">
+                <div class="alert alert-info">
+                    <div>
+                        <p><strong>Scroll to bottom of this page</strong> - you should see:</p>
+                        <ul class="list-disc list-inside mt-2">
+                            <li>Resources section with GitHub, Issues, Discussions links</li>
+                            <li>Copyright notice below the links</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html> 

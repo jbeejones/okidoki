@@ -1,225 +1,110 @@
 # OkiDoki - static generator for API docs
 
-## Why Choose OkiDoki?
+OkiDoki is a static site generator built for API and technical documentation. Write your docs in standard Markdown and generate fast, searchable documentation sites with minimal configuration. Built for developer workflows with sub-second build times and a lightweight output.
 
-OkiDoki is a minimal-config static site generator focused on developer documentation needs.
+Visit the full documentation at [Githib](https://jbeejones.github.io/okidoki)
 
-**Multi-language code examples**: Handlebars `{{#tabs}}` helpers let you write code snippets once and display them across multiple language tabs. Useful for API documentation where you need to show the same endpoint in Python, JavaScript, cURL, etc.
+## Installation
 
-**Zero-config theming**: Uses DaisyUI and Tailwind CSS with automatic dark/light mode switching. No custom CSS required.
-
-**Built-in search**: Lunr.js full-text search is configured out of the box. No external services needed.
-
-**Static output**: Generates plain HTML/CSS/JS files that work on any web server or CDN. No runtime dependencies.
-
-
-
-## Quick Start
-
-### 1. Install OkiDoki
+Install OkiDoki globally using npm:
 
 ```bash
 npm install -g okidoki
 ```
+## Quick Setup
 
-### 2. Create your documentation project
+1. **Create a new documentation project:**
+   ```bash
+   mkdir mydocs && cd mydocs
+   ```
 
-```bash
-mkdir my-docs
-cd my-docs
-okidoki init
+2. **Initialize your project:**
+   ```bash
+   okidoki init
+   ```
+   This creates the basic structure with configuration files.
+
+3. **Generate your documentation:**
+   ```bash
+   okidoki generate
+   ```
+
+4. **Serve your docs locally:**
+   ```bash
+   npx serve dist
+   ```
+   Your documentation will be available at `http://localhost:3000`
+
+
+## Project Structure
+
+After running `okidoki init`, you'll have:
+
+```
+mydocs/
+├── okidoki.yaml      # Main configuration
+├── sidebars.yaml     # Navigation structure
+├── docs/             # Your markdown files
+│   └── index.md      # Homepage content
+└── dist/             # Generated site (after build)
 ```
 
-This creates:
-- `docs/` - Your markdown files
-- `okidoki.yaml` - Configuration file
-- `sidebars.yaml` - Navigation structure
+## Basic Configuration
 
-### 3. Write your first doc
-
-Edit `okidoki.yaml` for the docs title and global variables.
-
+### okidoki.yaml
 ```yaml
-# Okidoki Configuration
 site:
-  title: "My Docs"
-  description: "Docs generated with Okidoki"
+  title: "My Documentation"
+  description: "Documentation for my project"
+  theme:
+    light: "fantasy"
+    dark: "forest"
 
-# globals
 globals:
   version: "1.0.0"
-  author: "John Doe"
+  api_url: "https://api.example.com"
 ```
 
-Edit `docs/index.md`:
-
-````markdown
-
-# Getting started
-
-This doumentation is currently for version {{globals.version}}.
-
-This is a code example in JavaScript:
-```js
-console.log("Hello from JavaScript!");
-```
-
-Author: {{globals.author}}
-````
-
-### 4. Generate your site
-
-```bash
-okidoki generate
-```
-
-### 5. Preview locally
-
-**Simplest approach** - Generate once and serve:
-
-```bash
-okidoki generate && npx serve dist
-```
-
-**Auto-rebuild during development** - For automatic rebuilding when files change, install nodemon:
-
-```bash
-npm install -g nodemon
-
-# Watch files and auto-regenerate
-nodemon -w ./docs -w okidoki.yaml -w sidebars.yaml -e md,png,jpg,jpeg,gif,svg,webp,yaml,yml --exec "okidoki generate"
-```
-
-**Don't want to install nodemon globally?** Use npx instead:
-
-```bash
-npx nodemon -w ./docs -w okidoki.yaml -w sidebars.yaml -e md,png,jpg,jpeg,gif,svg,webp,yaml,yml --exec "okidoki generate && npx serve dist"
-```
-
-That's it! Your documentation site is ready. Edit markdown files in `docs/`, and they'll automatically rebuild during development. Deploy the `dist/` folder anywhere when ready.
-
-
-## Deployment
-
-OkiDoki generates static files in the `dist/` folder that can be deployed anywhere. Here are the most popular deployment options:
-
-### GitHub Pages
-
-Deploy directly from your GitHub repository:
-
-1. **Create a GitHub Actions workflow** (recommended):
-
-Create `.github/workflows/deploy.yml`:
-
+### sidebars.yaml
 ```yaml
-name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          
-      - name: Install OkiDoki
-        run: npm install -g okidoki
-        
-      - name: Generate site
-        run: okidoki generate
-        
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-          
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+menu:
+  - title: Getting Started
+    document: /start.md
+  - title: API Reference
+    document: /api.md
+  - title: Examples
+    document: /examples.md
 ```
 
-2. **Enable Pages in repository settings**:
-   - Go to Settings → Pages
-   - Source: "GitHub Actions"
-   - Your site will be available at `https://username.github.io/repository-name`
+## Writing Your First Page
 
-### Netlify
+Create a new markdown file in the `docs/` directory:
 
-Deploy with automatic builds from Git or manual drag-and-drop:
+```markdown
+# My First Page
 
-#### Option 1: Git Integration (Recommended)
-1. Connect your GitHub/GitLab repository to Netlify
-2. **Build settings**:
-   - Build command: `npm install -g okidoki && okidoki generate`
-   - Publish directory: `dist`
-3. **Environment variables** (if needed):
-   - `NODE_VERSION`: `18` (or your preferred version)
+This is my first documentation page with **bold text** and `code`.
 
-#### Option 2: Manual Deploy
-```bash
-# Generate your site
-okidoki generate
+## Code Example
 
-# Install Netlify CLI
-npm install -g netlify-cli
-
-# Deploy (first time)
-netlify deploy --dir=dist --prod
+```javascript
+function hello() {
+  console.log("Hello, OkiDoki!");
+}
 ```
 
-### Vercel
 
-Deploy with Git integration or Vercel CLI:
+## Next Steps
 
-#### Option 1: Git Integration (Recommended)
-1. Import your repository at [vercel.com/new](https://vercel.com/new)
-2. **Build settings** (usually auto-detected):
-   - Framework Preset: Other
-   - Build Command: `npm install -g okidoki && okidoki generate`
-   - Output Directory: `dist`
+- Check out the [Documentation Reference](https://jbeejones.github.io/okidoki/reference.md) for advanced features
+- Browse [Examples](https://jbeejones.github.io/okidoki/markdown-examples.md) for inspiration  
+- Visit the [Help](https://jbeejones.github.io/okidoki/help.md) section if you run into issues
 
-#### Option 2: Vercel CLI
-```bash
-# Generate your site
-okidoki generate
+## Key Features
 
-# Install Vercel CLI
-npm install -g vercel
+- **Markdown First**: Write in standard markdown, no proprietary formats
+- **Fast Search**: Full-text search across all documentation
+- **Clean Themes**: Beautiful, responsive themes out of the box
+- **Quick Build**: Generate docs in under 1 second
+- **Small Footprint**: Generated sites are ~50KB 
 
-# Deploy
-vercel --prod
-```
-
-### Other Options
-
-**Traditional Web Hosting**: Upload the `dist/` folder contents via FTP/SFTP to your web server's public directory.
-
-**Amazon S3 + CloudFront**: Perfect for high-traffic sites requiring global CDN distribution.
-
-**Firebase Hosting**: Google's hosting solution with easy CLI deployment.
-
-All these platforms support custom domains and HTTPS out of the box. Your documentation will be fast and globally distributed! 🚀
-
-## Why I Built OkiDoki
-
-I got tired of existing documentation tools being either too simple (basic markdown-to-HTML converters) or overly complex (requiring extensive configuration for basic features). Most tools make you choose between beautiful output and simplicity.
-
-When writing API docs, I kept copying the same code examples across multiple language tabs manually. I wanted a tool that could handle frontmatter variables and multi-language code blocks natively, without plugins or complex setup.
-
-The final straw was setting up search functionality - it always required external services, complex indexing, or heavy JavaScript frameworks. I wanted something that just worked out of the box with static files.

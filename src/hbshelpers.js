@@ -72,7 +72,7 @@ function registerHelpers(handlebarsInstance) {
             const isActive = false; //item.document === activeDocId;
             return `
                 <a href="${href}" class="${isActive ? 'menu-active' : ''}">
-                    ${item.title} ${item.badge ? `<div class="badge badge-xs badge-${item.badge.variant || 'success'}">${item.badge.text}</div>` : ''}
+                    ${item.title} ${item.badge ? `<div class="badge badge badge-${item.badge.variant || 'success'}">${item.badge.text}</div>` : ''}
                 </a>
             `;
         };

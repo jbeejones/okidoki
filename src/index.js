@@ -272,6 +272,8 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
                         },
                         settings: settings,
                         site: settings.site,
+                        navbar: sidebars.navbar || [],
+                        footer: sidebars.footer || [],
                         baseUrl: settings.site.baseUrl || '/',
                         title: settings.site.title,
                         description: settings.site.description

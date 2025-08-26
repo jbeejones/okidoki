@@ -632,6 +632,7 @@ function renderPage(templateName, { props, html, page, id }) {
         settings: settings,
         sidebars: transformedSidebars,
         navbar: transformedSidebarsNavbar.navbar,
+        footer: sidebars.footer || [],
         title: settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
         html,

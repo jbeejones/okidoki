@@ -469,7 +469,7 @@
       <ul class="menu menu-lg menu-horizontal">
         <!-- Navbar menu content here -->          
           {{#each navbar}}
-            <li><a href="{{this.document}}">{{this.title}}</a></li>
+            <li><a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}">{{this.title}}</a></li>
           {{/each}}
       </ul>
       {{#if settings.search.enabled}}
@@ -553,7 +553,7 @@
           <li><a href="/index.html">Home</a></li>
           <!-- Navbar menu content here -->          
           {{#each navbar}}
-            <li><a href="{{this.document}}">{{this.title}}</a></li>
+            <li><a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}">{{this.title}}</a></li>
           {{/each}}
           <div class="divider"></div>
         </div>
@@ -567,7 +567,23 @@
     {{/unless}}
   </div>
   {{#unless layout.hideFooter}}
-  <footer class="footer sm:footer-horizontal footer-center text-base-content p-4">
+  <footer class="footer footer-center text-base-content p-4">
+    {{#if footer}}
+    <div class="footer-content">
+      {{#each footer}}
+      <div class="footer-section">
+        {{#if title}}<h3 class="footer-title font-bold mb-2">{{title}}</h3>{{/if}}
+        {{#if items}}
+        <nav class="flex flex-wrap gap-4 justify-center">
+          {{#each items}}
+          <a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
+          {{/each}}
+        </nav>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
     <aside>
       <p>Copyright © {{copyright.year}} - All right reserved by {{copyright.name}}</p>
     </aside>
