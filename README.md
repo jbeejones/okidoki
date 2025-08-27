@@ -1,8 +1,14 @@
-# OkiDoki - static generator for API docs
+# OkiDoki - Free & Open Source Documentation Generator
 
-OkiDoki is a static site generator built for API and technical documentation. Write your docs in standard Markdown and generate fast, searchable documentation sites with minimal configuration. Built for developer workflows with sub-second build times and a lightweight output.
+[![npm version](https://badge.fury.io/js/okidoki.svg)](https://badge.fury.io/js/okidoki)
+[![GitHub license](https://img.shields.io/github/license/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/stargazers)
 
-Visit the full documentation at [Github](https://jbeejones.github.io/okidoki)
+**OkiDoki** is a **free, open-source** static site generator built for API and technical documentation. Write your docs in standard Markdown and generate fast, searchable documentation sites with minimal configuration. Built for developer workflows with sub-second build times and a lightweight output.
+
+🌟 **Completely free and open source** - No subscriptions, no limits, no vendor lock-in!
+
+Visit the full documentation at [Github](https://jbeejones.github.io/okidoki) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
 ## Installation
 
@@ -102,9 +108,24 @@ function hello() {
 
 ## Key Features
 
-- **Markdown First**: Write in standard markdown, no proprietary formats
-- **Fast Search**: Full-text search across all documentation
-- **Clean Themes**: Beautiful, responsive themes out of the box
-- **Quick Build**: Generate docs in under 1 second
-- **Small Footprint**: Generated sites are ~50KB 
+- **🆓 Free & Open Source**: No subscriptions, no limits, no vendor lock-in
+- **📝 Markdown First**: Write in standard markdown, no proprietary formats
+- **⚡ Fast Search**: Full-text search across all documentation
+- **🎨 Clean Themes**: Beautiful, responsive themes out of the box
+- **⚡ Quick Build**: Generate docs in under 1 second
+- **💾 Small Footprint**: Generated sites are ~50KB 
+
+## Contributing
+
+OkiDoki is open source and we welcome contributions! Here are ways you can help:
+
+- 🐛 **Report bugs** - [Open an issue](https://github.com/jbeejones/okidoki/issues)
+- 💡 **Suggest features** - [Start a discussion](https://github.com/jbeejones/okidoki/discussions) 
+- 📝 **Improve docs** - Submit pull requests for documentation improvements
+- 🔧 **Fix issues** - Check our [open issues](https://github.com/jbeejones/okidoki/issues) for ways to help
+- ⭐ **Star the project** - Help others discover OkiDoki!
+
+## License
+
+OkiDoki is released under the [ISC License](https://github.com/jbeejones/okidoki/blob/main/LICENSE). You're free to use, modify, and distribute it for any purpose.
 
