@@ -1,6 +1,6 @@
 {
   "name": "okidoki",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "bin": {
     "okidoki": "src/index.js"
   },
