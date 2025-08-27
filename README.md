@@ -127,5 +127,5 @@ OkiDoki is open source and we welcome contributions! Here are ways you can help:
 
 ## License
 
-OkiDoki is released under the [ISC License](https://github.com/jbeejones/okidoki/blob/main/LICENSE). You're free to use, modify, and distribute it for any purpose.
+OkiDoki is released under the [MIT License](https://github.com/jbeejones/okidoki/blob/main/LICENSE). You're free to use, modify, and distribute it for any purpose.
 

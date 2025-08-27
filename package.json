@@ -36,7 +36,7 @@
     "technical-docs"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "Free, open-source static site generator for beautiful API and technical documentation from markdown",
   "dependencies": {
     "@sindresorhus/slugify": "^2.2.1",
