@@ -8,7 +8,7 @@
 
 🌟 **Completely free and open source** - No subscriptions, no limits, no vendor lock-in!
 
-Visit the full documentation at [Github](https://jbeejones.github.io/okidoki) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
+Visit the full documentation at [Github](https://jbeejones.github.io/okidoki-website) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
 ## Installation
 
