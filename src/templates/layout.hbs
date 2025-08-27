@@ -14,6 +14,7 @@
   <meta name="keywords" content="{{keywords}}">
   <title>{{title}}</title>
   <link rel='canonical' href='{{baseUrl}}' />
+  <base href='{{baseUrl}}' />
 
   <!-- Open Graph / Facebook -->
   <meta property='og:type' content='website' />
@@ -26,15 +27,15 @@
   <meta property='twitter:title' content='{{title}}' />
   <meta property='twitter:description' content='{{settings.site.description}}' />
   <meta property='twitter:image' content='{{baseUrl}}/og-image.png' />
-  <link rel="stylesheet" href="mystyles.css?cachebrk={{cacheBreaker}}" type="text/css" />
+  <link rel="stylesheet" href="/mystyles.css?cachebrk={{cacheBreaker}}" type="text/css" />
   <script src="https://unpkg.com/lunr/lunr.js" defer></script>
-  <script src="mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
-  <link rel="stylesheet" href="github-dark.min.css" type="text/css" />
+  <script src="/mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
+  <link rel="stylesheet" href="/github-dark.min.css" type="text/css" />
   <link rel="icon" href="{{settings.site.favicon}}" type="image/x-icon">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
   <style>
     [data-theme="{{settings.site.theme.dark}}"] .prose h1,
     [data-theme="{{settings.site.theme.dark}}"] .prose h2,
@@ -409,7 +410,7 @@
     </div>
     {{/unless}}
     <div class="flex-1">
-      <a class="flex items-center whitespace-nowrap" href="index.html">
+      <a class="flex items-center whitespace-nowrap" href="/index.html">
           <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3">
           <span class="text-xl font-mono font-bold">{{title}}</span>
       </a>
@@ -549,7 +550,7 @@
             </ul>
           </div>
           {{/if}}
-          <li><a href="index.html">Home</a></li>
+          <li><a href="/index.html">Home</a></li>
           <!-- Navbar menu content here -->          
           {{#each navbar}}
             <li><a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}">{{this.title}}</a></li>

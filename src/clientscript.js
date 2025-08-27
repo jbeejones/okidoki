@@ -278,7 +278,7 @@ async function validateCacheWithServer() {
         console.log('🔄 Validating cache with server using content hash...');
         
         // First try to get server metadata for content hash validation
-        const metaResponse = await fetch('./search-meta.json').catch(e => {
+        const metaResponse = await fetch('/search-meta.json').catch(e => {
             console.warn('📡 Meta request failed:', e.message);
             return null;
         });
@@ -339,11 +339,11 @@ async function validateCacheWithServer() {
         
         // Use HEAD requests for lightweight validation
         const [indexHead, dataHead] = await Promise.all([
-            fetch('./lunr-index.json', { method: 'HEAD' }).catch(e => {
+            fetch('/lunr-index.json', { method: 'HEAD' }).catch(e => {
                 console.warn('📡 Index HEAD request failed:', e.message);
                 return null;
             }),
-            fetch('./search-data.json', { method: 'HEAD' }).catch(e => {
+            fetch('/search-data.json', { method: 'HEAD' }).catch(e => {
                 console.warn('📡 Data HEAD request failed:', e.message);
                 return null;
             })
@@ -397,9 +397,9 @@ async function fetchAndCacheSearchData() {
         console.log('🌐 Fetching search data from server...');
         
         const [indexResponse, dataResponse, metaResponse] = await Promise.all([
-            fetch('./lunr-index.json'),
-            fetch('./search-data.json'),
-            fetch('./search-meta.json').catch(e => {
+            fetch('/lunr-index.json'),
+            fetch('/search-data.json'),
+            fetch('/search-meta.json').catch(e => {
                 console.warn('📡 Meta fetch failed (this is ok for older builds):', e.message);
                 return null;
             })

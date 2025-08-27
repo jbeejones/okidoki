@@ -4,7 +4,7 @@
 site:
   title: "My Docs"
   description: "Docs generated with Okidoki"
-  baseUrl: "/"
+  baseUrl: "/okidoki-website/"
   favicon: "/favicon.ico"
   theme:
     light: "fantasy"
