@@ -1,6 +1,6 @@
 # OkiDoki - Free & Open Source Documentation Generator
 
-[![npm version](https://badge.fury.io/js/okidoki.svg)](https://badge.fury.io/js/okidoki)
+[![npm version](https://img.shields.io/npm/v/okidoki.svg)](https://www.npmjs.com/package/okidoki)
 [![GitHub license](https://img.shields.io/github/license/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/stargazers)
 
