@@ -6,13 +6,13 @@
     <title>404 - Page Not Found</title>
     
     <!-- Compiled CSS with all utilities -->
-    <link rel="stylesheet" href="/mystyles.css" type="text/css" />
+    <link rel="stylesheet" href="{{joinUrl baseUrl 'mystyles.css'}}" type="text/css" />
     
     <!-- Favicons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{joinUrl baseUrl 'apple-touch-icon.png'}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{joinUrl baseUrl 'favicon-32x32.png'}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{joinUrl baseUrl 'favicon-16x16.png'}}">
+    <link rel="manifest" href="{{joinUrl baseUrl 'site.webmanifest'}}">
     
     <style>
         /* Basic styling for consistency with main site */
@@ -59,7 +59,7 @@
             </div>
             
             <div class="space-y-4">
-                <a href="/" class="btn btn-primary btn-lg">
+                <a href="{{joinUrl baseUrl 'index.html'}}" class="btn btn-primary btn-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>
@@ -78,6 +78,6 @@
         </div>
     </div>
     
-    <script src="/mybundle.js"></script>
+    <script src="{{joinUrl baseUrl 'mybundle.js'}}"></script>
 </body>
 </html> 

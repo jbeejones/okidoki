@@ -3,7 +3,7 @@
     {{#unless layout.hideBreadcrumbs}}
     <div class="breadcrumbs text-sm pl-4 mt-6 lg:mt-6">
       <ul>
-        <li><a href="/">Home</a></li>
+        <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
         {{#each breadcrumbs}}
           <li>{{this}}</li>
         {{/each}}

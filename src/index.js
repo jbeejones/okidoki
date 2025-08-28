@@ -6,7 +6,7 @@ import lunr from 'lunr';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseMarkdown, renderPage, loadConfig } from './mdhelper.js';
+import { parseMarkdown, renderPage, loadConfig, clearConfigCache } from './mdhelper.js';
 import crypto from 'crypto';
 import logger from './logger.js';
 /*
@@ -359,7 +359,7 @@ function minifyHtml(html) {
 }
 
 async function initCommand(argv) {
-    const { dev } = argv;
+    const { dev, config: configPath = 'okidoki.yaml', sidebars: sidebarsPath = 'sidebars.yaml' } = argv;
     logger.info('Initializing documentation project...');
     
     // For init, we can't load config yet since we're creating it
@@ -397,8 +397,7 @@ This is an example documentation page. Edit this file to get started with your d
             logger.info('Documentation file already exists, skipping example creation');
         }
 
-        // Create okidoki.yaml configuration only if it doesn't exist
-        const configPath = 'okidoki.yaml';
+        // Create okidoki configuration only if it doesn't exist
         if (!fs.existsSync(configPath)) {
             const okidokiConfig = `# Okidoki Configuration
 
@@ -437,13 +436,12 @@ navigation:
   footer: true
 `;
             fs.writeFileSync(configPath, okidokiConfig);
-            logger.info('Created okidoki.yaml configuration file');
+            logger.info(`Created ${configPath} configuration file`);
         } else {
-            logger.info('okidoki.yaml already exists, skipping configuration creation');
+            logger.info(`${configPath} already exists, skipping configuration creation`);
         }
 
-        // Create sidebars.yaml for navigation only if it doesn't exist
-        const sidebarsPath = 'sidebars.yaml';
+        // Create sidebars configuration for navigation only if it doesn't exist
         if (!fs.existsSync(sidebarsPath)) {
             const sidebarsConfig = `# Sidebar Navigation Configuration
 
@@ -472,9 +470,9 @@ footer:
         url: "https://github.com/yourusername/your-repo/discussions"
 `;
             fs.writeFileSync(sidebarsPath, sidebarsConfig);
-            logger.info('Created sidebars.yaml navigation file');
+            logger.info(`Created ${sidebarsPath} navigation file`);
         } else {
-            logger.info('sidebars.yaml already exists, skipping navigation file creation');
+            logger.info(`${sidebarsPath} already exists, skipping navigation file creation`);
         }
 
         // Create development package.json if --dev flag is used
@@ -540,20 +538,23 @@ footer:
 }
 
 async function generateCommand(argv) {
-    const { source, verbose } = argv;
+    const { source, verbose, config, sidebars: sidebarsPath } = argv;
     logger.setVerbose(verbose);
+    
+    // Clear config cache to ensure fresh loading with custom paths
+    clearConfigCache();
     
     logger.info('Generating documentation from markdown files ...');
     
     try {
-        // Check if configuration files exist
-        if (!fs.existsSync('okidoki.yaml') || !fs.existsSync('sidebars.yaml')) {
-            logger.info('Configuration files not found. Running init first...');
-            await initCommand({ output: argv.output });
+        // Check if custom configuration files exist
+        if (!fs.existsSync(config) || !fs.existsSync(sidebarsPath)) {
+            logger.info(`Configuration files not found (${config}, ${sidebarsPath}). Running init first...`);
+            await initCommand({ output: argv.output, config, sidebars: sidebarsPath });
         }
 
         // Load configuration once at the top
-        const { settings, sidebars } = loadConfig();
+        const { settings, sidebars } = loadConfig(config, sidebarsPath);
         
         // Determine output directory: CLI arg -> config -> default  
         const output = argv.output || settings.build.outputDir || 'dist';
@@ -582,14 +583,14 @@ async function generateCommand(argv) {
         // Check if source directory exists and has markdown files
         if (!fs.existsSync(source)) {
             logger.info(`Source directory '${source}' not found. Creating with example content...`);
-            await initCommand({ output });
+            await initCommand({ output, config, sidebars: sidebarsPath });
         }
 
         let docs = await readMarkdownDocs(source);
 
         if (docs.length === 0) {
             logger.info('No markdown files found. Creating example content...');
-            await initCommand({ output });
+            await initCommand({ output, config, sidebars: sidebarsPath });
             // Read docs again after initialization
             docs = await readMarkdownDocs(source);
         }
@@ -649,12 +650,15 @@ async function generateCommand(argv) {
         // Copy package assets files to output directory (excluding HTML files to avoid overwriting generated content)
         const packageAssetsDir = path.join(packageDir, 'assets');
         if (fs.existsSync(packageAssetsDir)) {
+            // Process HTML files first (like 404.html, 500.html) with Handlebars context
+            await processCustomHtmlFiles(packageAssetsDir, output, settings, sidebars);
+            
+            // Then copy other assets
             copyDir(packageAssetsDir, output, {
                 filter: (src) => {
                     if (!src.endsWith('.html')) return true;
-                    // Allow status code HTML files (e.g., 404.html, 500.html)
-                    const fileName = path.basename(src);
-                    return /^\d{3}\.html$/.test(fileName);
+                    // Skip HTML files - they were processed above
+                    return false;
                 }
             });
             logger.info('Copied default assets');
@@ -709,6 +713,18 @@ yargs(hideBin(process.argv))
             description: 'Output directory',
             type: 'string'
         },
+        config: {
+            alias: 'c',
+            description: 'Path to create okidoki configuration file',
+            type: 'string',
+            default: 'okidoki.yaml'
+        },
+        sidebars: {
+            alias: 'b',
+            description: 'Path to create sidebars configuration file',
+            type: 'string',
+            default: 'sidebars.yaml'
+        },
         dev: {
             alias: 'd',
             description: 'Create a package.json with development scripts (nodemon, concurrently)',
@@ -727,6 +743,18 @@ yargs(hideBin(process.argv))
             alias: 'o',
             description: 'Output directory for generated files',
             type: 'string'
+        },
+        config: {
+            alias: 'c',
+            description: 'Path to okidoki configuration file',
+            type: 'string',
+            default: 'okidoki.yaml'
+        },
+        sidebars: {
+            alias: 'b',
+            description: 'Path to sidebars configuration file',
+            type: 'string',
+            default: 'sidebars.yaml'
         },
         verbose: {
             alias: 'v',

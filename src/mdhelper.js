@@ -23,10 +23,18 @@ const packageDir = path.dirname(path.dirname(__filename));
 // Cache for configuration
 let configCache = null;
 
+// Function to clear configuration cache
+function clearConfigCache() {
+    configCache = null;
+}
+
 // Configuration loading function
-function loadConfig() {
-    // Return cached config if already loaded
-    if (configCache) {
+function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml') {
+    // Create a cache key based on file paths to handle different config files
+    const cacheKey = `${configPath}:${sidebarsPath}`;
+    
+    // Return cached config if already loaded for these specific paths
+    if (configCache && configCache.cacheKey === cacheKey) {
         return configCache;
     }
     // Default configuration
@@ -81,18 +89,19 @@ function loadConfig() {
     }
 
     try {
-        const configPath = path.join(process.cwd(), 'okidoki.yaml');
-        const userSettings = yaml.load(fs.readFileSync(configPath, 'utf8'));
+        const fullConfigPath = path.join(process.cwd(), configPath);
+        const userSettings = yaml.load(fs.readFileSync(fullConfigPath, 'utf8'));
         const settings = deepMerge(defaultConfig.settings, userSettings);
 
-        const sidebarsYaml = fs.readFileSync(path.join(process.cwd(), 'sidebars.yaml'), 'utf8');
+        const fullSidebarsPath = path.join(process.cwd(), sidebarsPath);
+        const sidebarsYaml = fs.readFileSync(fullSidebarsPath, 'utf8');
         const sidebars = yaml.load(sidebarsYaml);
 
-        configCache = { settings, sidebars };
+        configCache = { settings, sidebars, cacheKey };
         return configCache;
     } catch (error) {
         // Return default configuration if files don't exist
-        configCache = defaultConfig;
+        configCache = { ...defaultConfig, cacheKey };
         return configCache;
     }
 }
@@ -672,4 +681,4 @@ function renderPage(templateName, { props, html, page, id }) {
     return content;
 }
 
-export { parseMarkdown, renderPage, loadConfig }; 
+export { parseMarkdown, renderPage, loadConfig, clearConfigCache }; 

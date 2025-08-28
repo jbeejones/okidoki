@@ -30,7 +30,7 @@
   <script src="https://unpkg.com/lunr/lunr.js" defer></script>
   <script src="{{baseUrl}}mybundle.js?cachebrk={{cacheBreaker}}" defer></script>
   <link rel="stylesheet" href="{{baseUrl}}github-dark.min.css" type="text/css" />
-  <link rel="icon" href="{{settings.site.favicon}}" type="image/x-icon">
+  <link rel="icon" href="{{joinUrl baseUrl settings.site.favicon}}" type="image/x-icon">
   <link rel="apple-touch-icon" sizes="180x180" href="{{baseUrl}}apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="{{baseUrl}}favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="{{baseUrl}}favicon-16x16.png">
@@ -468,7 +468,7 @@
       <ul class="menu menu-lg menu-horizontal">
         <!-- Navbar menu content here -->          
           {{#each navbar}}
-            <li><a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}">{{this.title}}</a></li>
+            <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
           {{/each}}
       </ul>
       {{#if settings.search.enabled}}
@@ -552,7 +552,7 @@
           <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
           <!-- Navbar menu content here -->          
           {{#each navbar}}
-            <li><a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}">{{this.title}}</a></li>
+            <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
           {{/each}}
           <div class="divider"></div>
         </div>
@@ -575,7 +575,7 @@
         {{#if items}}
         <nav class="flex flex-wrap gap-4 justify-center">
           {{#each items}}
-          <a href="{{#if this.url}}{{this.url}}{{else}}{{this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
+          <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
           {{/each}}
         </nav>
         {{/if}}
