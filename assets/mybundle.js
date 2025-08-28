@@ -2406,7 +2406,7 @@
         searchResultsContainer.innerHTML = displayedResults.map((result) => {
           const doc = searchData[result.ref];
           if (!doc) return "";
-          const urlWithSearch = `${doc.path}?highlight=${encodeURIComponent(cleanQuery)}`;
+          const urlWithSearch = `${buildUrl(doc.path)}?highlight=${encodeURIComponent(cleanQuery)}`;
           return `
                         <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
                             <div class="font-medium text-base-content">${doc.title}</div>

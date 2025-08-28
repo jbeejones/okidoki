@@ -898,7 +898,7 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
                     if (!doc) return '';
                     
                     // Add search query as URL parameter for highlighting on destination page
-                    const urlWithSearch = `${doc.path}?highlight=${encodeURIComponent(cleanQuery)}`;
+                    const urlWithSearch = `${buildUrl(doc.path)}?highlight=${encodeURIComponent(cleanQuery)}`;
                     
                     return `
                         <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
