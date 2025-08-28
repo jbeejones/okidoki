@@ -13,7 +13,8 @@
     "generate": "node src/index.js generate",
     "start": "npx serve assets",
     "dev": "nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec \"npm run generate\"",
-    "dev:serve": "npm run generate && concurrently \"nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec 'npm run generate'\" \"npx serve dist\""
+    "dev:serve": "npm run generate && concurrently \"nodemon -w ./docs -e md,png,jpg,jpeg,gif,svg,webp --exec 'npm run generate'\" \"npx serve dist\"",
+    "publish": "npm version patch -m \"chore(release): %s\" && npm publish"
   },
   "repository": {
     "type": "git",
