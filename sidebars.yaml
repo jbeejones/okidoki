@@ -14,12 +14,6 @@ menu:
     document: /tabs-demo.md
 
 navbar:
-  - title: Landing Page
-    document: /landing.html
-    hideMenu: true
-    hideBreadcrumbs: true
-    hideFooter: true
-    fullWidth: true
   - title: Documentation
     document: /index.html
   - title: About

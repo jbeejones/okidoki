@@ -118,7 +118,7 @@ function transformDocumentPath(path) {
 }
 
 // Transform sidebar document paths
-function transformSidebarItems(items) {
+function transformSidebarItems(items, baseUrl = null) {
     if (!items) return items;
     return items.map(item => {
         if (typeof item === 'string') {
@@ -127,13 +127,30 @@ function transformSidebarItems(items) {
         if (item.items) {
             return {
                 ...item,
-                items: transformSidebarItems(item.items)
+                items: transformSidebarItems(item.items, baseUrl)
             };
         }
         if (item.document) {
+            let document = transformDocumentPath(item.document);
+            
+            // Add baseUrl to internal links (not external URLs)
+            if (baseUrl && document && !document.startsWith('http') && document.startsWith('/')) {
+                const cleanBase = baseUrl.replace(/\/$/, '');
+                const cleanPath = document.replace(/^\//, '');
+                document = cleanBase + '/' + cleanPath;
+            }
+            
             return {
                 ...item,
-                document: transformDocumentPath(item.document)
+                document: document
+            };
+        }
+        if (item.url && baseUrl && item.url.startsWith('/') && !item.url.startsWith('http')) {
+            const cleanBase = baseUrl.replace(/\/$/, '');
+            const cleanPath = item.url.replace(/^\//, '');
+            return {
+                ...item,
+                url: cleanBase + '/' + cleanPath
             };
         }
         return item;
@@ -473,15 +490,23 @@ md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
   
   if (hrefIndex >= 0) {
     const href = token.attrs[hrefIndex][1];
+    let newHref = href;
     
     // Convert .md links to .html (for internal documentation links)
     if (href.endsWith('.md')) {
-      token.attrs[hrefIndex][1] = href.replace(/\.md$/, '.html');
+      newHref = href.replace(/\.md$/, '.html');
     }
     // Also handle .md links with hash fragments (e.g., file.md#section)
     else if (href.includes('.md#')) {
-      token.attrs[hrefIndex][1] = href.replace(/\.md#/, '.html#');
+      newHref = href.replace(/\.md#/, '.html#');
     }
+    
+    // For internal links (starting with /), prepend baseUrl if available from env
+    if (env && env.baseUrl && newHref.startsWith('/') && !newHref.startsWith('http')) {
+      newHref = env.baseUrl + newHref.replace(/^\//, '');
+    }
+    
+    token.attrs[hrefIndex][1] = newHref;
   }
   
   return defaultLinkOpen(tokens, idx, options, env, self);
@@ -561,7 +586,7 @@ async function parseMarkdown(markdownContent) {
     if (props.handlebars) {
         try {
             const handlebarsResult = compiledBody(mappedProps);
-            let html = md.render(handlebarsResult);
+            let html = md.render(handlebarsResult, { baseUrl: settings.site.baseUrl || '/' });
             
             // Replace include placeholders with actual HTML content (after markdown processing)
             if (global.okidokiIncludes && global.okidokiIncludes.size > 0) {
@@ -577,7 +602,7 @@ async function parseMarkdown(markdownContent) {
         } catch (error) {
             console.error('Handlebars compilation error:', error);
             // Fall back to non-handlebars processing
-            const html = md.render(markdownBody);
+            const html = md.render(markdownBody, { baseUrl: settings.site.baseUrl || '/' });
             return { props: mappedProps, md: markdownBody, html };
         }
     } else {
@@ -588,11 +613,12 @@ async function parseMarkdown(markdownContent) {
 
 function renderPage(templateName, { props, html, page, id }) {
     const { settings, sidebars } = loadConfig();
+    const baseUrl = settings.site.baseUrl || '/';
     const transformedSidebars = {
-        menu: transformSidebarItems(sidebars.menu)
+        menu: transformSidebarItems(sidebars.menu, baseUrl)
     };
     const transformedSidebarsNavbar = {
-        navbar: transformSidebarItems(sidebars.navbar)
+        navbar: transformSidebarItems(sidebars.navbar, baseUrl)
     };
     //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
     //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);

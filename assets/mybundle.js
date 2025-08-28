@@ -1758,6 +1758,13 @@
 
   // src/clientscript.js
   var import_lunr = __toESM(require_lunr(), 1);
+  function buildUrl(path) {
+    const baseUrl = document.documentElement.getAttribute("data-base-url") || "/";
+    if (path.startsWith("http")) return path;
+    const cleanBase = baseUrl.replace(/\/$/, "");
+    const cleanPath = path.replace(/^\//, "");
+    return cleanBase + "/" + cleanPath;
+  }
   var idx;
   var searchData = {};
   var CACHE_KEYS = {
@@ -1956,7 +1963,7 @@
   async function validateCacheWithServer() {
     try {
       console.log("\u{1F504} Validating cache with server using content hash...");
-      const metaResponse = await fetch("/search-meta.json").catch((e) => {
+      const metaResponse = await fetch(buildUrl("/search-meta.json")).catch((e) => {
         console.warn("\u{1F4E1} Meta request failed:", e.message);
         return null;
       });
@@ -2000,11 +2007,11 @@
       }
       console.log("\u{1F4E1} Making HEAD requests for ETag validation...");
       const [indexHead, dataHead] = await Promise.all([
-        fetch("/lunr-index.json", { method: "HEAD" }).catch((e) => {
+        fetch(buildUrl("/lunr-index.json"), { method: "HEAD" }).catch((e) => {
           console.warn("\u{1F4E1} Index HEAD request failed:", e.message);
           return null;
         }),
-        fetch("/search-data.json", { method: "HEAD" }).catch((e) => {
+        fetch(buildUrl("/search-data.json"), { method: "HEAD" }).catch((e) => {
           console.warn("\u{1F4E1} Data HEAD request failed:", e.message);
           return null;
         })
@@ -2047,9 +2054,9 @@
     try {
       console.log("\u{1F310} Fetching search data from server...");
       const [indexResponse, dataResponse, metaResponse] = await Promise.all([
-        fetch("/lunr-index.json"),
-        fetch("/search-data.json"),
-        fetch("/search-meta.json").catch((e) => {
+        fetch(buildUrl("/lunr-index.json")),
+        fetch(buildUrl("/search-data.json")),
+        fetch(buildUrl("/search-meta.json")).catch((e) => {
           console.warn("\u{1F4E1} Meta fetch failed (this is ok for older builds):", e.message);
           return null;
         })

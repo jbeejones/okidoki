@@ -1,5 +1,15 @@
 import lunr from 'lunr';
 
+// Helper function to build URLs with baseUrl
+function buildUrl(path) {
+    const baseUrl = document.documentElement.getAttribute('data-base-url') || '/';
+    if (path.startsWith('http')) return path; // External URL
+    
+    const cleanBase = baseUrl.replace(/\/$/, '');
+    const cleanPath = path.replace(/^\//, '');
+    return cleanBase + '/' + cleanPath;
+}
+
 // Load search index and data
 let idx;
 let searchData = {};
@@ -278,7 +288,7 @@ async function validateCacheWithServer() {
         console.log('🔄 Validating cache with server using content hash...');
         
         // First try to get server metadata for content hash validation
-        const metaResponse = await fetch('/search-meta.json').catch(e => {
+        const metaResponse = await fetch(buildUrl('/search-meta.json')).catch(e => {
             console.warn('📡 Meta request failed:', e.message);
             return null;
         });
@@ -339,11 +349,11 @@ async function validateCacheWithServer() {
         
         // Use HEAD requests for lightweight validation
         const [indexHead, dataHead] = await Promise.all([
-            fetch('/lunr-index.json', { method: 'HEAD' }).catch(e => {
+            fetch(buildUrl('/lunr-index.json'), { method: 'HEAD' }).catch(e => {
                 console.warn('📡 Index HEAD request failed:', e.message);
                 return null;
             }),
-            fetch('/search-data.json', { method: 'HEAD' }).catch(e => {
+            fetch(buildUrl('/search-data.json'), { method: 'HEAD' }).catch(e => {
                 console.warn('📡 Data HEAD request failed:', e.message);
                 return null;
             })
@@ -397,9 +407,9 @@ async function fetchAndCacheSearchData() {
         console.log('🌐 Fetching search data from server...');
         
         const [indexResponse, dataResponse, metaResponse] = await Promise.all([
-            fetch('/lunr-index.json'),
-            fetch('/search-data.json'),
-            fetch('/search-meta.json').catch(e => {
+            fetch(buildUrl('/lunr-index.json')),
+            fetch(buildUrl('/search-data.json')),
+            fetch(buildUrl('/search-meta.json')).catch(e => {
                 console.warn('📡 Meta fetch failed (this is ok for older builds):', e.message);
                 return null;
             })

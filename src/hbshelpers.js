@@ -100,6 +100,16 @@ function registerHelpers(handlebarsInstance) {
         return options.fn();
     });
 
+    // Helper to properly join baseUrl with paths (avoiding double slashes)
+    handlebarsInstance.registerHelper('joinUrl', function(baseUrl, path) {
+        if (!path) return baseUrl || '/';
+        if (typeof path === 'string' && path.startsWith('http')) return path; // External URL
+        
+        const cleanBase = (baseUrl || '/').replace(/\/$/, '');
+        const cleanPath = (path || '').replace(/^\//, '');
+        return cleanBase + '/' + cleanPath;
+    });
+
     handlebarsInstance.registerHelper('alert', function (text, type, options) {
         let alertType = '';
         let content = '';
