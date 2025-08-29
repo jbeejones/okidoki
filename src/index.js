@@ -6,7 +6,7 @@ import lunr from 'lunr';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseMarkdown, renderPage, loadConfig, clearConfigCache } from './mdhelper.js';
+import { parseMarkdown, renderPage, loadConfig, clearConfigCache, transformSidebarItems, transformDocumentPath } from './mdhelper.js';
 import crypto from 'crypto';
 import logger from './logger.js';
 /*
@@ -265,6 +265,7 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
                     logger.log(`Processing custom HTML with Handlebars: ${relativePath}`);
                     
                     // Create context similar to regular page rendering
+                    const baseUrl = settings.site.baseUrl || '/';
                     const context = {
                         copyright: {
                             year: new Date().getFullYear(),
@@ -272,9 +273,9 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
                         },
                         settings: settings,
                         site: settings.site,
-                        navbar: sidebars.navbar || [],
-                        footer: sidebars.footer || [],
-                        baseUrl: settings.site.baseUrl || '/',
+                        navbar: transformSidebarItems(sidebars.navbar, baseUrl) || [],
+                        footer: transformSidebarItems(sidebars.footer, baseUrl) || [],
+                        baseUrl: baseUrl,
                         title: settings.site.title,
                         description: settings.site.description
                     };

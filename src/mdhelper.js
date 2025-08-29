@@ -154,12 +154,26 @@ function transformSidebarItems(items, baseUrl = null) {
                 document: document
             };
         }
-        if (item.url && baseUrl && item.url.startsWith('/') && !item.url.startsWith('http')) {
-            const cleanBase = baseUrl.replace(/\/$/, '');
-            const cleanPath = item.url.replace(/^\//, '');
+        if (item.url && !item.url.startsWith('http')) {
+            let url = transformDocumentPath(item.url);
+            
+            // Add baseUrl to internal links
+            if (baseUrl) {
+                if (url.startsWith('/')) {
+                    // Absolute path - add baseUrl
+                    const cleanBase = baseUrl.replace(/\/$/, '');
+                    const cleanPath = url.replace(/^\//, '');
+                    url = cleanBase + '/' + cleanPath;
+                } else {
+                    // Relative path - add baseUrl
+                    const cleanBase = baseUrl.replace(/\/$/, '');
+                    url = cleanBase + '/' + url;
+                }
+            }
+            
             return {
                 ...item,
-                url: cleanBase + '/' + cleanPath
+                url: url
             };
         }
         return item;
@@ -629,6 +643,7 @@ function renderPage(templateName, { props, html, page, id }) {
     const transformedSidebarsNavbar = {
         navbar: transformSidebarItems(sidebars.navbar, baseUrl)
     };
+    const transformedFooter = transformSidebarItems(sidebars.footer, baseUrl);
     //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
     //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
     // Find sidebar configuration for current page
@@ -667,7 +682,7 @@ function renderPage(templateName, { props, html, page, id }) {
         settings: settings,
         sidebars: transformedSidebars,
         navbar: transformedSidebarsNavbar.navbar,
-        footer: sidebars.footer || [],
+        footer: transformedFooter || [],
         title: settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
         html,
@@ -681,4 +696,4 @@ function renderPage(templateName, { props, html, page, id }) {
     return content;
 }
 
-export { parseMarkdown, renderPage, loadConfig, clearConfigCache }; 
+export { parseMarkdown, renderPage, loadConfig, clearConfigCache, transformSidebarItems, transformDocumentPath }; 

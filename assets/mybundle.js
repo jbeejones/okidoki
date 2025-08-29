@@ -1758,12 +1758,23 @@
 
   // src/clientscript.js
   var import_lunr = __toESM(require_lunr(), 1);
+  function escapeHtml(unsafe) {
+    if (!unsafe) return "";
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
   function buildUrl(path) {
     const baseUrl = document.documentElement.getAttribute("data-base-url") || "/";
+    console.debug("buildUrl called with:", { path, baseUrl });
+    if (!path) {
+      console.warn("buildUrl called with empty/undefined path, returning baseUrl only");
+      return baseUrl;
+    }
     if (path.startsWith("http")) return path;
     const cleanBase = baseUrl.replace(/\/$/, "");
     const cleanPath = path.replace(/^\//, "");
-    return cleanBase + "/" + cleanPath;
+    const result = cleanBase + "/" + cleanPath;
+    console.debug("buildUrl result:", result);
+    return result;
   }
   var idx;
   var searchData = {};
@@ -2406,12 +2417,18 @@
         searchResultsContainer.innerHTML = displayedResults.map((result) => {
           const doc = searchData[result.ref];
           if (!doc) return "";
-          const urlWithSearch = `${buildUrl(doc.path)}?highlight=${encodeURIComponent(cleanQuery)}`;
+          console.debug("Search result doc:", { id: result.ref, doc });
+          const builtUrl = buildUrl(doc.path);
+          const urlWithSearch = `${builtUrl}?highlight=${encodeURIComponent(cleanQuery)}`;
+          console.debug("Generated URL:", { originalPath: doc.path, builtUrl, urlWithSearch });
+          const escapedTitle = escapeHtml(doc.title);
+          const escapedDescription = doc.description ? escapeHtml(doc.description) : "";
+          const escapedPath = escapeHtml(doc.path);
           return `
                         <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
-                            <div class="font-medium text-base-content">${doc.title}</div>
-                            ${doc.description ? `<div class="text-sm opacity-70 mt-1">${doc.description}</div>` : ""}
-                            <div class="text-xs opacity-50 mt-1">${doc.path}</div>
+                            <div class="font-medium text-base-content">${escapedTitle}</div>
+                            ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ""}
+                            <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
                         </li>
                     `;
         }).join("") + (results.length > MAX_RESULTS ? `

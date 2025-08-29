@@ -1,13 +1,36 @@
 import lunr from 'lunr';
 
+// Helper function to escape HTML attributes
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Helper function to build URLs with baseUrl
 function buildUrl(path) {
     const baseUrl = document.documentElement.getAttribute('data-base-url') || '/';
+    
+    // Debug logging to help identify path issues
+    console.debug('buildUrl called with:', { path, baseUrl });
+    
+    if (!path) {
+        console.warn('buildUrl called with empty/undefined path, returning baseUrl only');
+        return baseUrl;
+    }
+    
     if (path.startsWith('http')) return path; // External URL
     
     const cleanBase = baseUrl.replace(/\/$/, '');
     const cleanPath = path.replace(/^\//, '');
-    return cleanBase + '/' + cleanPath;
+    const result = cleanBase + '/' + cleanPath;
+    
+    console.debug('buildUrl result:', result);
+    return result;
 }
 
 // Load search index and data
@@ -895,16 +918,37 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
             searchResultsContainer.innerHTML = displayedResults
                 .map(result => {
                     const doc = searchData[result.ref];
-                    if (!doc) return '';
+                    if (!doc) {
+                        console.error('No doc found for result.ref:', result.ref);
+                        return '';
+                    }
                     
-                    // Add search query as URL parameter for highlighting on destination page
-                    const urlWithSearch = `${buildUrl(doc.path)}?highlight=${encodeURIComponent(cleanQuery)}`;
+                    // Aggressive debugging to catch the issue
+                    console.log('=== SEARCH RESULT DEBUG ===');
+                    console.log('result.ref:', result.ref);
+                    console.log('doc object:', JSON.stringify(doc, null, 2));
+                    console.log('doc.path specifically:', typeof doc.path, '|' + doc.path + '|');
+                    
+                    // Build URL with detailed debugging
+                    const builtUrl = buildUrl(doc.path);
+                    const urlWithSearch = `${builtUrl}?highlight=${encodeURIComponent(cleanQuery)}`;
+                    console.log('URL construction:', {
+                        'doc.path': doc.path,
+                        'builtUrl': builtUrl,
+                        'urlWithSearch': urlWithSearch
+                    });
+                    console.log('=== END DEBUG ===');
+                    
+                    // Escape display content only (not URLs which need to work for clicks)
+                    const escapedTitle = escapeHtml(doc.title);
+                    const escapedDescription = doc.description ? escapeHtml(doc.description) : '';
+                    const escapedPath = escapeHtml(doc.path);
                     
                     return `
                         <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
-                            <div class="font-medium text-base-content">${doc.title}</div>
-                            ${doc.description ? `<div class="text-sm opacity-70 mt-1">${doc.description}</div>` : ''}
-                            <div class="text-xs opacity-50 mt-1">${doc.path}</div>
+                            <div class="font-medium text-base-content">${escapedTitle}</div>
+                            ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ''}
+                            <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
                         </li>
                     `;
                 }).join('') + 
