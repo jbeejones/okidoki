@@ -8,7 +8,7 @@
 
 🌟 **Completely free and open source** - No subscriptions, no limits, no vendor lock-in!
 
-Visit the full documentation at [Github](https://jbeejones.github.io/okidoki-website) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
+Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
 ## Installation
 
@@ -102,9 +102,9 @@ function hello() {
 
 ## Next Steps
 
-- Check out the [Documentation Reference](https://jbeejones.github.io/okidoki/reference.md) for advanced features
-- Browse [Examples](https://jbeejones.github.io/okidoki/markdown-examples.md) for inspiration  
-- Visit the [Help](https://jbeejones.github.io/okidoki/help.md) section if you run into issues
+- Check out the [Documentation Reference](https://jbeejones.github.io/okidoki-website/reference.html) for advanced features
+- Browse [Examples](https://jbeejones.github.io/okidoki-website/markdown-examples.html) for inspiration  
+- Visit the [Help](https://jbeejones.github.io/okidoki-website/help.html) section if you run into issues
 
 ## Key Features
 
