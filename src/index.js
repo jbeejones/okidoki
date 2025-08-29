@@ -232,6 +232,50 @@ function generateContentHash(data) {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex').substring(0, 16);
 }
 
+// Function to generate sitemap.xml for all processed documents
+function generateSitemap(docs, settings, sourceDir = 'docs') {
+    const baseUrl = settings.site.baseUrl || '/';
+    
+    // Ensure baseUrl ends with / but doesn't have double slashes
+    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // XML header
+    let sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    sitemapXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    // Add each document to the sitemap
+    for (const doc of docs) {
+        // Clean up the path - remove leading slash and add normalized base URL
+        const cleanPath = doc.path.startsWith('/') ? doc.path.slice(1) : doc.path;
+        const fullUrl = `${normalizedBaseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+        
+        // Get last modified date from the source markdown file
+        let lastmod;
+        try {
+            const markdownPath = path.join(sourceDir, doc.path.replace('.html', '.md').replace(/^\//, ''));
+            if (fs.existsSync(markdownPath)) {
+                const stats = fs.statSync(markdownPath);
+                lastmod = stats.mtime.toISOString().split('T')[0]; // YYYY-MM-DD format
+            } else {
+                lastmod = new Date().toISOString().split('T')[0]; // Fallback to current date
+            }
+        } catch (error) {
+            lastmod = new Date().toISOString().split('T')[0]; // Fallback to current date
+        }
+        
+        sitemapXml += '  <url>\n';
+        sitemapXml += `    <loc>${fullUrl}</loc>\n`;
+        sitemapXml += `    <lastmod>${lastmod}</lastmod>\n`;
+        sitemapXml += '    <changefreq>weekly</changefreq>\n';
+        sitemapXml += '    <priority>0.8</priority>\n';
+        sitemapXml += '  </url>\n';
+    }
+    
+    sitemapXml += '</urlset>';
+    
+    return sitemapXml;
+}
+
 // Function to process custom HTML files with Handlebars context
 async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) {
     const { parseMarkdown, renderPage, loadConfig } = await import('./mdhelper.js');
@@ -698,6 +742,11 @@ async function generateCommand(argv) {
         } else {
             logger.log('No image files found in source directory');
         }
+
+        // Generate sitemap.xml
+        const sitemapXml = generateSitemap(docs, settings, source);
+        fs.writeFileSync(path.join(output, 'sitemap.xml'), sitemapXml);
+        logger.log('Created sitemap.xml');
 
         logger.info(`Documentation generated successfully! (${docs.length} documents)`);
     } catch (error) {
