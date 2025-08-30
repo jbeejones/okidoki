@@ -65,20 +65,31 @@
   /* Fix excessive padding around codeblocks in tabs */
   .tabs .tab-content {
     padding: 1rem !important; /* Reduce from default p-6 (1.5rem) to 1rem */
+    max-width: 100% !important; /* Prevent content from exceeding container */
+    overflow-x: auto !important; /* Enable horizontal scrolling for wide content */
+    box-sizing: border-box !important; /* Include padding in width calculation */
   }
   
   .tabs .tab-content pre {
     margin: 0.5rem 0 !important; /* Reduce vertical margins on code blocks */
+    max-width: 100% !important; /* Constrain code block width */
+    overflow-x: auto !important; /* Enable horizontal scrolling */
+    box-sizing: border-box !important; /* Include padding in width calculation */
   }
   
   .tabs .tab-content pre code {
     padding: 0.75rem !important; /* Reasonable padding inside code blocks */
     line-height: 1.45 !important; /* Better line height for code */
+    max-width: none !important; /* Allow code to be as wide as needed */
+    white-space: pre !important; /* Preserve whitespace and prevent wrapping */
   }
   
-  /* Add bottom margin to tabs container */
+  /* Add bottom margin to tabs container and constrain width */
   .tabs {
     margin-bottom: 1.5rem !important; /* Add space at bottom of tabs */
+    max-width: 100% !important; /* Prevent tabs from exceeding page width */
+    overflow-x: auto !important; /* Enable horizontal scrolling if needed */
+    box-sizing: border-box !important; /* Include borders/padding in width */
   }
   
   /* Reduce alert box height for single-line content */
