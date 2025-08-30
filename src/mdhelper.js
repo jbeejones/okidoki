@@ -600,8 +600,22 @@ async function parseMarkdown(markdownContent) {
     // Parse the markdown content
     const compiledBody = props.handlebars ? handlebarsInstance.compile(markdownBody) : markdownBody;
     const mappedProps = { };
+    
+    // Properties that should NOT be auto-linked (preserve as raw strings)
+    const rawProperties = ['api_base_url', 'base_url', 'url', 'api_url', 'endpoint', 'path', 'link', 'href'];
+    
     for (const [key, value] of Object.entries(props)) {
-        mappedProps[key] = typeof value === 'string' ? md.renderInline(value) : value;
+        if (typeof value === 'string') {
+            // Store raw value for variables (prevents auto-linking)
+            mappedProps[key] = value;
+            
+            // Also store processed version for display text (if not in raw list)
+            if (!rawProperties.includes(key)) {
+                mappedProps[`${key}_processed`] = md.renderInline(value);
+            }
+        } else {
+            mappedProps[key] = value;
+        }
     }
     logger.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
