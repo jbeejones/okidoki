@@ -47,7 +47,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
                 favicon: "/favicon.ico",
                 logo: "/okidokilogo.svg",
                 theme: {
-                    light: "bumblebee",
+                    light: "light",
                     dark: "night"
                 },
                 copyright: {
