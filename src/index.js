@@ -143,8 +143,34 @@ function generateFallbackTitle(doc) {
 
 // Create lunr search index
 function createSearchIndex(documents) {
+    const { settings, sidebars } = loadConfig();
     const searchDocs = [];
     const searchData = {};
+    
+    // Helper to check if document should be excluded from search
+    function shouldExcludeFromSearch(doc) {
+        // Check frontmatter exclusion
+        if (doc.props.exclude_from_search === true || doc.props.searchable === false) {
+            return true;
+        }
+        
+        // Check sidebar configuration exclusion
+        const docPath = doc.path;
+        const checkSidebarItems = (items) => {
+            if (!items) return false;
+            for (const item of items) {
+                if (item.document && transformDocumentPath(item.document) === docPath) {
+                    return item.exclude_from_search === true || item.searchable === false;
+                }
+                if (item.items && checkSidebarItems(item.items)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        
+        return checkSidebarItems(sidebars.menu) || checkSidebarItems(sidebars.navbar);
+    }
     
     // Build lunr index
     const idx = lunr(function () {
@@ -154,6 +180,11 @@ function createSearchIndex(documents) {
         this.field('path');
         
         documents.forEach(function (doc) {
+            // Skip documents that should be excluded from search
+            if (shouldExcludeFromSearch(doc)) {
+                console.log(`Excluding from search index: ${doc.path}`);
+                return;
+            }
             const fallbackTitle = generateFallbackTitle(doc);
             
             // Extract searchable content

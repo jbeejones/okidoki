@@ -541,6 +541,32 @@ md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
   return defaultLinkOpen(tokens, idx, options, env, self);
 };
 
+// Custom renderer for images to add baseUrl to internal image paths
+const defaultImage = md.renderer.rules.image || function(tokens, idx, options, env, self) {
+  return self.renderToken(tokens, idx, options);
+};
+
+md.renderer.rules.image = function (tokens, idx, options, env, self) {
+  const token = tokens[idx];
+  const srcIndex = token.attrIndex('src');
+  
+  if (srcIndex >= 0) {
+    const src = token.attrs[srcIndex][1];
+    let newSrc = src;
+    
+    // For internal images (starting with /), prepend baseUrl if available from env
+    if (env && env.baseUrl && newSrc.startsWith('/') && !newSrc.startsWith('http')) {
+      const cleanBase = env.baseUrl.replace(/\/$/, '');
+      const cleanPath = newSrc.replace(/^\//, '');
+      newSrc = cleanBase + '/' + cleanPath;
+    }
+    
+    token.attrs[srcIndex][1] = newSrc;
+  }
+  
+  return defaultImage(tokens, idx, options, env, self);
+};
+
 // Register tabs helper
 registerTabs(md, handlebarsInstance);
 
@@ -631,6 +657,17 @@ async function parseMarkdown(markdownContent, filename = null) {
             const handlebarsResult = compiledBody(mappedProps);
             let html = md.render(handlebarsResult, { baseUrl: settings.site.baseUrl || '/' });
             
+            // Post-process HTML img tags to add baseUrl (markdown images are handled by renderer)
+            const baseUrl = settings.site.baseUrl || '/';
+            if (baseUrl !== '/') {
+                const cleanBase = baseUrl.replace(/\/$/, '');
+                html = html.replace(/<img([^>]*)\ssrc="\/([^"]*)"([^>]*)>/g, (match, before, src, after) => {
+                    if (src.startsWith('http')) return match; // Skip external URLs
+                    if (src.startsWith(cleanBase.replace(/^\//, ''))) return match; // Skip already processed
+                    return `<img${before} src="${cleanBase}/${src}"${after}>`;
+                });
+            }
+            
             // Replace include placeholders with actual HTML content (after markdown processing)
             if (global.okidokiIncludes && global.okidokiIncludes.size > 0) {
                 for (const [token, content] of global.okidokiIncludes.entries()) {
@@ -650,7 +687,19 @@ async function parseMarkdown(markdownContent, filename = null) {
             return { props: mappedProps, md: markdownBody, html };
         }
     } else {
-        const html = md.render(compiledBody);
+        let html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' });
+        
+        // Post-process HTML img tags to add baseUrl (markdown images are handled by renderer)
+        const baseUrl = settings.site.baseUrl || '/';
+        if (baseUrl !== '/') {
+            const cleanBase = baseUrl.replace(/\/$/, '');
+            html = html.replace(/<img([^>]*)\ssrc="\/([^"]*)"([^>]*)>/g, (match, before, src, after) => {
+                if (src.startsWith('http')) return match; // Skip external URLs
+                if (src.startsWith(cleanBase.replace(/^\//, ''))) return match; // Skip already processed
+                return `<img${before} src="${cleanBase}/${src}"${after}>`;
+            });
+        }
+        
         return { props: mappedProps, md: markdownBody, html };
     }
 }
