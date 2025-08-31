@@ -367,30 +367,47 @@
       }
     };
     
-    // Load saved theme or use default from system preference
+    // Hybrid theme system: manual choice persists, otherwise follows OS
+    function setTheme(themeName) {
+      // Manual theme selection - save to localStorage
+      localStorage.setItem('theme', themeName);
+      document.documentElement.setAttribute('data-theme', themeName);
+      console.log('Manual theme set:', themeName);
+    }
+    
     function loadTheme() {
       const savedTheme = localStorage.getItem('theme');
       
       if (savedTheme) {
+        // Use saved manual choice
         document.documentElement.setAttribute('data-theme', savedTheme);
+        console.log('Using saved theme:', savedTheme);
       } else {
-        // Use system preference
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const defaultTheme = prefersDark ? darkTheme : lightTheme;
-        document.documentElement.setAttribute('data-theme', defaultTheme);
+        // Follow OS preference
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = isDark ? darkTheme : lightTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+        console.log('Using OS theme:', theme, '(isDark:', isDark + ')');
       }
     }
     
+    function resetToOSTheme() {
+      // Clear manual choice and follow OS
+      localStorage.removeItem('theme');
+      loadTheme();
+    }
+
     // Load theme immediately
     loadTheme();
-    
-    // Listen for system theme changes (only if no manual theme is saved)
+
+    // Listen for OS theme changes (always override manual choice)
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-        if (!localStorage.getItem('theme')) {
-          const newTheme = e.matches ? darkTheme : lightTheme;
-          document.documentElement.setAttribute('data-theme', newTheme);
-        }
+        const theme = e.matches ? darkTheme : lightTheme;
+        // OS change always wins - save to localStorage and apply
+        localStorage.setItem('theme', theme);
+        document.documentElement.setAttribute('data-theme', theme);
+        console.log('OS theme changed to:', theme, '- overriding any manual choice');
       });
     }
   </script>
