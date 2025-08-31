@@ -1778,6 +1778,53 @@
   }
   var idx;
   var searchData = {};
+  window.copyCodeToClipboard = function(codeId) {
+    const codeElement = document.getElementById(codeId);
+    const button = document.querySelector(`button[onclick="copyCodeToClipboard('${codeId}')"]`);
+    if (codeElement && codeElement.querySelector("code")) {
+      const codeText = codeElement.querySelector("code").textContent;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(codeText).then(() => {
+          showCopySuccess(button);
+        }).catch((err) => {
+          console.warn("Failed to copy using clipboard API:", err);
+          fallbackCopyToClipboard(codeText, button);
+        });
+      } else {
+        fallbackCopyToClipboard(codeText, button);
+      }
+    }
+  };
+  function fallbackCopyToClipboard(text, button) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      const successful = document.execCommand("copy");
+      if (successful) {
+        showCopySuccess(button);
+      } else {
+        console.warn("Fallback copy failed");
+      }
+    } catch (err) {
+      console.warn("Fallback copy error:", err);
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+  function showCopySuccess(button) {
+    if (button) {
+      button.classList.add("copied");
+      setTimeout(() => {
+        button.classList.remove("copied");
+      }, 2e3);
+    }
+  }
   var CACHE_KEYS = {
     INDEX: "okidoki_lunr_index",
     DATA: "okidoki_search_data",
@@ -2416,11 +2463,22 @@
         const displayedResults = results.slice(0, MAX_RESULTS);
         searchResultsContainer.innerHTML = displayedResults.map((result) => {
           const doc = searchData[result.ref];
-          if (!doc) return "";
-          console.debug("Search result doc:", { id: result.ref, doc });
+          if (!doc) {
+            console.error("No doc found for result.ref:", result.ref);
+            return "";
+          }
+          console.log("=== SEARCH RESULT DEBUG ===");
+          console.log("result.ref:", result.ref);
+          console.log("doc object:", JSON.stringify(doc, null, 2));
+          console.log("doc.path specifically:", typeof doc.path, "|" + doc.path + "|");
           const builtUrl = buildUrl(doc.path);
           const urlWithSearch = `${builtUrl}?highlight=${encodeURIComponent(cleanQuery)}`;
-          console.debug("Generated URL:", { originalPath: doc.path, builtUrl, urlWithSearch });
+          console.log("URL construction:", {
+            "doc.path": doc.path,
+            "builtUrl": builtUrl,
+            "urlWithSearch": urlWithSearch
+          });
+          console.log("=== END DEBUG ===");
           const escapedTitle = escapeHtml(doc.title);
           const escapedDescription = doc.description ? escapeHtml(doc.description) : "";
           const escapedPath = escapeHtml(doc.path);

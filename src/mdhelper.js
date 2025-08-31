@@ -668,6 +668,21 @@ async function parseMarkdown(markdownContent, filename = null) {
                 });
             }
             
+            // Add copy-to-clipboard buttons to code blocks
+            html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, codeAttrs, codeContent) => {
+                const copyId = `copy-${Math.random().toString(36).substr(2, 9)}`;
+                return `<div class="code-block-container relative">
+                    <button class="copy-button absolute top-2 right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                            onclick="copyCodeToClipboard('${copyId}')" 
+                            title="Copy to clipboard">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                    </button>
+                    <pre id="${copyId}"><code${codeAttrs}>${codeContent}</code></pre>
+                </div>`;
+            });
+            
             // Replace include placeholders with actual HTML content (after markdown processing)
             if (global.okidokiIncludes && global.okidokiIncludes.size > 0) {
                 for (const [token, content] of global.okidokiIncludes.entries()) {
@@ -699,6 +714,21 @@ async function parseMarkdown(markdownContent, filename = null) {
                 return `<img${before} src="${cleanBase}/${src}"${after}>`;
             });
         }
+        
+        // Add copy-to-clipboard buttons to code blocks
+        html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, codeAttrs, codeContent) => {
+            const copyId = `copy-${Math.random().toString(36).substr(2, 9)}`;
+            return `<div class="code-block-container relative">
+                <button class="copy-button absolute top-2 right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                        onclick="copyCodeToClipboard('${copyId}')" 
+                        title="Copy to clipboard">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
+                <pre id="${copyId}"><code${codeAttrs}>${codeContent}</code></pre>
+            </div>`;
+        });
         
         return { props: mappedProps, md: markdownBody, html };
     }

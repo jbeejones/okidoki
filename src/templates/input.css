@@ -143,11 +143,49 @@
       line-height: 1.4 !important;
     }
     
-    .prose table td code,
-    .prose table th code {
-      font-size: 0.75rem !important;
-    }
-  }
+         .prose table td code,
+     .prose table th code {
+       font-size: 0.75rem !important;
+     }
+   }
+   
+   /* Copy to clipboard button for code blocks */
+   .code-block-container {
+     position: relative !important;
+   }
+   
+   .copy-button {
+     z-index: 10 !important;
+     transition: opacity 0.2s ease !important;
+     background-color: rgba(0, 0, 0, 0.7) !important; /* Dark background for visibility */
+     color: white !important; /* White text/icon for contrast */
+     border: 1px solid rgba(255, 255, 255, 0.2) !important;
+   }
+   
+   .copy-button:hover {
+     background-color: rgba(0, 0, 0, 0.9) !important;
+     opacity: 1 !important;
+   }
+   
+   .code-block-container:hover .copy-button {
+     opacity: 1 !important;
+   }
+   
+   /* Success state for copy button */
+   .copy-button.copied {
+     background-color: rgb(34 197 94) !important; /* green-500 */
+     color: white !important;
+   }
+   
+   .copy-button.copied svg {
+     display: none;
+   }
+   
+   .copy-button.copied::after {
+     content: "✓";
+     font-size: 0.875rem;
+     font-weight: bold;
+   }
   
   /* Override DaisyUI automatic dropdown focus behavior for search dropdowns */
   .dropdown:focus-within [id*="search-results"].hidden,

@@ -36,6 +36,63 @@ function buildUrl(path) {
 // Load search index and data
 let idx;
 let searchData = {};
+
+// Copy code to clipboard function
+window.copyCodeToClipboard = function(codeId) {
+    const codeElement = document.getElementById(codeId);
+    const button = document.querySelector(`button[onclick="copyCodeToClipboard('${codeId}')"]`);
+    
+    if (codeElement && codeElement.querySelector('code')) {
+        const codeText = codeElement.querySelector('code').textContent;
+        
+        // Use modern clipboard API if available
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(codeText).then(() => {
+                showCopySuccess(button);
+            }).catch(err => {
+                console.warn('Failed to copy using clipboard API:', err);
+                fallbackCopyToClipboard(codeText, button);
+            });
+        } else {
+            fallbackCopyToClipboard(codeText, button);
+        }
+    }
+};
+
+// Fallback copy method for older browsers or non-HTTPS
+function fallbackCopyToClipboard(text, button) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopySuccess(button);
+        } else {
+            console.warn('Fallback copy failed');
+        }
+    } catch (err) {
+        console.warn('Fallback copy error:', err);
+    } finally {
+        document.body.removeChild(textArea);
+    }
+}
+
+// Show copy success feedback
+function showCopySuccess(button) {
+    if (button) {
+        button.classList.add('copied');
+        setTimeout(() => {
+            button.classList.remove('copied');
+        }, 2000);
+    }
+}
 let searchResults = [];
 
 // Cache keys for localStorage
