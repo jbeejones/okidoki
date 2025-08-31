@@ -226,7 +226,8 @@ const admonitionTypes = {
     'info': 'info',
     'tip': 'success', 
     'warning': 'warning',
-    'danger': 'error'
+    'danger': 'error',
+    'neutral': ''
 };
 
 // Create a container for each admonition type
@@ -251,9 +252,13 @@ Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
                     case 'error': // Official DaisyUI error icon
                         iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                         break;
+                    case '': // Neutral/default alert (no color modifier)
+                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                        break;
                 }
 
-                return `<div role="alert" class="alert alert-${alertType} mb-2">${iconSvg}<span>`;
+                const alertClass = alertType ? `alert alert-${alertType}` : 'alert';
+                return `<div role="alert" class="${alertClass} mb-2">${iconSvg}<span>`;
             } else {
                 // Closing tag
                 return '</span></div>\n\n';
@@ -583,7 +588,7 @@ function extractHeadings(markdown) {
 const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 
 // parse markdown and return props and html
-async function parseMarkdown(markdownContent) {
+async function parseMarkdown(markdownContent, filename = null) {
     const { settings, sidebars } = loadConfig();
     const match = frontmatterRegex.exec(markdownContent);
 
@@ -637,7 +642,8 @@ async function parseMarkdown(markdownContent) {
             
             return { props: mappedProps, md: markdownBody, html };
         } catch (error) {
-            console.error('Handlebars compilation error:', error);
+            const fileContext = filename ? ` in file: ${filename}` : '';
+            console.error(`Handlebars compilation error${fileContext}:`, error);
             // Fall back to non-handlebars processing
             const html = md.render(markdownBody, { baseUrl: settings.site.baseUrl || '/' });
             return { props: mappedProps, md: markdownBody, html };

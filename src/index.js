@@ -82,7 +82,7 @@ async function readMarkdownDocs(dir = 'docs', resetId = true) {
                 const relativePath = '/'+path.relative('docs', fullPath).replace('.md', '.html');
                 
                 try {
-                    const { props, md, html } = await parseMarkdown(content);    
+                    const { props, md, html } = await parseMarkdown(content, fullPath);    
                     //logger.log(`Created html: ${fullPath}, props: ${props}, md: ${md}, html: ${html}`);
                     results.push({
                         id: docID++,
