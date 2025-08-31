@@ -225,6 +225,7 @@ md.use(markdownItAnchor, { slugify: s => slugify(s) })
 const admonitionTypes = {
     'info': 'info',
     'tip': 'success', 
+    'success': 'success',
     'warning': 'warning',
     'danger': 'error',
     'neutral': ''

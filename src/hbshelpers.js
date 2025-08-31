@@ -121,14 +121,16 @@ function registerHelpers(handlebarsInstance) {
             alertType = options.hash.type || '';
             content = options.fn(this);
         } else {
-            // Parameter helper usage: {{alert "text" "type"}}
-            if (typeof type === 'object') {
+            // Check if this is block helper with positional type: {{#alert "info"}}content{{/alert}}
+            if (typeof type === 'object' && type.fn) {
                 options = type;
-                alertType = '';
+                alertType = text || ''; // First param is the alert type
+                content = options.fn(this);
             } else {
+                // Inline helper usage: {{alert "text" "type"}}
                 alertType = type || '';
+                content = text || '';
             }
-            content = text || '';
         }
         
         // Build the alert class - default is just "alert", with optional color modifier  
