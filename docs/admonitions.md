@@ -1,79 +1,134 @@
 ---
-title: Admonitions Demo
-description: Testing the new admonition syntax
+title: Alerts and Badges Demo
+description: Showcase of alert and badge functionality using Handlebars helpers
+handlebars: true
 ---
 
-# Admonitions Demo
+# Alerts and Badges
 
-This page demonstrates the new admonition syntax alongside the existing Handlebars alert helpers.
+This page demonstrates the alert and badge functionality available in OkiDoki using Handlebars helpers.
 
-## New Admonition Syntax
+## Alert Helper
 
-You can now use VitePress/Docusaurus-style admonitions:
+Create styled alerts using the `{{alert}}` helper:
 
-:::info
-This is an informational callout. Use it for neutral information and general notes.
-:::
+### Basic Alerts
 
-:::tip
-This is a tip callout. Great for helpful suggestions and best practices that users should know.
-:::
-
-:::warning  
-This is a warning callout. Use it to highlight potential issues or things users should be careful about.
-:::
-
-:::danger
-This is a danger callout. Use it for critical warnings and errors that could cause problems.
-:::
-
-## Existing Handlebars Alert Helpers
-
-You can still use the existing Handlebars syntax:
-
-{{#alert type="info"}}
-This is an info alert using the Handlebars helper syntax.
+{{#alert "info"}}
+This is an **informational** alert. Use it for neutral information.
 {{/alert}}
 
-{{#alert type="success"}}
-This is a success alert using the Handlebars helper syntax.
+{{#alert "success"}}
+This is a **success** alert. Use it for positive confirmations.
 {{/alert}}
 
-{{#alert type="warning"}}
-This is a warning alert using the Handlebars helper syntax.
+{{#alert "warning"}}
+This is a **warning** alert. Use it to highlight potential issues.
 {{/alert}}
 
-{{#alert type="error"}}
-This is an error alert using the Handlebars helper syntax.
+{{#alert "error"}}
+This is an **error** alert. Use it for critical warnings and errors.
 {{/alert}}
 
-## Mixed Usage
-
-You can mix both syntaxes in the same document:
-
-:::info
-This admonition contains **markdown formatting** and `inline code`.
-
-- It supports lists
-- And other markdown features
-- Including [links](https://example.com)
-:::
-
-{{#alert type="success"}}
-This Handlebars alert also supports **markdown** and `code`.
+{{#alert}}
+This is a **neutral** alert. Default alert without type specified.
 {{/alert}}
 
-## Multiline Admonitions
+### Soft Alerts
 
-:::tip
-Admonitions can contain multiple paragraphs and complex content.
+Add `soft=true` for a muted appearance:
 
-This is a second paragraph with more detailed information.
+{{#alert "info" soft=true}}
+Soft information alert with subtle styling
+{{/alert}}
 
-```javascript
-// They can even contain code blocks
-console.log("Hello from an admonition!");
+{{#alert "success" soft=true}}
+Soft success alert with muted colors
+{{/alert}}
+
+{{#alert "warning" soft=true}}
+Soft warning alert for gentle notices
+{{/alert}}
+
+{{#alert "error" soft=true}}
+Soft error alert with reduced intensity
+{{/alert}}
+
+### Inline Alerts
+
+{{alert "Quick info message" "info"}} {{alert "Success!" "success"}} {{alert "Warning!" "warning"}}
+
+## Badge Helper
+
+Create inline badges using the `{{badge}}` helper:
+
+### Basic Badges
+
+Status: {{badge "Active" "success"}} {{badge "v2.1" "info"}} {{badge "Beta" "warning"}}
+
+Project: {{badge "OkiDoki" "primary"}} {{badge "Open Source" "accent"}}
+
+### Badge Types
+
+{{badge "Primary" "primary"}} {{badge "Secondary" "secondary"}} {{badge "Accent" "accent"}}
+
+{{badge "Info" "info"}} {{badge "Success" "success"}} {{badge "Warning" "warning"}} {{badge "Error" "error"}}
+
+{{badge "Neutral" "neutral"}} {{badge "Ghost" "ghost"}} {{badge "Outline" "outline"}}
+
+## Practical Examples
+
+### API Endpoint Documentation
+
+#### {{badge "GET" "primary"}} `/users`
+Retrieve a list of all users in the system.
+
+#### {{badge "POST" "success"}} `/users`
+Create a new user account.
+
+#### {{badge "PUT" "warning"}} `/users/{id}`
+Update an existing user's information.
+
+#### {{badge "DELETE" "error"}} `/users/{id}`
+Remove a user from the system.
+
+### Version Information
+
+Current Version: {{badge "v2.1.0" "info"}}
+Status: {{badge "Stable" "success"}}
+Build: {{badge "#1234" "accent"}}
+
+### Mixed Content
+
+{{#alert "info"}}
+**API Status**: {{badge "Online" "success"}} - All systems operational.
+
+{{badge "Documentation" "primary"}} is available at `/docs`
+{{/alert}}
+
+### Code Examples
+
+Use badges inline like this: The API returns {{badge "200 OK" "success"}} for successful requests.
+
+## Syntax Reference
+
+### Alert Syntax
+
+```handlebars
+<!-- Block syntax (recommended) -->
+{{#alert "type"}}Your content{{/alert}}
+{{#alert "type" soft=true}}Soft alert{{/alert}}
+
+<!-- Inline syntax -->
+{{alert "Message" "type"}}
 ```
 
-And more content after the code block.
-::: 
+**Types**: `info`, `success`, `warning`, `error` (or omit for neutral)
+
+### Badge Syntax
+
+```handlebars
+{{badge "Text" "type"}}
+```
+
+**Types**: `primary`, `secondary`, `accent`, `info`, `success`, `warning`, `error`, `neutral`, `ghost`, `outline` 

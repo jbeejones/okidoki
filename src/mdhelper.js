@@ -2,7 +2,7 @@ import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 import markdownit from 'markdown-it'
 import markdownItAnchor from 'markdown-it-anchor';
-import markdownItContainer from 'markdown-it-container';
+
 import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
 //import { markedHighlight } from "marked-highlight";
@@ -231,182 +231,36 @@ const md = markdownit({
 
 md.use(markdownItAnchor, { slugify: s => slugify(s) })
 
-// Add admonition support using markdown-it-container
-// Map admonition types to DaisyUI alert classes
-const admonitionTypes = {
-    'info': 'info',
-    'tip': 'success', 
-    'success': 'success',
-    'warning': 'warning',
-    'danger': 'error',
-    'neutral': ''
-};
+// Register tabs functionality
+registerTabs(md, handlebarsInstance);
 
-// Create a container for each admonition type
-Object.entries(admonitionTypes).forEach(([admonitionType, alertType]) => {
-    md.use(markdownItContainer, admonitionType, {
-        render: function (tokens, idx) {
-            const token = tokens[idx];
-
-            if (token.nesting === 1) {
-                // Opening tag
-                let iconSvg = '';
-                switch (alertType) {
-                    case 'success': // Official DaisyUI success icon
-                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        break;
-                    case 'info': // Official DaisyUI info icon
-                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                        break;
-                    case 'warning': // Official DaisyUI warning icon
-                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
-                        break;
-                    case 'error': // Official DaisyUI error icon
-                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        break;
-                    case '': // Neutral/default alert (no color modifier)
-                        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                        break;
-                }
-
-                const alertClass = alertType ? `alert alert-${alertType}` : 'alert';
-                return `<div role="alert" class="${alertClass} mb-2">${iconSvg}<span>`;
-            } else {
-                // Closing tag
-                return '</span></div>\n\n';
-            }
-        }
-    });
-});
-
-// Add badge support using markdown-it-container
-// Map badge types to DaisyUI badge classes
-const badgeTypes = {
-    'badge': 'badge',
-    'badge-neutral': 'badge badge-neutral',
-    'badge-primary': 'badge badge-primary',
-    'badge-secondary': 'badge badge-secondary', 
-    'badge-accent': 'badge badge-accent',
-    'badge-info': 'badge badge-info',
-    'badge-success': 'badge badge-success',
-    'badge-warning': 'badge badge-warning',
-    'badge-error': 'badge badge-error',
-    'badge-outline': 'badge badge-outline',
-    'badge-ghost': 'badge badge-ghost',
-    'badge-soft': 'badge badge-soft',
-    'badge-xs': 'badge badge-xs',
-    'badge-sm': 'badge badge-sm',
-    'badge-md': 'badge badge-md',
-    'badge-lg': 'badge badge-lg',
-    'badge-xl': 'badge badge-xl'
-};
-
-// Create a container for each badge type
-Object.entries(badgeTypes).forEach(([badgeType, badgeClasses]) => {
-    md.use(markdownItContainer, badgeType, {
-        render: function (tokens, idx) {
-            const token = tokens[idx];
-
-            if (token.nesting === 1) {
-                // Opening tag - render as inline span with badge classes
-                return `<span class="${badgeClasses}">`;
-            } else {
-                // Closing tag
-                return '</span>';
-            }
-        },
-        marker: ':'
-    });
-});
-
-// Add inline badge support
-function badge_inline(state, silent) {
-    const start = state.pos;
-    const max = state.posMax;
-    
-    // Check for opening :::
-    if (start + 3 >= max) return false;
-    if (state.src.slice(start, start + 3) !== ':::') return false;
-    
-    // Find the badge type
-    const typeStart = start + 3;
-    let typeEnd = typeStart;
-    while (typeEnd < max && state.src[typeEnd] !== ' ' && state.src[typeEnd] !== ':' && state.src[typeEnd] !== '\n') {
-        typeEnd++;
-    }
-    
-    if (typeEnd === typeStart) return false; // No badge type found
-    
-    const badgeType = state.src.slice(typeStart, typeEnd);
-    
-    // Check if this is a valid badge type
-    if (!badgeTypes[badgeType]) return false;
-    
-    // Skip whitespace after badge type
-    let contentStart = typeEnd;
-    while (contentStart < max && state.src[contentStart] === ' ') {
-        contentStart++;
-    }
-    
-    // Find closing ::: (must be on the same line for inline badges)
-    let pos = contentStart;
-    let foundEnd = false;
-    let contentEnd = contentStart;
-    
-    while (pos + 2 < max && state.src[pos] !== '\n') {
-        if (state.src.slice(pos, pos + 3) === ':::') {
-            contentEnd = pos;
-            foundEnd = true;
-            break;
-        }
-        pos++;
-    }
-    
-    if (!foundEnd) return false;
-    
-    const content = state.src.slice(contentStart, contentEnd).trim();
-    if (!content) return false;
-    
-    if (!silent) {
-        const token = state.push('badge_inline', 'span', 0);
-        token.content = content;
-        token.meta = { badgeType, badgeClasses: badgeTypes[badgeType] };
-    }
-    
-    state.pos = contentEnd + 3;
-    return true;
-}
-
-// Add the inline rule
-md.inline.ruler.before('emphasis', 'badge_inline', badge_inline);
-
-// Add renderer for inline badge tokens
-md.renderer.rules.badge_inline = function(tokens, idx) {
+// Custom image renderer to add baseUrl for internal images
+md.renderer.rules.image = function(tokens, idx, options, env) {
     const token = tokens[idx];
-    const { badgeClasses } = token.meta;
-    const content = md.utils.escapeHtml(token.content);
-    return `<span class="${badgeClasses}">${content}</span>`;
+    const srcIndex = token.attrIndex('src');
+    
+    if (srcIndex >= 0) {
+        const src = token.attrs[srcIndex][1];
+        const baseUrl = env && env.baseUrl ? env.baseUrl : '/';
+        
+        // Only prepend baseUrl to absolute paths that don't start with http
+        if (src.startsWith('/') && !src.startsWith('http') && baseUrl !== '/') {
+            const cleanBase = baseUrl.replace(/\/$/, '');
+            // Avoid double baseUrl application
+            if (!src.startsWith(cleanBase)) {
+                token.attrs[srcIndex][1] = cleanBase + src;
+            }
+        }
+    }
+    
+    // Use default renderer
+    return md.renderer.renderToken(tokens, idx, options);
 };
 
-// Post-process badges to remove paragraph wrapping from block-level badges
-const originalRenderBadge = md.render;
-md.render = function(src, env) {
-    let result = originalRenderBadge.call(this, src, env);
-    
-    // Clean up badge HTML - remove paragraph tags inside badge spans
-    // Escape special regex characters and join badge class names
-    const escapedBadgeClasses = Object.values(badgeTypes)
-        .map(className => className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-        .join('|');
-    
-    const badgeRegex = new RegExp(`(<span class="(${escapedBadgeClasses})">)<p>(.*?)<\\/p>\\s*(<\\/span>)`, 'g');
-    result = result.replace(badgeRegex, '$1$3$4');
-    
-    return result;
-};
+// Store original render function before overriding
+const originalMdRender = md.render.bind(md);
 
-// Add tabs support by pre-processing markdown to convert :::tabs syntax to {{#tabs}} syntax
-const originalRender = md.render;
+// Override md.render for tab processing
 md.render = function(src, env) {
     // Pre-process: Convert :::tabs/:::tab syntax to Handlebars syntax
     let processedSrc = src;
@@ -438,7 +292,7 @@ md.render = function(src, env) {
             }
         } else {
             // Mixed content or regular markdown - use normal processing
-            return originalRender.call(md, content);
+            return originalMdRender(content);
         }
     }
 
@@ -505,7 +359,7 @@ md.render = function(src, env) {
     });
     
     // Call the original render with processed markdown
-    let finalHtml = originalRender.call(this, processedSrc, env);
+    let finalHtml = originalMdRender(processedSrc, env);
     
     // Replace tab content placeholders with processed content
     if (this.__tabContentCache) {
@@ -638,10 +492,12 @@ async function parseMarkdown(markdownContent, filename = null) {
         props = yaml.load(yamlRaw) || {};
         markdownBody = markdownContent.slice(match[0].length);
     }
-    props = { ...settings, ...props };
+    props = { ...settings, ...settings.globals, ...props, okidoki_version: packageVersion, version: packageVersion };
 
     // Parse the markdown content
-    const compiledBody = props.handlebars ? handlebarsInstance.compile(markdownBody) : markdownBody;
+    // Default to handlebars processing unless explicitly disabled
+    const shouldUseHandlebars = props.handlebars !== false;
+    const compiledBody = shouldUseHandlebars ? handlebarsInstance.compile(markdownBody) : markdownBody;
     const mappedProps = { };
     
     // Properties that should NOT be auto-linked (preserve as raw strings)
@@ -663,7 +519,7 @@ async function parseMarkdown(markdownContent, filename = null) {
     logger.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     
-    if (props.handlebars) {
+    if (shouldUseHandlebars) {
         try {
             const handlebarsResult = compiledBody(mappedProps);
             let html = md.render(handlebarsResult, { baseUrl: settings.site.baseUrl || '/' });

@@ -8,6 +8,7 @@ tags: ["examples", "markdown", "tutorial"]
 date: "2024-01-15"
 custom_variable: "This is a custom frontmatter variable"
 api_base_url: "https://api.example.com/v1"
+handlebars: false
 ---
 
 # OkiDoki Markdown Examples

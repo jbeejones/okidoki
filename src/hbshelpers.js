@@ -113,53 +113,53 @@ function registerHelpers(handlebarsInstance) {
     handlebarsInstance.registerHelper('alert', function (text, type, options) {
         let alertType = '';
         let content = '';
+        let isSoft = false;
         
         // Check if this is being used as a block helper
-        if (typeof text === 'object' && text.hash) {
-            // Block helper usage: {{#alert type="info"}}content{{/alert}}
+        if (typeof text === 'object' && text.hash && text.fn) {
+            // Block helper usage: {{#alert type="info" soft=true}}content{{/alert}}
             options = text;
             alertType = options.hash.type || '';
+            isSoft = options.hash.soft === true;
+            content = options.fn(this);
+        } else if (typeof type === 'object' && type.fn) {
+            // Block helper with positional type: {{#alert "info"}}content{{/alert}}
+            options = type;
+            alertType = text || ''; // First param is the alert type
+            isSoft = options.hash && options.hash.soft === true;
             content = options.fn(this);
         } else {
-            // Check if this is block helper with positional type: {{#alert "info"}}content{{/alert}}
-            if (typeof type === 'object' && type.fn) {
-                options = type;
-                alertType = text || ''; // First param is the alert type
-                content = options.fn(this);
-            } else {
-                // Inline helper usage: {{alert "text" "type"}}
-                alertType = type || '';
-                content = text || '';
-            }
+            // Inline helper usage: {{alert "text" "type"}}
+            alertType = type || '';
+            isSoft = options && options.hash && options.hash.soft === true;
+            content = text || '';
         }
         
-        // Build the alert class - default is just "alert", with optional color modifier  
-        const alertClass = 'alert mb-2' + (alertType ? ' alert-' + alertType : '');
+        // Build the alert class - default is just "alert", with optional color modifier and soft  
+        let alertClass = 'alert mb-2';
+        if (alertType) alertClass += ' alert-' + alertType;
+        if (isSoft) alertClass += ' alert-soft';
         
         // Choose the appropriate icon based on alert type
         let iconSvg = '';
         switch (alertType) {
             case 'success':
-                // Checkmark icon for success
                 iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">' +
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />' +
                     '</svg>';
                 break;
             case 'warning':
-                // Warning triangle icon
                 iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">' +
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />' +
                     '</svg>';
                 break;
             case 'error':
-                // X mark icon for error
                 iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">' +
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />' +
                     '</svg>';
                 break;
             case 'info':
             default:
-                // Information circle icon (default for info and base alert)
                 iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">' +
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' +
                     '</svg>';
@@ -167,15 +167,15 @@ function registerHelpers(handlebarsInstance) {
         }
         
         // Process markdown content with full rendering to support code blocks
-        let parsedContent = md.render(content).trim();
+        // Ensure content is a string
+        const contentStr = typeof content === 'string' ? content : String(content || '');
+        let parsedContent = md.render(contentStr).trim();
         
         // Remove outer paragraph tags if the entire content is wrapped in a single paragraph
-        // This happens when the content is simple text without block elements
         if (parsedContent.startsWith('<p>') && parsedContent.endsWith('</p>')) {
-            // Check if there's only one paragraph by counting opening <p> tags
             const paragraphCount = (parsedContent.match(/<p>/g) || []).length;
             if (paragraphCount === 1) {
-                parsedContent = parsedContent.slice(3, -4); // Remove <p> and </p>
+                parsedContent = parsedContent.slice(3, -4);
             }
         }
         
@@ -188,7 +188,7 @@ function registerHelpers(handlebarsInstance) {
     });
 
     handlebarsInstance.registerHelper('badge', function (text, type, options) {
-        // If only one parameter is passed, the second is options, so type should default
+        // Handle different parameter patterns
         if (typeof type === 'object') {
             options = type;
             type = 'primary';
@@ -197,7 +197,8 @@ function registerHelpers(handlebarsInstance) {
         // Default to primary if no type provided
         type = type || 'primary';
         
-        const badgeHtml = '<div class="badge badge-' + type + '">' + text + '</div>';
+        // Support inline rendering with proper span instead of div
+        const badgeHtml = '<span class="badge badge-' + type + '">' + text + '</span>';
         
         return new handlebarsInstance.SafeString(badgeHtml);
     });

@@ -1,6 +1,7 @@
 ---
 title: Custom HTML Pages Guide
 description: Learn how to create complete custom HTML pages that override the default templates
+handlebars: false
 ---
 
 # Custom HTML Pages Guide
