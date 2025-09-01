@@ -410,6 +410,15 @@ async function parseMarkdown(markdownContent, filename = null) {
             if (!rawProperties.includes(key)) {
                 mappedProps[`${key}_processed`] = md.renderInline(value);
             }
+        } else if (key === 'keywords') {
+            // Special handling for keywords - support both string and array formats
+            if (Array.isArray(value)) {
+                mappedProps[key] = value.join(', ');
+            } else if (typeof value === 'string') {
+                mappedProps[key] = value;
+            } else {
+                mappedProps[key] = '';
+            }
         } else {
             mappedProps[key] = value;
         }
@@ -560,8 +569,9 @@ function renderPage(templateName, { props, html, page, id }) {
         sidebars: transformedSidebars,
         navbar: transformedSidebarsNavbar.navbar,
         footer: transformedFooter || [],
-        title: settings.site.title,
+        title: props.title || settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
+        keywords: props.keywords || '', // Add keywords to top-level context
         html,
         props,
         page,
