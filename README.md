@@ -62,13 +62,6 @@ mydocs/
 site:
   title: "My Documentation"
   description: "Documentation for my project"
-  theme:
-    light: "fantasy"
-    dark: "forest"
-
-globals:
-  version: "1.0.0"
-  api_url: "https://api.example.com"
 ```
 
 ### sidebars.yaml
@@ -84,7 +77,7 @@ menu:
 
 ## Writing Your First Page
 
-Create a new markdown file in the `docs/` directory:
+Create a new markdown file `start.md` in the `docs/` directory:
 
 ```markdown
 # My First Page
@@ -98,7 +91,7 @@ function hello() {
   console.log("Hello, OkiDoki!");
 }
 ```
-
+The run the `okidoki generate` command again and refresh your browser to see the updated documentation site.
 
 ## Next Steps
 
