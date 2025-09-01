@@ -33,3 +33,11 @@ navigation:
   sidebar: "sidebars.yaml"
   topNav: true
   footer: true
+
+# Plugin configuration
+plugins:
+  enabled: true
+  directory: "plugins"
+  # List of plugin files to load (without .js extension)
+  # If empty or not specified, all .js files in the plugins directory will be loaded
+  load: []

@@ -78,6 +78,11 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
             globals: {
                 okidoki_version: packageVersion,
                 version: packageVersion
+            },
+            plugins: {
+                enabled: true,
+                directory: "plugins",
+                load: []
             }
         },
         sidebars: {
@@ -204,8 +209,11 @@ handlebarsInstance.registerHelper(layouts(handlebarsInstance));
 // Register the layout partial
 handlebarsInstance.registerPartial('layout', layoutTemplate);
 
-// Register custom helpers
-registerHelpers(handlebarsInstance);
+// Register custom helpers (without plugins initially)
+await registerHelpers(handlebarsInstance);
+
+// Track if plugins have been loaded to avoid reloading
+let pluginsLoaded = false;
 
 // Define the page templates
 const templates = {
@@ -368,6 +376,13 @@ const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 // parse markdown and return props and html
 async function parseMarkdown(markdownContent, filename = null) {
     const { settings, sidebars } = loadConfig();
+    
+    // Load plugins once when we have settings (deferred loading)
+    if (!pluginsLoaded && settings) {
+        const { loadPlugins } = await import('./hbshelpers.js');
+        await loadPlugins(handlebarsInstance, settings);
+        pluginsLoaded = true;
+    }
     const match = frontmatterRegex.exec(markdownContent);
 
     let props = { };

@@ -21,7 +21,7 @@ const md = markdownit({
 
 
 
-function registerHelpers(handlebarsInstance) {
+async function registerHelpers(handlebarsInstance, settings = null) {
     // Register the equals Handlebars helper
     handlebarsInstance.registerHelper('eq', function (a, b, options) {
         const ignoreCase = options.hash.ignoreCase || false;
@@ -335,7 +335,99 @@ function registerHelpers(handlebarsInstance) {
             return '';
         }
     });
-    
-    
+
+    // Load and register custom plugins
+    if (settings) {
+        await loadPlugins(handlebarsInstance, settings);
+    }
 }
+
+// Plugin loading system
+async function loadPlugins(handlebarsInstance, settings) {
+    try {
+        // Check if plugins are enabled
+        if (!settings || !settings.plugins || !settings.plugins.enabled) {
+            return;
+        }
+        
+        const pluginsDir = path.join(process.cwd(), settings.plugins.directory || 'plugins');
+        
+        // Check if plugins directory exists
+        if (!fs.existsSync(pluginsDir)) {
+            return; // No plugins directory, nothing to load
+        }
+        
+        // Get list of plugin files to load
+        let pluginFiles = [];
+        
+        // Check if specific plugins are configured
+        if (settings.plugins.load && Array.isArray(settings.plugins.load) && settings.plugins.load.length > 0) {
+            pluginFiles = settings.plugins.load;
+        } else {
+            // Load all .js and .cjs files in the directory
+            try {
+                pluginFiles = fs.readdirSync(pluginsDir)
+                    .filter(file => file.endsWith('.js') || file.endsWith('.cjs'))
+                    .map(file => file.replace(/\.(js|cjs)$/, ''));
+            } catch (error) {
+                console.warn(`Could not read plugins directory: ${pluginsDir}`);
+                return;
+            }
+        }
+        
+        // Load each plugin
+        for (const pluginName of pluginFiles) {
+            // Try both .js and .cjs extensions
+            let pluginPath = path.join(pluginsDir, `${pluginName}.js`);
+            let isCommonJS = false;
+            
+            if (!fs.existsSync(pluginPath)) {
+                pluginPath = path.join(pluginsDir, `${pluginName}.cjs`);
+                isCommonJS = true;
+            }
+            
+            if (!fs.existsSync(pluginPath)) {
+                console.warn(`Plugin file not found: ${pluginName}.js or ${pluginName}.cjs`);
+                continue;
+            }
+            
+            try {
+                let plugin;
+                
+                if (isCommonJS) {
+                    // Use dynamic require for CommonJS files
+                    const pluginUrl = `file://${path.resolve(pluginPath)}?t=${Date.now()}`;
+                    plugin = await import(pluginUrl);
+                } else {
+                    // Create a file URL for dynamic import (ES modules)
+                    const pluginUrl = `file://${path.resolve(pluginPath)}?t=${Date.now()}`;
+                    plugin = await import(pluginUrl);
+                }
+                
+                // Check if plugin exports a function (recommended pattern)
+                if (typeof plugin.default === 'function') {
+                    plugin.default(handlebarsInstance);
+                } else if (typeof plugin === 'function') {
+                    plugin(handlebarsInstance);
+                } else if (plugin.helpers && typeof plugin.helpers === 'object') {
+                    // Support object-based helpers: { helpers: { helperName: function() {} } }
+                    for (const [helperName, helperFunc] of Object.entries(plugin.helpers)) {
+                        if (typeof helperFunc === 'function') {
+                            handlebarsInstance.registerHelper(helperName, helperFunc);
+                        }
+                    }
+                } else {
+                    console.warn(`Plugin ${pluginName} does not export a valid helper function or helpers object`);
+                }
+            } catch (error) {
+                console.error(`Failed to load plugin ${pluginName}: ${error.message}`);
+            }
+        }
+    } catch (error) {
+        console.error(`Plugin loading error: ${error.message}`);
+        // Don't fail the build, just continue without plugins
+    }
+}
+
+export { loadPlugins };
 export default registerHelpers;

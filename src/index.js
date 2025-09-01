@@ -313,7 +313,7 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
     const handlebars = await import('handlebars');
     const { default: registerHelpers } = await import('./hbshelpers.js');
     
-    function processDirectory(currentDir) {
+    async function processDirectory(currentDir) {
         const items = fs.readdirSync(currentDir);
         
         for (const item of items) {
@@ -321,7 +321,7 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
             const stat = fs.statSync(fullPath);
             
             if (stat.isDirectory()) {
-                processDirectory(fullPath);
+                await processDirectory(fullPath);
             } else if (item.endsWith('.html')) {
                 const relativePath = path.relative(assetsDir, fullPath);
                 const outputPath = path.join(outputDir, relativePath);
@@ -357,7 +357,7 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
                     
                     // Create a temporary Handlebars instance for processing
                     const hbsInstance = handlebars.default.create();
-                    registerHelpers(hbsInstance);
+                    await registerHelpers(hbsInstance, settings);
                     
                     try {
                         const template = hbsInstance.compile(htmlContent);
@@ -389,7 +389,7 @@ async function processCustomHtmlFiles(assetsDir, outputDir, settings, sidebars) 
         }
     }
     
-    processDirectory(assetsDir);
+    await processDirectory(assetsDir);
 }
 
 // Smart HTML minification function that preserves code blocks
