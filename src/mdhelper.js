@@ -380,10 +380,7 @@ async function parseMarkdown(markdownContent, filename = null) {
     }
     props = { ...settings, ...settings.globals, ...props, okidoki_version: packageVersion, version: packageVersion };
 
-    // Parse the markdown content
-    // Default to handlebars processing unless explicitly disabled
-    const shouldUseHandlebars = props.handlebars !== false;
-    const compiledBody = shouldUseHandlebars ? handlebarsInstance.compile(markdownBody) : markdownBody;
+    // Build mappedProps for Handlebars context
     const mappedProps = { };
     
     // Properties that should NOT be auto-linked (preserve as raw strings)
@@ -405,10 +402,22 @@ async function parseMarkdown(markdownContent, filename = null) {
     logger.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     
+    // Parse the markdown content
+    // Default to handlebars processing unless explicitly disabled
+    const shouldUseHandlebars = props.handlebars !== false;
+    
+    let compiledBody;
+    if (shouldUseHandlebars) {
+        // Compile with Handlebars
+        const handlebarsCompiled = handlebarsInstance.compile(markdownBody);
+        compiledBody = handlebarsCompiled(mappedProps);
+    } else {
+        compiledBody = markdownBody;
+    }
+    
     if (shouldUseHandlebars) {
         try {
-            const handlebarsResult = compiledBody(mappedProps);
-            let html = md.render(handlebarsResult, { baseUrl: settings.site.baseUrl || '/' });
+            let html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' });
             
             // Post-process HTML img tags to add baseUrl (markdown images are handled by renderer)
             const baseUrl = settings.site.baseUrl || '/';
