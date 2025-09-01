@@ -56,13 +56,24 @@ function normalizeIndentation(content) {
 
 function registerTabs(md, handlebarsInstance)  {
   handlebarsInstance.registerHelper('tabs', function (options) {
+    // Ensure this is called as a block helper
+    if (!options || typeof options.fn !== 'function') {
+      console.warn('tabs helper must be used as a block helper: {{#tabs}}...{{/tabs}}');
+      return '';
+    }
+    
     // Initialize the tabs array at the root level
+    if (!options.data.root) options.data.root = {};
     options.data.root.tabs = [];
     
     // Execute the block content which will populate the tabs array
     options.fn(this);
     
     const tabs = options.data.root.tabs || [];
+    if (tabs.length === 0) {
+      return '';
+    }
+    
     const tabId = `tabs_${Math.random().toString(36).substring(2, 11)}`;
 
     let html = []
@@ -86,9 +97,16 @@ function registerTabs(md, handlebarsInstance)  {
    * Helper for individual tab content
    */
   handlebarsInstance.registerHelper('tab', function (options) {
+    // Ensure this is called as a block helper
+    if (!options || typeof options.fn !== 'function') {
+      console.warn('tab helper must be used as a block helper: {{#tab title="..."}}...{{/tab}}');
+      return '';
+    }
+    
+    if (!options.data.root) options.data.root = {};
     const tabs = options.data.root.tabs || [];
     tabs.push({
-      title: options.hash.title,
+      title: options.hash.title || 'Untitled',
       content: options.fn(this)
     });
     options.data.root.tabs = tabs;
