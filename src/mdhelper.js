@@ -20,6 +20,15 @@ import logger from './logger.js';
 const __filename = fileURLToPath(import.meta.url);
 const packageDir = path.dirname(path.dirname(__filename));
 
+// Get package version
+let packageVersion = '1.0.0'; // fallback
+try {
+    const packageJson = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf8'));
+    packageVersion = packageJson.version || '1.0.0';
+} catch (error) {
+    logger.log('Could not load package version, using fallback');
+}
+
 // Cache for configuration
 let configCache = null;
 
@@ -67,6 +76,8 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
                 placeholder: "Search documentation..."
             },
             globals: {
+                okidoki_version: packageVersion,
+                version: packageVersion
             }
         },
         sidebars: {
