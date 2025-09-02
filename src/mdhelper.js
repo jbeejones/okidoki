@@ -53,6 +53,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
                 title: "Documentation",
                 description: "Documentation generated with Okidoki",
                 baseUrl: "/",
+                url: "", // Full site URL for absolute links in sitemap (e.g., "https://example.com")
                 favicon: "/favicon.ico",
                 logo: "/okidokilogo.svg",
                 theme: {

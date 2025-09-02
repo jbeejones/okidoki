@@ -267,8 +267,19 @@ function generateContentHash(data) {
 function generateSitemap(docs, settings, sourceDir = 'docs') {
     const baseUrl = settings.site.baseUrl || '/';
     
-    // Ensure baseUrl ends with / but doesn't have double slashes
-    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    // Build the full site URL for absolute URLs in sitemap
+    let siteUrl = '';
+    if (settings.site.url) {
+        // Use configured site URL
+        siteUrl = settings.site.url.replace(/\/$/, '');
+    } else if (baseUrl.startsWith('http')) {
+        // If baseUrl is already absolute, use it
+        siteUrl = baseUrl.replace(/\/$/, '');
+    } else {
+        // For relative baseUrls, we can't generate absolute URLs
+        // Use the baseUrl as-is (this will need manual configuration)
+        siteUrl = baseUrl.replace(/\/$/, '');
+    }
     
     // XML header
     let sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -276,9 +287,19 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
     
     // Add each document to the sitemap
     for (const doc of docs) {
-        // Clean up the path - remove leading slash and add normalized base URL
+        // Clean up the path - remove leading slash
         const cleanPath = doc.path.startsWith('/') ? doc.path.slice(1) : doc.path;
-        const fullUrl = `${normalizedBaseUrl}/${cleanPath}`.replace(/\/+/g, '/');
+        
+        // Build absolute URL
+        let fullUrl;
+        if (siteUrl.startsWith('http')) {
+            // Full absolute URL - combine site URL with base URL and clean path
+            const baseUrlPath = baseUrl === '/' ? '' : baseUrl.replace(/\/$/, '');
+            fullUrl = `${siteUrl}${baseUrlPath}/${cleanPath}`;
+        } else {
+            // Relative URL (fallback for when site.url is not configured)
+            fullUrl = `${siteUrl}/${cleanPath}`.replace(/\/+/g, '/');
+        }
         
         // Get last modified date from the source markdown file
         let lastmod;
