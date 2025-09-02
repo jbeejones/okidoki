@@ -10,6 +10,9 @@
 
 Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
+![okidoki screenshot](./screenshots/okidoki.png)
+
+
 ## Installation
 
 Install OkiDoki globally using npm:
