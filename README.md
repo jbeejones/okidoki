@@ -122,3 +122,13 @@ OkiDoki is open source and we welcome contributions! Here are ways you can help:
 
 OkiDoki is released under the [MIT License](https://github.com/jbeejones/okidoki/blob/main/LICENSE). You're free to use, modify, and distribute it for any purpose.
 
+## Similar Tools
+
+Other popular documentation generators you might consider:
+
+- **[Docusaurus](https://docusaurus.io/)** - React-based, feature-rich
+- **[VitePress](https://vitepress.dev/)** - Vue-powered, very fast
+- **[GitBook](https://www.gitbook.com/)** - Commercial, collaborative
+- **[MkDocs](https://www.mkdocs.org/)** - Python-based, Material theme
+- **[Nextra](https://nextra.site/)** - Next.js powered
+- **[Slate](https://slatedocs.github.io/slate/)** - API-focused, three-column layout
