@@ -15,7 +15,7 @@ Visit the full documentation at the [OkiDoki website](https://jbeejones.github.i
 
 ## Installation
 
-Install OkiDoki globally using npm:
+Install OkiDoki globally using [https://www.npmjs.com/package/okidoki](https://www.npmjs.com/package/okidoki):
 
 ```bash
 npm install -g okidoki
