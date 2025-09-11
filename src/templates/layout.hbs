@@ -13,7 +13,24 @@
   
   <meta name="keywords" content="{{keywords}}">
   <title>{{title}}</title>
-  <link rel='canonical' href='{{baseUrl}}' />
+  <!-- ✅ Canonical points to this page -->
+  {{#if settings.site.url}}
+    {{#eq page.path '/index.html'}}
+      {{#eq baseUrl '/'}}
+  <link rel="canonical" href="{{settings.site.url}}{{page.path}}">
+      {{else}}
+  <link rel="canonical" href="{{settings.site.url}}{{baseUrl}}">
+      {{/eq}}
+    {{else}}
+      {{#eq baseUrl '/'}}
+  <link rel="canonical" href="{{settings.site.url}}{{page.path}}">
+   {{else}}
+  <link rel="canonical" href="{{joinUrl settings.site.url (joinUrl baseUrl page.path)}}">
+      {{/eq}}
+    {{/eq}}
+  {{else}}
+  <link rel="canonical" href="{{baseUrl}}{{page.path}}">
+  {{/if}}
 
   <!-- Open Graph / Facebook -->
   <meta property='og:type' content='website' />

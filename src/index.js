@@ -290,15 +290,30 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
         // Clean up the path - remove leading slash
         const cleanPath = doc.path.startsWith('/') ? doc.path.slice(1) : doc.path;
         
+        // Special handling for index.html when baseUrl is not '/'
+        // Use the baseUrl with trailing slash instead of index.html
+        const isIndexPage = cleanPath === 'index.html' || doc.path === '/index.html';
+        
         // Build absolute URL
         let fullUrl;
         if (siteUrl.startsWith('http')) {
             // Full absolute URL - combine site URL with base URL and clean path
             const baseUrlPath = baseUrl === '/' ? '' : baseUrl.replace(/\/$/, '');
-            fullUrl = `${siteUrl}${baseUrlPath}/${cleanPath}`;
+            
+            if (isIndexPage && baseUrl !== '/') {
+                // For index page when baseUrl is not '/', use baseUrl with trailing slash
+                fullUrl = `${siteUrl}${baseUrlPath}/`;
+            } else {
+                fullUrl = `${siteUrl}${baseUrlPath}/${cleanPath}`;
+            }
         } else {
             // Relative URL (fallback for when site.url is not configured)
-            fullUrl = `${siteUrl}/${cleanPath}`.replace(/\/+/g, '/');
+            if (isIndexPage && baseUrl !== '/') {
+                // For index page when baseUrl is not '/', use baseUrl with trailing slash
+                fullUrl = `${siteUrl}/`.replace(/\/+/g, '/');
+            } else {
+                fullUrl = `${siteUrl}/${cleanPath}`.replace(/\/+/g, '/');
+            }
         }
         
         // Get last modified date from the source markdown file
