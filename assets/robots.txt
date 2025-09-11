@@ -1,2 +1,8 @@
 User-agent: *
-Allow: / 
+Allow: /
+
+# 🚫 Prevent duplicate indexing of /index.html
+Disallow: /index.html
+
+# ✅ Point search engines to your sitemap
+Sitemap: https://jbeejones.github.io/okidoki-website/sitemap.xml
