@@ -442,10 +442,10 @@
       </label>
     </div>
     {{/unless}}
-    <div class="flex-1">
-      <a class="flex items-center whitespace-nowrap" href="{{joinUrl baseUrl 'index.html'}}">
-          <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3">
-          <span class="text-xl font-mono font-bold">{{title}}</span>
+    <div class="flex-1 min-w-0 overflow-hidden">
+      <a class="flex items-center min-w-0" href="{{joinUrl baseUrl 'index.html'}}">
+          <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
+          <span class="text-xl font-mono font-bold truncate max-w-[40vw] sm:max-w-[50vw] md:max-w-[60vw] lg:max-w-none">{{title}}</span>
       </a>
     </div>
     
@@ -616,10 +616,12 @@
       </div>
       {{/each}}
     </div>
-    {{/if}}
+    
+    {{else}}
     <aside>
-      <p>Copyright © {{copyright.year}} - All right reserved by {{copyright.name}}</p>
+      <p>This site was created with <a href="https://github.com/jbeejones/okidoki" class="link link-hover">OkiDoki</a> - Copyright © {{copyright.year}} - All right reserved by {{copyright.name}}. <a href="https://github.com/jbeejones/okidoki" class="link link-hover">Learn more</a></p>
     </aside>
+    {{/if}}
   </footer>
   {{/unless}}
 </body>
