@@ -108,21 +108,24 @@ description: ${description}
     generateHttpMethodBadge(method) {
         const methodUpper = method.toUpperCase();
         
-        // Map HTTP methods to DaisyUI badge types
-        const badgeTypeMap = {
-            'get': 'success',      // Green for safe read operations
-            'post': 'info',        // Blue for create operations
-            'put': 'warning',      // Orange/Yellow for update operations
-            'patch': 'warning',    // Orange/Yellow for partial updates
-            'delete': 'error',     // Red for destructive operations
-            'head': 'neutral',     // Gray for metadata requests
-            'options': 'secondary' // Gray-ish for discovery requests
+        // Map HTTP methods to colors (shields.io color scheme)
+        const colorMap = {
+            'get': 'brightgreen',    // Green for safe read operations
+            'post': 'blue',          // Blue for create operations
+            'put': 'orange',         // Orange for update operations
+            'patch': 'yellow',       // Yellow for partial updates
+            'delete': 'red',         // Red for destructive operations
+            'head': 'lightgrey',     // Gray for metadata requests
+            'options': 'inactive'    // Gray for discovery requests
         };
         
-        const badgeType = badgeTypeMap[method.toLowerCase()] || 'primary';
+        const color = colorMap[method.toLowerCase()] || 'blue';
         
-        // Using Handlebars badge helper syntax
-        return `{{badge "${methodUpper}" "${badgeType}"}}`;
+        // Generate shields.io badge URL with proper dimensions
+        const badgeUrl = `https://img.shields.io/badge/${methodUpper}-${method.toLowerCase()}-${color}?style=flat-square`;
+        
+        // Return image markdown with dimensions using the syntax we just fixed
+        return `![${methodUpper}](${badgeUrl} =80x20)`;
     }
 
     generatePathsSection(paths, components) {
@@ -143,8 +146,21 @@ description: ${description}
                     markdown += `${operation.description}\n\n`;
                 }
                 
+                // Collect all parameters (path-level + operation-level)
+                let allParameters = [];
+                
+                // Add path-level parameters first
+                if (pathItem.parameters) {
+                    allParameters = allParameters.concat(pathItem.parameters);
+                }
+                
+                // Add operation-level parameters
                 if (operation.parameters) {
-                    markdown += this.generateParametersSection(operation.parameters);
+                    allParameters = allParameters.concat(operation.parameters);
+                }
+                
+                if (allParameters.length > 0) {
+                    markdown += this.generateParametersSection(allParameters, components);
                 }
                 
                 if (operation.requestBody) {
@@ -162,16 +178,40 @@ description: ${description}
         return markdown;
     }
 
-    generateParametersSection(parameters) {
+    generateParametersSection(parameters, components = null) {
+        if (!parameters || parameters.length === 0) {
+            return '';
+        }
+
         let markdown = `#### Parameters\n\n`;
         markdown += `| Name | In | Type | Required | Description |\n`;
         markdown += `|------|----|----|----------|-------------|\n`;
         
-        parameters.forEach(param => {
-            const type = param.schema?.type || 'string';
+        parameters.forEach(paramRef => {
+            let param = paramRef;
+            
+            // Handle parameter references (e.g., "#/components/parameters/SomeParam")
+            if (paramRef.$ref && components) {
+                const refPath = paramRef.$ref.replace('#/components/parameters/', '');
+                param = components.parameters?.[refPath] || paramRef;
+            }
+            
+            // Skip parameters that don't have required fields
+            if (!param.name || !param.in) {
+                logger.warn(`Skipping parameter with missing name or in field: ${JSON.stringify(param)}`);
+                return;
+            }
+            
+            const name = param.name || 'unnamed';
+            const location = param.in || 'unknown';
+            const type = param.schema?.type || param.type || 'string';
             const required = param.required ? 'Yes' : 'No';
             const description = param.description || '';
-            markdown += `| ${param.name} | ${param.in} | ${type} | ${required} | ${description} |\n`;
+            
+            // Escape pipe characters in description to avoid breaking table
+            const escapedDescription = description.replace(/\|/g, '\\|');
+            
+            markdown += `| ${name} | ${location} | ${type} | ${required} | ${escapedDescription} |\n`;
         });
         
         markdown += '\n';

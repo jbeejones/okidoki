@@ -49,6 +49,7 @@
     "lunr": "^2.3.9",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
+    "markdown-it-imsize": "^2.0.1",
     "marked-highlight": "^2.2.1",
     "yargs": "^17.7.2"
   },

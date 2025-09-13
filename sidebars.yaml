@@ -11,6 +11,10 @@ menu:
     document: /tabs-demo.md
   - title: Test API Documentation
     document: /test-api-spec.md
+  - title: API Reference
+    document: /test-api-converted.md
+  - title: API Reference (Fixed)
+    document: /test-api-converted-fixed.md
 navbar:
   - title: Documentation
     document: /index.html

@@ -2,6 +2,7 @@ import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 import markdownit from 'markdown-it'
 import markdownItAnchor from 'markdown-it-anchor';
+import markdownItImsize from 'markdown-it-imsize';
 
 import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
@@ -239,6 +240,7 @@ const md = markdownit({
 });
 
 md.use(markdownItAnchor, { slugify: s => slugify(s) })
+md.use(markdownItImsize)
 
 // Register tabs functionality
 registerTabs(md, handlebarsInstance);
