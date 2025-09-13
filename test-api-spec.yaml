@@ -1,0 +1,610 @@
+openapi: 3.0.3
+info:
+  title: OkiOki Test API
+  description: |
+    A comprehensive test API specification to demonstrate OpenAPI to Markdown conversion in OkiOki.
+    
+    This API includes various endpoint types, authentication methods, and data models to showcase
+    the full capabilities of the conversion feature.
+    
+    ## Features Demonstrated
+    - Multiple HTTP methods (GET, POST, PUT, DELETE)
+    - Path, query, and header parameters
+    - Request and response bodies
+    - Authentication with API keys
+    - Complex nested data models
+    - Error handling
+    - File uploads
+  version: 2.1.0
+  termsOfService: https://example.com/terms
+  contact:
+    name: OkiOki API Team
+    email: api-team@okidoki.dev
+    url: https://okidoki.dev/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.okidoki.dev/v2
+    description: Production server
+  - url: https://staging-api.okidoki.dev/v2
+    description: Staging server
+  - url: http://localhost:3000/v2
+    description: Development server
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /users:
+    get:
+      summary: List users
+      description: Retrieve a paginated list of users with optional filtering
+      operationId: listUsers
+      tags:
+        - Users
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 1
+        - name: limit
+          in: query
+          description: Number of users per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: status
+          in: query
+          description: Filter users by status
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, pending]
+            example: active
+        - name: search
+          in: query
+          description: Search users by name or email
+          required: false
+          schema:
+            type: string
+            example: "john@example.com"
+      responses:
+        '200':
+          description: List of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create user
+      description: Create a new user account
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        description: User data for account creation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}:
+    get:
+      summary: Get user by ID
+      description: Retrieve detailed information about a specific user
+      operationId: getUserById
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          description: Unique identifier for the user
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: include
+          in: query
+          description: Additional data to include in response
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [profile, settings, activity]
+            example: ["profile", "settings"]
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update user
+      description: Update user information
+      operationId: updateUser
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete user
+      description: Permanently delete a user account
+      operationId: deleteUser
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Confirm-Delete
+          in: header
+          description: Confirmation header required for deletion
+          required: true
+          schema:
+            type: string
+            enum: ["yes"]
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/{userId}/avatar:
+    post:
+      summary: Upload user avatar
+      description: Upload an avatar image for a user
+      operationId: uploadAvatar
+      tags:
+        - Users
+        - Files
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPEG, PNG)
+                description:
+                  type: string
+                  description: Optional description for the avatar
+      responses:
+        '200':
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avatarUrl:
+                    type: string
+                    format: uri
+                    example: "https://cdn.okidoki.dev/avatars/123e4567.jpg"
+
+  /projects:
+    get:
+      summary: List projects
+      description: Get a list of projects with filtering options
+      operationId: listProjects
+      tags:
+        - Projects
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, completed, archived]
+        - name: owner
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Projects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+    
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+          minLength: 2
+          maxLength: 100
+        status:
+          type: string
+          enum: [active, inactive, pending]
+          description: Current user status
+          example: "active"
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+          example: "2023-01-15T10:30:00Z"
+        lastLoginAt:
+          type: string
+          format: date-time
+          description: Last login timestamp
+          example: "2023-11-20T14:25:30Z"
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+          description: User tags for categorization
+          example: ["premium", "beta-tester"]
+
+    UserDetailed:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            profile:
+              $ref: '#/components/schemas/UserProfile'
+            settings:
+              $ref: '#/components/schemas/UserSettings'
+            stats:
+              $ref: '#/components/schemas/UserStats'
+
+    UserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        avatar:
+          type: string
+          format: uri
+          example: "https://cdn.okidoki.dev/avatars/123e4567.jpg"
+        bio:
+          type: string
+          description: User biography
+          example: "Software developer passionate about API design"
+          maxLength: 500
+        location:
+          type: string
+          example: "San Francisco, CA"
+        website:
+          type: string
+          format: uri
+          example: "https://johndoe.dev"
+
+    UserSettings:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, auto]
+          default: auto
+        notifications:
+          type: object
+          properties:
+            email:
+              type: boolean
+              default: true
+            push:
+              type: boolean
+              default: false
+            sms:
+              type: boolean
+              default: false
+        privacy:
+          type: object
+          properties:
+            profileVisible:
+              type: boolean
+              default: true
+            showActivity:
+              type: boolean
+              default: false
+
+    UserStats:
+      type: object
+      properties:
+        projectsCount:
+          type: integer
+          example: 15
+        documentsCreated:
+          type: integer
+          example: 42
+        lastActivity:
+          type: string
+          format: date-time
+          example: "2023-11-20T16:45:00Z"
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "jane.doe@example.com"
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: "Jane Doe"
+        password:
+          type: string
+          minLength: 8
+          description: User password (minimum 8 characters)
+          example: "securePassword123"
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        status:
+          type: string
+          enum: [active, inactive]
+        tags:
+          type: array
+          items:
+            type: string
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - owner
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          description: Project name
+          example: "Documentation Website"
+        description:
+          type: string
+          description: Project description
+          example: "A modern documentation website built with OkiOki"
+        status:
+          type: string
+          enum: [draft, active, completed, archived]
+          example: "active"
+        owner:
+          $ref: '#/components/schemas/User'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-10-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-11-15T11:30:00Z"
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        pages:
+          type: integer
+          example: 8
+        hasNext:
+          type: boolean
+          example: true
+        hasPrev:
+          type: boolean
+          example: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The provided email address is already in use"
+        details:
+          type: object
+          description: Additional error details
+          example:
+            field: "email"
+            code: "DUPLICATE_VALUE"
+        timestamp:
+          type: string
+          format: date-time
+          description: Error occurrence timestamp
+          example: "2023-11-20T15:30:45Z"
+        requestId:
+          type: string
+          description: Unique request identifier for debugging
+          example: "req_123456789"
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters or data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Users
+    description: User management operations
+  - name: Projects
+    description: Project management operations
+  - name: Files
+    description: File upload and management operations 

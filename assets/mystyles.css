@@ -2343,6 +2343,24 @@ html {
   }
 }
 
+.avatar {
+  position: relative;
+  display: inline-flex;
+}
+
+.avatar > div {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.avatar img {
+  height: 100%;
+  width: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
 .avatar.placeholder > div {
   display: flex;
   align-items: center;
@@ -3502,6 +3520,14 @@ input.tab:checked + .tab-content,
   color: var(--fallback-erc,oklch(var(--erc)/var(--tw-text-opacity)));
   --alert-bg: var(--fallback-er,oklch(var(--er)/1));
   --alert-bg-mix: var(--fallback-b1,oklch(var(--b1)/1));
+}
+
+.avatar-group :where(.avatar) {
+  overflow: hidden;
+  border-radius: 9999px;
+  border-width: 4px;
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-border-opacity)));
 }
 
 .badge-neutral {
@@ -4825,38 +4851,6 @@ input.tab:checked + .tab-content,
   height: 320px;
 }
 
-.badge-xs {
-  height: 0.75rem;
-  font-size: 0.75rem;
-  line-height: .75rem;
-  padding-left: 0.313rem;
-  padding-right: 0.313rem;
-}
-
-.badge-sm {
-  height: 1rem;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  padding-left: 0.438rem;
-  padding-right: 0.438rem;
-}
-
-.badge-md {
-  height: 1.25rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  padding-left: 0.563rem;
-  padding-right: 0.563rem;
-}
-
-.badge-lg {
-  height: 1.5rem;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  padding-left: 0.688rem;
-  padding-right: 0.688rem;
-}
-
 .btm-nav-xs > *:where(.active) {
   border-top-width: 1px;
 }
@@ -5049,6 +5043,40 @@ html:has(.drawer-toggle:checked) {
   --tab-padding: 0.5rem;
 }
 
+.avatar.online:before {
+  content: "";
+  position: absolute;
+  z-index: 10;
+  display: block;
+  border-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity)));
+  outline-style: solid;
+  outline-width: 2px;
+  outline-color: var(--fallback-b1,oklch(var(--b1)/1));
+  width: 15%;
+  height: 15%;
+  top: 7%;
+  right: 7%;
+}
+
+.avatar.offline:before {
+  content: "";
+  position: absolute;
+  z-index: 10;
+  display: block;
+  border-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
+  outline-style: solid;
+  outline-width: 2px;
+  outline-color: var(--fallback-b1,oklch(var(--b1)/1));
+  width: 15%;
+  height: 15%;
+  top: 7%;
+  right: 7%;
+}
+
 .drawer-open > .drawer-toggle ~ .drawer-side > .drawer-overlay {
   cursor: default;
   background-color: transparent;
@@ -5212,6 +5240,15 @@ html:has(.drawer-toggle:checked) {
 .alert span p {
   margin: 0 !important;
   /* Remove paragraph margins inside alerts */
+}
+
+/* Fix HTTP method badge vertical alignment in headings */
+
+h1 .badge, h2 .badge, h3 .badge, h4 .badge, h5 .badge, h6 .badge {
+  vertical-align: baseline !important;
+  margin-top: -0.375rem !important;
+  /* Lift badges higher in headings */
+  display: inline-block !important;
 }
 
 /* Better table cell text wrapping for mobile */
@@ -5572,12 +5609,20 @@ html:has(.drawer-toggle:checked) {
   width: 100%;
 }
 
+.min-w-0 {
+  min-width: 0px;
+}
+
 .\!max-w-\[920px\] {
   max-width: 920px !important;
 }
 
 .\!max-w-none {
   max-width: none !important;
+}
+
+.max-w-\[40vw\] {
+  max-width: 40vw;
 }
 
 .max-w-md {
@@ -5590,6 +5635,10 @@ html:has(.drawer-toggle:checked) {
 
 .flex-none {
   flex: none;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 
 .shrink-0 {
@@ -5649,10 +5698,6 @@ html:has(.drawer-toggle:checked) {
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.whitespace-nowrap {
   white-space: nowrap;
 }
 
@@ -5784,6 +5829,18 @@ html:has(.drawer-toggle:checked) {
 
 .font-medium {
   font-weight: 500;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
+}
+
+.capitalize {
+  text-transform: capitalize;
 }
 
 .italic {
@@ -5923,6 +5980,11 @@ html:has(.drawer-toggle:checked) {
 .font-bold, .font-medium, .font-semibold {
 }
 
+/* Fix HTTP method badge alignment in headings */
+
+.badge {
+}
+
 /* Force include layout classes */
 
 .block, .inline-block, .flex, .grid {
@@ -6036,9 +6098,19 @@ html:has(.drawer-toggle:checked) {
   opacity: 1;
 }
 
+@media (min-width: 640px) {
+  .sm\:max-w-\[50vw\] {
+    max-width: 50vw;
+  }
+}
+
 @media (min-width: 768px) {
   .md\:w-auto {
     width: auto;
+  }
+
+  .md\:max-w-\[60vw\] {
+    max-width: 60vw;
   }
 }
 
@@ -6069,6 +6141,10 @@ html:has(.drawer-toggle:checked) {
 
   .lg\:h-\[calc\(100vh-3rem-4rem\)\] {
     height: calc(100vh - 3rem - 4rem);
+  }
+
+  .lg\:max-w-none {
+    max-width: none;
   }
 
   .lg\:items-center {
@@ -6102,6 +6178,9 @@ html:has(.drawer-toggle:checked) {
   }
 
   .lg\:flex {
+  }
+
+  .lg\:max-w-none {
   }
 }
 

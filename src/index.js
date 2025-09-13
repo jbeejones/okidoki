@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseMarkdown, renderPage, loadConfig, clearConfigCache, transformSidebarItems, transformDocumentPath } from './mdhelper.js';
+import { convertOpenAPIToMarkdown } from './openapi-converter.js';
 import crypto from 'crypto';
 import logger from './logger.js';
 /*
@@ -454,8 +455,8 @@ function minifyHtml(html) {
     html = html
         // Remove HTML comments
         .replace(/<!--[\s\S]*?-->/g, '')
-        // Remove extra whitespace between tags (but not inside them)
-        .replace(/>\s+</g, '><')
+        // Remove extra whitespace between tags (but preserve single spaces for inline elements)
+        .replace(/>\s{2,}</g, '><')  // Only remove multiple spaces/newlines, keep single spaces
         // Remove leading/trailing whitespace from lines
         .replace(/^\s+|\s+$/gm, '')
         // Collapse multiple whitespace characters to single space
@@ -822,6 +823,74 @@ async function generateCommand(argv) {
     }
 }
 
+async function openapiCommand(argv) {
+    const { input, output, title, description, docs, sidebars: sidebarsPath, config } = argv;
+    
+    try {
+        logger.info('Converting OpenAPI specification to markdown...');
+        
+        // Determine output path
+        const docsDir = docs || 'docs';
+        let outputFile;
+        
+        if (output) {
+            outputFile = output;
+        } else {
+            // Generate output filename from input filename
+            const inputBasename = path.basename(input, path.extname(input));
+            outputFile = path.join(docsDir, `${inputBasename}.md`);
+        }
+        
+        // Conversion options
+        const options = {};
+        if (title) options.title = title;
+        if (description) options.description = description;
+        
+        // Perform the conversion
+        const result = await convertOpenAPIToMarkdown(input, outputFile, options);
+        
+        // Optionally update sidebars.yaml to include the new API documentation
+        const sidebarsFilePath = sidebarsPath || 'sidebars.yaml';
+        if (result.success && fs.existsSync(sidebarsFilePath)) {
+            const sidebarsContent = fs.readFileSync(sidebarsFilePath, 'utf8');
+            const yaml = await import('js-yaml');
+            const sidebarsConfig = yaml.default.load(sidebarsContent);
+            
+            // Check if API Reference entry already exists
+            const apiTitle = title || 'API Reference';
+            const apiPath = '/' + path.relative(docsDir, outputFile).replace(/\\/g, '/');
+            
+            if (!sidebarsConfig.menu) {
+                sidebarsConfig.menu = [];
+            }
+            
+            const existingEntry = sidebarsConfig.menu.find(item => 
+                item.document === apiPath || item.title === apiTitle
+            );
+            
+            if (!existingEntry) {
+                sidebarsConfig.menu.push({
+                    title: apiTitle,
+                    document: apiPath
+                });
+                
+                fs.writeFileSync(sidebarsFilePath, yaml.default.dump(sidebarsConfig));
+                logger.info(`Added ${apiTitle} to navigation in ${sidebarsFilePath}`);
+            } else {
+                logger.info(`${apiTitle} already exists in navigation`);
+            }
+        }
+        
+        logger.info('OpenAPI conversion completed successfully!');
+        logger.info(`Generated: ${outputFile}`);
+        logger.info('Run "okidoki generate" to build your documentation with the new API reference');
+        
+    } catch (error) {
+        logger.error(`Failed to convert OpenAPI specification: ${error.message}`);
+        process.exit(1);
+    }
+}
+
 // CLI setup
 yargs(hideBin(process.argv))
     .command('init', 'Initialize a new documentation project', {
@@ -880,6 +949,46 @@ yargs(hideBin(process.argv))
             default: false
         }
     }, generateCommand)
+    .command('openapi', 'Convert OpenAPI specification to markdown', {
+        input: {
+            alias: 'i',
+            description: 'Path to OpenAPI specification file (JSON or YAML)',
+            type: 'string',
+            demandOption: true
+        },
+        output: {
+            alias: 'o',
+            description: 'Output markdown file path',
+            type: 'string'
+        },
+        title: {
+            alias: 't',
+            description: 'Title for the generated documentation',
+            type: 'string'
+        },
+        description: {
+            alias: 'd',
+            description: 'Description for the generated documentation',
+            type: 'string'
+        },
+        docs: {
+            description: 'Target docs directory',
+            type: 'string',
+            default: 'docs'
+        },
+        sidebars: {
+            alias: 'b',
+            description: 'Path to sidebars configuration file',
+            type: 'string',
+            default: 'sidebars.yaml'
+        },
+        config: {
+            alias: 'c',
+            description: 'Path to okidoki configuration file',
+            type: 'string',
+            default: 'okidoki.yaml'
+        }
+    }, openapiCommand)
     .demandCommand(1, 'You need to specify a command')
     .strict()
     .fail((msg, err, yargs) => {

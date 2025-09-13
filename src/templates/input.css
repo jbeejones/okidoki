@@ -50,9 +50,14 @@
   .mb-1, .mb-2, .mb-4, .mb-6, .mb-8 { }
   .mx-auto, .my-4 { }
   
+
+  
   /* Force include text classes */
   .text-sm, .text-base, .text-lg, .text-xl, .text-2xl { }
   .font-bold, .font-medium, .font-semibold { }
+  
+  /* Fix HTTP method badge alignment in headings */
+  .badge { }
   
   /* Force include layout classes */
   .block, .inline-block, .flex, .grid { }
@@ -104,6 +109,13 @@
   
   .alert span p {
     margin: 0 !important; /* Remove paragraph margins inside alerts */
+  }
+  
+  /* Fix HTTP method badge vertical alignment in headings */
+  h1 .badge, h2 .badge, h3 .badge, h4 .badge, h5 .badge, h6 .badge {
+    vertical-align: baseline !important;
+    margin-top: -0.375rem !important; /* Lift badges higher in headings */
+    display: inline-block !important;
   }
   
   /* Better table cell text wrapping for mobile */

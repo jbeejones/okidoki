@@ -1,6 +1,3 @@
-# Sidebar Navigation Configuration
-
-# Main navigation items
 menu:
   - title: About OkiDoki
     document: /about.md
@@ -12,20 +9,19 @@ menu:
     document: /admonitions.md
   - title: Tabs Demo
     document: /tabs-demo.md
-
+  - title: Test API Documentation
+    document: /test-api-spec.md
 navbar:
   - title: Documentation
     document: /index.html
   - title: About
     document: /about.html
-
-# Footer links
 footer:
-  - title: "Resources"
+  - title: Resources
     items:
-      - label: "GitHub"
-        url: "https://github.com/jbeejones/okidoki"
-      - label: "Issues"
-        url: "https://github.com/jbeejones/okidoki/issues"
-      - label: "Discussions"
-        url: "https://github.com/jbeejones/okidoki/discussions"
+      - label: GitHub
+        url: https://github.com/jbeejones/okidoki
+      - label: Issues
+        url: https://github.com/jbeejones/okidoki/issues
+      - label: Discussions
+        url: https://github.com/jbeejones/okidoki/discussions
