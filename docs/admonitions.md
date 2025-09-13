@@ -30,6 +30,42 @@ This is a **warning** alert. Use it to highlight potential issues.
 This is an **error** alert. Use it for critical warnings and errors.
 {{/alert}}
 
+{{#alert "error"}}
+❌ **Error**: Critical code detected!
+
+```javascript
+console.log('Be careful with this');
+process.exit(1);
+```
+
+Please check your `code file` and ensure that your code is sanitized.
+{{/alert}}
+
+{{#alert "info"}}
+ℹ️ **Code Example**: Here's how to use the API:
+
+```bash
+curl -X GET https://api.example.com/users \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+The response will be in JSON format with user data.
+{{/alert}}
+
+{{#alert "success"}}
+✅ **Success**: Code deployed successfully!
+
+```json
+{
+  "status": "deployed",
+  "version": "1.2.3", 
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+Your application is now live at `https://app.example.com`
+{{/alert}}
+
 {{#alert}}
 This is a **neutral** alert. Default alert without type specified.
 {{/alert}}

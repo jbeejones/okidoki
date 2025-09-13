@@ -256,6 +256,217 @@
       outline: none !important;
     }
     
+    /* Mobile-responsive alert layout */
+    .alert-mobile-optimized {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important; /* 12px gap between icon and content */
+      padding: 1rem !important;
+      min-height: auto !important;
+    }
+    
+    .alert-icon-container {
+      flex-shrink: 0 !important;
+      flex-grow: 0 !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding-top: 0.125rem !important; /* 2px - slight offset to align with text baseline */
+    }
+    
+    .alert-content-container {
+      flex: 1 !important;
+      min-width: 0 !important; /* Allow shrinking below content size */
+      display: flex !important;
+      flex-direction: column !important;
+      text-align: left !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+    }
+    
+    /* Prevent word wrapping from affecting code blocks in alerts */
+    .alert-content-container pre,
+    .alert-content-container code {
+      word-wrap: normal !important;
+      overflow-wrap: normal !important;
+      white-space: pre !important;
+    }
+    
+    .alert-content-container span {
+      display: block !important;
+      width: 100% !important;
+      text-align: left !important;
+      line-height: 1.5 !important;
+    }
+    
+    /* Exception: Code spans should remain inline */
+    .alert-content-container pre code span,
+    .alert-content-container code span {
+      display: inline !important;
+      width: auto !important;
+    }
+    
+    /* Code blocks inside alerts */
+    .alert-mobile-optimized pre {
+      margin: 0.5rem 0 !important;
+      padding: 0.75rem !important;
+      background-color: #1f2937 !important; /* Solid dark background for good contrast */
+      color: #f8fafc !important; /* Light text for contrast */
+      border-radius: 0.375rem !important;
+      overflow-x: auto !important;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo, monospace !important;
+      font-size: 0.875rem !important;
+      line-height: 1.45 !important;
+      white-space: pre !important;
+      word-wrap: normal !important;
+      overflow-wrap: normal !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Ensure code elements inside pre blocks preserve formatting */
+    .alert-mobile-optimized pre code {
+      white-space: pre !important;
+      word-wrap: normal !important;
+      overflow-wrap: normal !important;
+    }
+    
+    /* Dark mode code blocks in alerts */
+    [data-theme="forest"] .alert-mobile-optimized pre {
+      background-color: #0f172a !important; /* Even darker for dark theme */
+      color: #e2e8f0 !important;
+    }
+    
+    /* Inline code in alerts */
+    .alert-mobile-optimized code:not(pre code) {
+      background-color: #374151 !important; /* Solid background for visibility */
+      color: #f9fafb !important; /* Light text */
+      padding: 0.2em 0.4em !important;
+      border-radius: 0.25rem !important;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo, monospace !important;
+      font-size: 0.875em !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Dark mode inline code in alerts */
+    [data-theme="forest"] .alert-mobile-optimized code:not(pre code) {
+      background-color: #1f2937 !important;
+      color: #f1f5f9 !important;
+    }
+    
+    /* Ensure code blocks don't inherit alert text colors */
+    .alert-mobile-optimized pre code {
+      background-color: transparent !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      font-size: inherit !important;
+      color: inherit !important;
+    }
+    
+    /* Fix highlight.js styling in alerts */
+    .alert-mobile-optimized .hljs {
+      background: transparent !important;
+      line-height: 1.45 !important;
+      color: inherit !important; /* Use parent color */
+    }
+    
+    /* Ensure syntax highlighting colors are visible on dark backgrounds */
+    .alert-mobile-optimized .hljs-string {
+      color: #10b981 !important; /* Green for strings */
+    }
+    
+    .alert-mobile-optimized .hljs-number {
+      color: #f59e0b !important; /* Amber for numbers */
+    }
+    
+    .alert-mobile-optimized .hljs-title.function_ {
+      color: #3b82f6 !important; /* Blue for functions */
+    }
+    
+    .alert-mobile-optimized .hljs-variable.language_ {
+      color: #ef4444 !important; /* Red for language variables */
+    }
+    
+    .alert-mobile-optimized .hljs-keyword {
+      color: #8b5cf6 !important; /* Purple for keywords */
+    }
+    
+    /* Critical fix: Ensure all syntax highlighting spans stay inline */
+    .alert-mobile-optimized pre code span,
+    .alert-mobile-optimized pre code .hljs-string,
+    .alert-mobile-optimized pre code .hljs-number,
+    .alert-mobile-optimized pre code .hljs-title,
+    .alert-mobile-optimized pre code .hljs-variable,
+    .alert-mobile-optimized pre code .hljs-keyword {
+      display: inline !important;
+      white-space: pre !important;
+      word-wrap: normal !important;
+      overflow-wrap: normal !important;
+    }
+    
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+      .alert-mobile-optimized {
+        padding: 0.75rem !important;
+        gap: 0.5rem !important; /* Smaller gap on mobile */
+      }
+      
+      /* Ensure proper text wrapping on mobile - no height restrictions */
+      .alert-content-container span,
+      .alert-content-container p,
+      .alert-content-container li {
+        word-break: break-word !important;
+        hyphens: auto !important;
+      }
+      
+      /* Mobile code blocks in alerts */
+      .alert-mobile-optimized pre {
+        font-size: 0.8rem !important; /* Smaller on mobile */
+        padding: 0.5rem !important; /* Less padding on mobile */
+        margin: 0.375rem 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important; /* Smooth horizontal scrolling */
+        /* Keep solid backgrounds for mobile too */
+        background-color: #1f2937 !important;
+        color: #f8fafc !important;
+        /* Preserve code formatting on mobile */
+        white-space: pre !important;
+        word-wrap: normal !important;
+        overflow-wrap: normal !important;
+      }
+      
+      [data-theme="forest"] .alert-mobile-optimized pre {
+        background-color: #0f172a !important;
+        color: #e2e8f0 !important;
+      }
+      
+      /* Ensure mobile code elements preserve formatting */
+      .alert-mobile-optimized pre code {
+        white-space: pre !important;
+        word-wrap: normal !important;
+        overflow-wrap: normal !important;
+      }
+      
+      .alert-mobile-optimized code:not(pre code) {
+        font-size: 0.8em !important; /* Smaller inline code on mobile */
+      }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 480px) {
+      .alert-mobile-optimized {
+        padding: 0.5rem !important;
+        gap: 0.375rem !important; /* Even smaller gap on very small screens */
+      }
+      
+      .alert-icon-container svg {
+        width: 1.25rem !important; /* 20px - smaller icon on very small screens */
+        height: 1.25rem !important;
+      }
+    }
+    
     [data-theme="{{settings.site.theme.dark}}"] .search-highlight {
       background-color: #ca8a04 !important; /* yellow-600 for dark mode */
       color: #fefce8 !important; /* yellow-50 for dark mode contrast */
