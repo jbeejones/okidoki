@@ -574,6 +574,39 @@
     .navbar .font-bold {
       font-size: 1rem !important; /* text-base for logo/title */
     }
+    
+    /* Page navigation - sticky positioning for desktop right column */
+    .page-nav-container {
+      position: sticky;
+      top: 5rem; /* Account for navbar height */
+    }
+    
+    /* Mobile dropdown arrow rotation */
+    details[open] summary svg {
+      transform: rotate(180deg);
+    }
+    
+    /* Remove default marker from summary */
+    summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    summary::marker {
+      display: none;
+    }
+    
+    /* Responsive breakpoints for page navigation */
+    /* Mobile dropdown: < 1024px (lg), Desktop sidebar: >= 1024px (lg) */
+    
+    /* Hide fixed navigation on mobile/tablet and make content full width */
+    @media (max-width: 1023px) {
+      .desktop-nav-fixed {
+        display: none !important;
+      }
+      .flex-nav-container {
+        display: block !important;
+      }
+    }
   </style>
   <script>
     // Define themes for light and dark modes

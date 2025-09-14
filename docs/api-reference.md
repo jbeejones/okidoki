@@ -1,6 +1,7 @@
 ---
 title: Test API Documentation
 description: Comprehensive API documentation demonstrating OpenAPI to Markdown conversion with DaisyUI badges
+pagenav: true
 ---
 
 # OkiOki Test API

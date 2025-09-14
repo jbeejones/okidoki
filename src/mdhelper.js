@@ -239,7 +239,38 @@ const md = markdownit({
     }
 });
 
-md.use(markdownItAnchor, { slugify: s => slugify(s) })
+// Custom slugify function that processes Handlebars helpers
+function createSlug(text, handlebarsInstance = null) {
+  let processedText = text;
+  
+  // Process Handlebars helpers if present
+  if (handlebarsInstance && text.includes('{{')) {
+    try {
+      const template = handlebarsInstance.compile(text);
+      const renderedContent = template({});
+      // Strip HTML tags from rendered content for clean slug
+      processedText = renderedContent.replace(/<[^>]*>/g, '');
+    } catch (error) {
+      // If Handlebars processing fails, use original text
+      console.warn('Failed to process Handlebars in heading for slug:', text, error.message);
+    }
+  }
+  
+  return slugify(processedText);
+}
+
+md.use(markdownItAnchor, { 
+  slugify: (s) => {
+    // For markdown-it-anchor, create consistent slugs
+    // At this point, Handlebars helpers should already be processed in the HTML
+    // But if they're still present, strip them for consistency
+    let cleanText = s;
+    if (s.includes('{{')) {
+      cleanText = s.replace(/\{\{[^}]+\}\}/g, '').trim();
+    }
+    return slugify(cleanText || s);
+  }
+})
 md.use(markdownItImsize)
 
 // Register tabs functionality
@@ -333,9 +364,65 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
 registerTabs(md, handlebarsInstance);
 
 
-function extractHeadings(markdown) {
+// Extract headings from final HTML (after all processing)
+function extractHeadingsFromHTML(html) {
+  const toc = [];
+  let currentH1 = null;
+  let currentH2 = null;
+
+  // Parse HTML to find headings with their IDs
+  const headingRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[1-6]>/gi;
+  let match;
+
+  while ((match = headingRegex.exec(html)) !== null) {
+    const level = parseInt(match[1], 10);
+    const slug = match[2];
+    const htmlContent = match[3];
+    
+    // Strip HTML tags from title for clean text
+    const title = htmlContent.replace(/<[^>]*>/g, '').trim();
+
+    const node = {
+      level,
+      title,
+      slug,
+      children: []
+    };
+
+    if (level === 1) {
+      toc.push(node);
+      currentH1 = node;
+      currentH2 = null;
+    } else if (level === 2 && currentH1) {
+      currentH1.children.push(node);
+      currentH2 = node;
+    } else if (level === 3 && currentH2) {
+      currentH2.children.push(node);
+    } else if (level >= 4 && currentH2) {
+      // Add H4+ headings to the last H3 if available, or to the H2
+      const targetParent = currentH2.children.length > 0 ? currentH2.children[currentH2.children.length - 1] : currentH2;
+      if (!targetParent.children) {
+        targetParent.children = [];
+      }
+      targetParent.children.push(node);
+    } else if (level === 2 && !currentH1) {
+      // Handle H2 without H1 parent
+      toc.push(node);
+      currentH2 = node;
+    } else if (level === 3 && !currentH2 && !currentH1) {
+      // Handle H3 without parents
+      toc.push(node);
+    }
+  }
+
+  return toc;
+}
+
+function extractHeadings(markdown, handlebarsTemplate = null) {
   const tokens = md.parse(markdown, {});
   const toc = [];
+
+  // Process heading tokens to build table of contents
 
   let currentH1 = null;
   let currentH2 = null;
@@ -346,12 +433,27 @@ function extractHeadings(markdown) {
     if (token.type === 'heading_open') {
       const level = parseInt(token.tag.slice(1), 10); // h1 => 1, h2 => 2, etc.
       const titleToken = tokens[i + 1];
-      const content = titleToken.content;
-      const slug = slugify(content);
+      let content = titleToken ? titleToken.content : 'NO_CONTENT';
+      let cleanTitle = content;
+      
+      // Process Handlebars helpers in heading content for title
+      if (handlebarsTemplate && content.includes('{{')) {
+        try {
+          const template = handlebarsTemplate.compile(content);
+          const renderedContent = template({});
+          // Strip HTML tags from rendered content for clean title
+          cleanTitle = renderedContent.replace(/<[^>]*>/g, '');
+        } catch (error) {
+          // If Handlebars processing fails, use original content
+          console.warn('Failed to process Handlebars in heading:', content, error.message);
+        }
+      }
+      
+      const slug = createSlug(content, handlebarsTemplate);
 
       const node = {
         level,
-        title: content,
+        title: cleanTitle,
         slug,
         children: []
       };
@@ -365,6 +467,13 @@ function extractHeadings(markdown) {
         currentH2 = node;
       } else if (level === 3 && currentH2) {
         currentH2.children.push(node);
+      } else if (level >= 4 && currentH2) {
+        // Add H4+ headings to the last H3 if available, or to the H2
+        const targetParent = currentH2.children.length > 0 ? currentH2.children[currentH2.children.length - 1] : currentH2;
+        if (!targetParent.children) {
+          targetParent.children = [];
+        }
+        targetParent.children.push(node);
       }
     }
   }
@@ -398,10 +507,10 @@ async function parseMarkdown(markdownContent, filename = null) {
     }
     props = { ...settings, ...settings.globals, ...props, okidoki_version: packageVersion, version: packageVersion };
 
-    // Build mappedProps for Handlebars context
+    // Build mappedProps for Handlebars context (extract headings after HTML generation)
     const mappedProps = { };
     
-    // Properties that should NOT be auto-linked (preserve as raw strings)
+
     const rawProperties = ['api_base_url', 'base_url', 'url', 'api_url', 'endpoint', 'path', 'link', 'href'];
     
     for (const [key, value] of Object.entries(props)) {
@@ -427,6 +536,7 @@ async function parseMarkdown(markdownContent, filename = null) {
         }
     }
     logger.log(`mappedProps: ${JSON.stringify(mappedProps, null, 2)}`);
+    
     //console.log('headings', JSON.stringify(extractHeadings(markdownBody), null, 2));
     
     // Parse the markdown content
@@ -482,12 +592,21 @@ async function parseMarkdown(markdownContent, filename = null) {
                 global.okidokiIncludes.clear();
             }
             
+            // Extract headings from final HTML for navigation
+            const headings = extractHeadingsFromHTML(html);
+            mappedProps.headings = headings;
+            
             return { props: mappedProps, md: markdownBody, html };
         } catch (error) {
             const fileContext = filename ? ` in file: ${filename}` : '';
             console.error(`Handlebars compilation error${fileContext}:`, error);
             // Fall back to non-handlebars processing
             const html = md.render(markdownBody, { baseUrl: settings.site.baseUrl || '/' });
+            
+            // Extract headings from final HTML for navigation
+            const headings = extractHeadingsFromHTML(html);
+            mappedProps.headings = headings;
+            
             return { props: mappedProps, md: markdownBody, html };
         }
     } else {
@@ -518,6 +637,10 @@ async function parseMarkdown(markdownContent, filename = null) {
                 <pre id="${copyId}"><code${codeAttrs}>${codeContent}</code></pre>
             </div>`;
         });
+        
+        // Extract headings from final HTML for navigation
+        const headings = extractHeadingsFromHTML(html);
+        mappedProps.headings = headings;
         
         return { props: mappedProps, md: markdownBody, html };
     }
@@ -554,12 +677,64 @@ function renderPage(templateName, { props, html, page, id }) {
     const sidebarItem = findSidebarConfig(sidebars.menu, page.path) || 
                        findSidebarConfig(sidebars.navbar, page.path);
 
+    // Process pagenav configuration
+    const pagenavConfig = props.pagenav || (sidebarItem && sidebarItem.pagenav) || false;
+    let pageNavigation = null;
+    
+    if (pagenavConfig && props.headings && props.headings.length > 0) {
+        // Determine max levels to show (default to 2 for h2,h3)
+        let maxLevels = 2;
+        if (typeof pagenavConfig === 'object' && pagenavConfig.levels) {
+            maxLevels = pagenavConfig.levels;
+        }
+        
+        // Extract h2+ headings from the tree structure (skip h1 roots)
+        const extractPageNavigation = (headings, maxLevel = maxLevels + 1) => {
+            const result = [];
+            
+            for (const heading of headings) {
+                if (heading.level === 1) {
+                    // For h1 headings, extract their children (h2+)
+                    if (heading.children && heading.children.length > 0) {
+                        for (const child of heading.children) {
+                            if (child.level <= maxLevel) {
+                                result.push({
+                                    ...child,
+                                    children: filterByLevel(child.children || [], child.level + 1, maxLevel)
+                                });
+                            }
+                        }
+                    }
+                } else if (heading.level >= 2 && heading.level <= maxLevel) {
+                    // For h2+ headings at root level
+                    result.push({
+                        ...heading,
+                        children: filterByLevel(heading.children || [], heading.level + 1, maxLevel)
+                    });
+                }
+            }
+            
+            return result;
+        };
+        
+        const filterByLevel = (headings, minLevel, maxLevel) => {
+            return headings.filter(h => h.level >= minLevel && h.level <= maxLevel)
+                          .map(h => ({
+                              ...h,
+                              children: filterByLevel(h.children || [], h.level + 1, maxLevel)
+                          }));
+        };
+        
+        pageNavigation = extractPageNavigation(props.headings);
+    }
+
     // Determine layout configuration from frontmatter and/or sidebar config
     const layoutConfig = {
         hideMenu: props.hideMenu || props.hideSidebar || (sidebarItem && sidebarItem.hideMenu) || false,
         hideBreadcrumbs: props.hideBreadcrumbs || (sidebarItem && sidebarItem.hideBreadcrumbs) || false,
         hideFooter: props.hideFooter || (sidebarItem && sidebarItem.hideFooter) || false,
-        fullWidth: props.fullWidth || props.hideMenu || props.hideSidebar || (sidebarItem && (sidebarItem.fullWidth || sidebarItem.hideMenu)) || false
+        fullWidth: props.fullWidth || props.hideMenu || props.hideSidebar || (sidebarItem && (sidebarItem.fullWidth || sidebarItem.hideMenu)) || false,
+        pagenav: !!pagenavConfig
     };
 
     const pageData = {
@@ -578,7 +753,8 @@ function renderPage(templateName, { props, html, page, id }) {
         html,
         props,
         page,
-        layout: layoutConfig
+        layout: layoutConfig,
+        pageNavigation: pageNavigation
     };
     //logger.log(`pageData: ${JSON.stringify({...pageData}, null, 2)}`);
     // First render the content
