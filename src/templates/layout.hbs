@@ -606,6 +606,26 @@
       .flex-nav-container {
         display: block !important;
       }
+      /* Ensure copy buttons don't interfere with mobile navigation */
+      .copy-button {
+        z-index: 1 !important;
+      }
+    }
+    
+    /* Ensure mobile dropdown has higher z-index than copy buttons */
+    .dropdown-content {
+      z-index: 9999 !important;
+    }
+    
+    /* Prevent copy buttons from appearing above navigation */
+    .copy-button {
+      z-index: 10 !important;
+    }
+    
+    /* Ensure navigation has priority over copy buttons */
+    .lg\\:hidden .dropdown-content {
+      z-index: 10000 !important;
+      position: relative;
     }
   </style>
   <script>

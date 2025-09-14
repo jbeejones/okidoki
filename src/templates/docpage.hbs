@@ -14,7 +14,7 @@
     {{#if layout.pagenav}}
     <!-- Mobile dropdown navigation -->
     {{#if pageNavigation}}
-    <div class="lg:hidden mb-6">
+    <div class="lg:hidden mb-6 relative z-50">
       <div class="dropdown dropdown-bottom w-full">
         <details class="w-full">
           <summary class="btn btn-outline w-full justify-between list-none">
@@ -23,7 +23,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </summary>
-          <div class="dropdown-content z-[1] bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1">
+          <div class="dropdown-content z-[9999] bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1">
             <ul class="menu menu-sm p-2">
               {{#each pageNavigation}}
                 <li>

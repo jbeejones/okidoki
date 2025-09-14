@@ -21,6 +21,11 @@ const md = markdownit({
 
 
 
+/**
+ * Register all built-in Handlebars helpers with the given instance
+ * @param {Object} handlebarsInstance - The Handlebars instance to register helpers with
+ * @param {Object} settings - Optional settings object for plugin loading
+ */
 async function registerHelpers(handlebarsInstance, settings = null) {
     // Register the equals Handlebars helper
     handlebarsInstance.registerHelper('eq', function (a, b, options) {
@@ -342,7 +347,11 @@ async function registerHelpers(handlebarsInstance, settings = null) {
     }
 }
 
-// Plugin loading system
+/**
+ * Load and register custom plugins from the plugins directory
+ * @param {Object} handlebarsInstance - The Handlebars instance to register plugins with
+ * @param {Object} settings - Settings object containing plugin configuration
+ */
 async function loadPlugins(handlebarsInstance, settings) {
     try {
         // Check if plugins are enabled

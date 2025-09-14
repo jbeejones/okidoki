@@ -54,6 +54,11 @@ function normalizeIndentation(content) {
   return normalizedLines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
+/**
+ * Register Handlebars helpers for creating tabbed content components
+ * @param {Object} md - Markdown-it instance (unused but kept for consistency)
+ * @param {Object} handlebarsInstance - Handlebars instance to register helpers with
+ */
 function registerTabs(md, handlebarsInstance)  {
   handlebarsInstance.registerHelper('tabs', function (options) {
     // Ensure this is called as a block helper

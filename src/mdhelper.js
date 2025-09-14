@@ -93,7 +93,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
         }
     };
 
-    // Deep merge function
+    // Deep merge function to recursively merge configuration objects
     function deepMerge(target, source) {
         const result = { ...target };
         for (const key in source) {
@@ -223,6 +223,11 @@ const templates = {
     docpage: handlebarsInstance.compile(docpageTemplate)
 };
 
+// Initialize Markdown-it with plugins and custom configuration
+// - html: true - enables HTML tags in source
+// - linkify: true - converts URL-like text to links
+// - typographer: true - enables language-neutral replacement + quotes beautification
+// - highlight: uses highlight.js for syntax highlighting of code blocks
 
 const md = markdownit({
     html: true,
@@ -239,6 +244,16 @@ const md = markdownit({
     }
 });
 
+// Helper function to decode HTML entities
+function decodeHTMLEntities(text) {
+  return text.replace(/&amp;/g, '&')
+             .replace(/&lt;/g, '<')
+             .replace(/&gt;/g, '>')
+             .replace(/&quot;/g, '"')
+             .replace(/&#39;/g, "'")
+             .replace(/&apos;/g, "'");
+}
+
 // Custom slugify function that processes Handlebars helpers
 function createSlug(text, handlebarsInstance = null) {
   let processedText = text;
@@ -248,8 +263,9 @@ function createSlug(text, handlebarsInstance = null) {
     try {
       const template = handlebarsInstance.compile(text);
       const renderedContent = template({});
-      // Strip HTML tags from rendered content for clean slug
+      // Strip HTML tags and decode HTML entities from rendered content for clean slug
       processedText = renderedContent.replace(/<[^>]*>/g, '');
+      processedText = decodeHTMLEntities(processedText);
     } catch (error) {
       // If Handlebars processing fails, use original text
       console.warn('Failed to process Handlebars in heading for slug:', text, error.message);
@@ -258,6 +274,9 @@ function createSlug(text, handlebarsInstance = null) {
   
   return slugify(processedText);
 }
+// Add support for image size syntax in markdown
+// Example: ![alt text](image.jpg =100x200)
+// This allows specifying width and height directly in markdown
 
 md.use(markdownItAnchor, { 
   slugify: (s) => {
@@ -276,28 +295,7 @@ md.use(markdownItImsize)
 // Register tabs functionality
 registerTabs(md, handlebarsInstance);
 
-// Custom image renderer to add baseUrl for internal images
-md.renderer.rules.image = function(tokens, idx, options, env) {
-    const token = tokens[idx];
-    const srcIndex = token.attrIndex('src');
-    
-    if (srcIndex >= 0) {
-        const src = token.attrs[srcIndex][1];
-        const baseUrl = env && env.baseUrl ? env.baseUrl : '/';
-        
-        // Only prepend baseUrl to absolute paths that don't start with http
-        if (src.startsWith('/') && !src.startsWith('http') && baseUrl !== '/') {
-            const cleanBase = baseUrl.replace(/\/$/, '');
-            // Avoid double baseUrl application
-            if (!src.startsWith(cleanBase)) {
-                token.attrs[srcIndex][1] = cleanBase + src;
-            }
-        }
-    }
-    
-    // Use default renderer
-    return md.renderer.renderToken(tokens, idx, options);
-};
+
 
 
 
@@ -360,10 +358,6 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
   return defaultImage(tokens, idx, options, env, self);
 };
 
-// Register tabs helper
-registerTabs(md, handlebarsInstance);
-
-
 // Extract headings from final HTML (after all processing)
 function extractHeadingsFromHTML(html) {
   const toc = [];
@@ -379,8 +373,9 @@ function extractHeadingsFromHTML(html) {
     const slug = match[2];
     const htmlContent = match[3];
     
-    // Strip HTML tags from title for clean text
-    const title = htmlContent.replace(/<[^>]*>/g, '').trim();
+    // Strip HTML tags and decode HTML entities for clean text
+    let title = htmlContent.replace(/<[^>]*>/g, '').trim();
+    title = decodeHTMLEntities(title);
 
     const node = {
       level,
@@ -418,6 +413,12 @@ function extractHeadingsFromHTML(html) {
   return toc;
 }
 
+/**
+ * Extract headings from markdown tokens to build table of contents
+ * @param {string} markdown - The markdown content to parse
+ * @param {Object} handlebarsTemplate - Optional Handlebars instance for processing helpers
+ * @returns {Array} Hierarchical array of heading objects with title, slug, level, and children
+ */
 function extractHeadings(markdown, handlebarsTemplate = null) {
   const tokens = md.parse(markdown, {});
   const toc = [];
@@ -441,8 +442,9 @@ function extractHeadings(markdown, handlebarsTemplate = null) {
         try {
           const template = handlebarsTemplate.compile(content);
           const renderedContent = template({});
-          // Strip HTML tags from rendered content for clean title
+          // Strip HTML tags and decode HTML entities from rendered content for clean title
           cleanTitle = renderedContent.replace(/<[^>]*>/g, '');
+          cleanTitle = decodeHTMLEntities(cleanTitle);
         } catch (error) {
           // If Handlebars processing fails, use original content
           console.warn('Failed to process Handlebars in heading:', content, error.message);
@@ -646,6 +648,12 @@ async function parseMarkdown(markdownContent, filename = null) {
     }
 }
 
+/**
+ * Render a complete page using templates and configuration
+ * @param {string} templateName - The template to use for rendering
+ * @param {Object} data - Object containing props, html, page, and id
+ * @returns {string} The rendered HTML page
+ */
 function renderPage(templateName, { props, html, page, id }) {
     const { settings, sidebars } = loadConfig();
     const baseUrl = settings.site.baseUrl || '/';
@@ -658,7 +666,7 @@ function renderPage(templateName, { props, html, page, id }) {
     const transformedFooter = transformSidebarItems(sidebars.footer, baseUrl);
     //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
     //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
-    // Find sidebar configuration for current page
+    // Find sidebar configuration for current page by recursively searching menu items
     const findSidebarConfig = (items, currentPath) => {
         if (!items) return null;
         for (const item of items) {
@@ -688,7 +696,7 @@ function renderPage(templateName, { props, html, page, id }) {
             maxLevels = pagenavConfig.levels;
         }
         
-        // Extract h2+ headings from the tree structure (skip h1 roots)
+        // Extract h2+ headings from the tree structure for page navigation (skip h1 roots)
         const extractPageNavigation = (headings, maxLevel = maxLevels + 1) => {
             const result = [];
             
@@ -717,6 +725,7 @@ function renderPage(templateName, { props, html, page, id }) {
             return result;
         };
         
+        // Filter headings by level range and recursively process their children
         const filterByLevel = (headings, minLevel, maxLevel) => {
             return headings.filter(h => h.level >= minLevel && h.level <= maxLevel)
                           .map(h => ({

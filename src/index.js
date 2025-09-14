@@ -23,7 +23,12 @@ const packageDir = path.dirname(path.dirname(__filename));
 
 
 
-// Function to copy directory recursively
+/**
+ * Copy directory recursively with file filtering options
+ * @param {string} src - Source directory path
+ * @param {string} dest - Destination directory path
+ * @param {Object} options - Copy options with exclude patterns
+ */
 function copyDir(src, dest, options = {}) {
     logger.log(`Copying directory from ${src} to ${dest}`);
     
@@ -54,6 +59,12 @@ function copyDir(src, dest, options = {}) {
 // global variable to store the document id
 let docID = 0;
 
+/**
+ * Recursively read and process all markdown documents from a directory
+ * @param {string} dir - Directory to scan for markdown files (default: 'docs')
+ * @param {boolean} resetId - Whether to reset document ID counter (default: true)
+ * @returns {Array} Array of processed document objects
+ */
 async function readMarkdownDocs(dir = 'docs', resetId = true) {
     const results = [];
     
@@ -105,7 +116,11 @@ async function readMarkdownDocs(dir = 'docs', resetId = true) {
 }
 
 
-// Helper function to generate a fallback title for documents
+/**
+ * Generate a fallback title for documents that don't have one in frontmatter
+ * @param {Object} doc - Document object with props and path information
+ * @returns {string} Generated title from various fallback strategies
+ */
 function generateFallbackTitle(doc) {
     // 1. Try frontmatter title first
     if (doc.props.title) {
@@ -142,7 +157,11 @@ function generateFallbackTitle(doc) {
     return 'Untitled';
 }
 
-// Create lunr search index
+/**
+ * Create Lunr.js search index from processed documents
+ * @param {Array} documents - Array of processed document objects
+ * @returns {Object} Object containing search index and metadata
+ */
 function createSearchIndex(documents) {
     const { settings, sidebars } = loadConfig();
     const searchDocs = [];
@@ -471,6 +490,10 @@ function minifyHtml(html) {
     return html;
 }
 
+/**
+ * Initialize a new documentation project with default configuration and assets
+ * @param {Object} argv - Command line arguments from yargs
+ */
 async function initCommand(argv) {
     const { dev, config: configPath = 'okidoki.yaml', sidebars: sidebarsPath = 'sidebars.yaml' } = argv;
     logger.info('Initializing documentation project...');
@@ -650,6 +673,10 @@ footer:
     }
 }
 
+/**
+ * Generate static documentation website from markdown files
+ * @param {Object} argv - Command line arguments containing source, output, config options
+ */
 async function generateCommand(argv) {
     const { source, verbose, config, sidebars: sidebarsPath } = argv;
     logger.setVerbose(verbose);
@@ -823,6 +850,10 @@ async function generateCommand(argv) {
     }
 }
 
+/**
+ * Convert OpenAPI specification to markdown documentation
+ * @param {Object} argv - Command line arguments containing input file, output options, etc.
+ */
 async function openapiCommand(argv) {
     const { input, output, title, description, docs, sidebars: sidebarsPath, config } = argv;
     

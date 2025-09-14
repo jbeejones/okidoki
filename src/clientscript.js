@@ -1,6 +1,10 @@
 import lunr from 'lunr';
 
-// Helper function to escape HTML attributes
+/**
+ * Escape HTML attributes to prevent XSS attacks
+ * @param {string} unsafe - The unsafe string to escape
+ * @returns {string} HTML-escaped string
+ */
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
     return unsafe
@@ -11,7 +15,11 @@ function escapeHtml(unsafe) {
         .replace(/'/g, "&#039;");
 }
 
-// Helper function to build URLs with baseUrl
+/**
+ * Build URLs with proper baseUrl prefix for internal links
+ * @param {string} path - The path to build URL for
+ * @returns {string} Complete URL with baseUrl prefix
+ */
 function buildUrl(path) {
     const baseUrl = document.documentElement.getAttribute('data-base-url') || '/';
     
@@ -235,7 +243,10 @@ function showCachedSearchResults(query, results) {
     updateSearchResults('search-results-mobile-navbar', query, results);
 }
 
-// Initialize search functionality with localStorage caching
+/**
+ * Initialize search functionality with localStorage caching
+ * @returns {Promise} Promise that resolves when search is initialized
+ */
 async function initializeSearch() {
     try {
         console.log('🔍 Initializing search...');
