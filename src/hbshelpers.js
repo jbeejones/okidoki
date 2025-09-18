@@ -341,6 +341,28 @@ async function registerHelpers(handlebarsInstance, settings = null) {
         }
     });
 
+         handlebarsInstance.registerHelper('youtube', function(videoId, options) {
+         const width = options.hash.width || '560';
+         const height = options.hash.height || '315';
+         const startTime = options.hash.t || options.hash.start;
+         const title = options.hash.title || 'YouTube video player';
+         
+         let src = `https://www.youtube.com/embed/${videoId}`;
+         if (startTime) {
+             src += `?start=${startTime}`;
+         }
+         
+         const html = `<iframe width="${width}" height="${height}" 
+             src="${src}" 
+             title="${title}"
+             frameborder="0" 
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+             referrerpolicy="strict-origin-when-cross-origin" 
+             allowfullscreen></iframe>`;
+             
+         return new handlebarsInstance.SafeString(html);
+     });
+
     // Load and register custom plugins
     if (settings) {
         await loadPlugins(handlebarsInstance, settings);
