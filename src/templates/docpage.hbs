@@ -16,39 +16,35 @@
     {{#if pageNavigation}}
     <div class="lg:hidden mb-6 relative z-50">
       <div class="dropdown dropdown-bottom w-full">
-        <details class="w-full">
-          <summary class="btn btn-outline w-full justify-between list-none">
-            <span class="text-sm font-semibold uppercase tracking-wide">On This Page</span>
-            <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </summary>
-          <div class="dropdown-content z-[9999] bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1">
-            <ul class="menu menu-sm p-2">
-              {{#each pageNavigation}}
+        <div tabindex="0" role="button" class="btn btn-outline w-full justify-between">
+          <span class="text-sm font-semibold uppercase tracking-wide">On This Page</span>
+          <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1 p-2 z-[9999]">
+          {{#each pageNavigation}}
+            <li>
+              <a href="#{{this.slug}}">{{this.title}}</a>
+              {{#if this.children}}
+              <ul>
+                {{#each this.children}}
                 <li>
-                  <a href="#{{this.slug}}" onclick="this.closest('details').removeAttribute('open')">{{this.title}}</a>
+                  <a href="#{{this.slug}}">{{this.title}}</a>
                   {{#if this.children}}
                   <ul>
                     {{#each this.children}}
-                    <li>
-                      <a href="#{{this.slug}}" onclick="this.closest('details').removeAttribute('open')">{{this.title}}</a>
-                      {{#if this.children}}
-                      <ul>
-                        {{#each this.children}}
-                        <li><a href="#{{this.slug}}" onclick="this.closest('details').removeAttribute('open')">{{this.title}}</a></li>
-                        {{/each}}
-                      </ul>
-                      {{/if}}
-                    </li>
+                    <li><a href="#{{this.slug}}">{{this.title}}</a></li>
                     {{/each}}
                   </ul>
                   {{/if}}
                 </li>
-              {{/each}}
-            </ul>
-          </div>
-        </details>
+                {{/each}}
+              </ul>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
       </div>
     </div>
     {{/if}}

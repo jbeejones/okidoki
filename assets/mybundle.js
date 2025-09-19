@@ -2298,7 +2298,92 @@
       console.warn("Highlighting initialization failed:", error);
     }
   }
+  console.log("\u{1F680} OkiDoki clientscript.js is loading...");
+  window.basicDebug = function() {
+    console.log("\u2705 Basic debug function is working!");
+    console.log("User agent:", navigator.userAgent);
+    console.log("Page title:", document.title);
+    console.log("Mobile nav details element:", document.querySelector(".mobile-nav-details"));
+    console.log("Mobile nav links:", document.querySelectorAll(".mobile-nav-link"));
+    return "Debug function executed successfully";
+  };
+  window.basicDebug();
+  window.debugMobileNavigation = function() {
+    console.log("=== MANUAL MOBILE NAV DEBUG ===");
+    const allNavLinks = document.querySelectorAll(".mobile-nav-link");
+    console.log("Total mobile nav links found:", allNavLinks.length);
+    if (allNavLinks.length === 0) {
+      console.log("\u274C No mobile nav links found! Check if page has navigation.");
+      const anyLinks = document.querySelectorAll('a[href^="#"]');
+      console.log("Total anchor links found:", anyLinks.length);
+      const dropdown = document.querySelector(".mobile-nav-details");
+      console.log("Dropdown element:", dropdown);
+      if (dropdown) {
+        console.log("Dropdown HTML:", dropdown.innerHTML.substring(0, 500) + "...");
+      }
+      return;
+    }
+    allNavLinks.forEach((link, index) => {
+      const href = link.getAttribute("href");
+      const targetId = href ? href.substring(1) : null;
+      const targetElement = targetId ? document.getElementById(targetId) : null;
+      console.log(`Link ${index + 1}:`);
+      console.log(`  - Href: ${href}`);
+      console.log(`  - Target ID: ${targetId}`);
+      console.log(`  - Target exists: ${!!targetElement}`);
+      if (targetElement) {
+        console.log(`  - Target element: <${targetElement.tagName.toLowerCase()}>`);
+        try {
+          console.log(`  - Target position:`, targetElement.getBoundingClientRect());
+        } catch (e) {
+          console.log(`  - Could not get position:`, e.message);
+        }
+      }
+    });
+    const firstLink = allNavLinks[0];
+    if (firstLink) {
+      const href = firstLink.getAttribute("href");
+      const targetId = href.substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        console.log("\u{1F9EA} Testing manual scroll to first element...");
+        try {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+          setTimeout(() => {
+            console.log("\u2705 Manual scroll test completed");
+          }, 1e3);
+        } catch (e) {
+          console.log("\u274C Scroll test failed:", e.message);
+        }
+      }
+    }
+  };
+  window.testMobileScrollTo = function(targetId) {
+    console.log("Testing scroll to:", targetId);
+    const element = document.getElementById(targetId);
+    if (element) {
+      console.log("Element found, scrolling...");
+      try {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        console.log("Scroll command executed");
+      } catch (e) {
+        console.log("\u274C Scroll failed:", e.message);
+      }
+    } else {
+      console.log("\u274C Element not found:", targetId);
+      const allElementsWithId = document.querySelectorAll("[id]");
+      console.log("Available IDs on page:");
+      allElementsWithId.forEach((el) => {
+        console.log(`  - #${el.id} (${el.tagName.toLowerCase()})`);
+      });
+    }
+  };
+  console.log("\u2705 Debug functions defined globally");
   document.addEventListener("DOMContentLoaded", function() {
+    console.log("\u{1F525} DOMContentLoaded fired - initializing...");
     initializeSearch();
     checkAndApplyUrlHighlighting();
     setTimeout(() => {
