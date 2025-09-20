@@ -53,6 +53,204 @@
   <link rel="icon" type="image/png" sizes="16x16" href="{{baseUrl}}favicon-16x16.png">
   <link rel="manifest" href="{{baseUrl}}site.webmanifest">
 
+  <!-- Dark mode prose styling -->
+  <style>
+    [data-theme="{{settings.site.theme.dark}}"] .prose h1,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h2,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h3,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h4,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h5,
+    [data-theme="{{settings.site.theme.dark}}"] .prose h6 {
+      color: #e2e8f0 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose p {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose ul,
+    [data-theme="{{settings.site.theme.dark}}"] .prose ol {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose li {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose table {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose th {
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose td {
+      border-color: #475569 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose a {
+      color: #60a5fa !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose a:hover {
+      color: #93c5fd !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose strong {
+      color: #f8fafc !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose em {
+      color: #e2e8f0 !important;
+    }
+    [data-theme="{{settings.site.theme.dark}}"] .prose code {
+      color: #f8fafc !important;
+      background-color: #1e293b !important;
+      padding: 0.2em 0.4em !important;
+      border-radius: 0.25rem !important;
+    }
+    
+    /* Fix code block styling in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .prose pre {
+      background-color: #0d1117 !important;
+      color: #c9d1d9 !important;
+      line-height: 1.45 !important; /* Better line height for code */
+      border: 1px solid #30363d !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .prose pre code {
+      background-color: transparent !important;
+      color: inherit !important;
+      padding: 0 !important; /* Remove padding since pre already has it */
+      line-height: inherit !important;
+      font-size: inherit !important;
+    }
+    
+    /* Ensure highlight.js styles work properly in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .hljs {
+      background: #0d1117 !important;
+      color: #c9d1d9 !important;
+      line-height: 1.45 !important;
+    }
+    
+    /* Fix line height for code blocks in light mode too */
+    [data-theme="{{settings.site.theme.light}}"] .prose pre {
+      line-height: 1.45 !important; /* Better line height for code */
+    }
+    
+    [data-theme="{{settings.site.theme.light}}"] .prose pre code {
+      line-height: inherit !important;
+    }
+
+    /* Fix alert/admonition text colors in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .alert {
+      color: #1f2937 !important; /* Dark text for better contrast on colored backgrounds */
+    }
+
+    /* Dark mode specific alert styling */
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-warning {
+      color: #1f2937 !important; /* Dark text on yellow/amber background */
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-info {
+      color: #1f2937 !important; /* Dark text on blue background */
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-success {
+      color: #1f2937 !important; /* Dark text on green background */
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error {
+      color: #ffffff !important; /* White text on red background */
+    }
+
+    /* Improve neutral/default alert contrast in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .alert:not(.alert-warning):not(.alert-info):not(.alert-success):not(.alert-error) {
+      background-color: #374151 !important; /* Darker gray background */
+      color: #f9fafb !important; /* Light text */
+      border: 1px solid #4b5563 !important; /* Subtle border */
+    }
+
+    /* Fix link colors within alerts in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .alert a {
+      color: #1f2937 !important; /* Dark links for colored alert backgrounds */
+      text-decoration: underline !important; /* Ensure links are distinguishable */
+      font-weight: 600 !important; /* Make links more prominent */
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert a:hover {
+      color: #000000 !important; /* Even darker on hover */
+      text-decoration: underline !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error a {
+      color: #ffffff !important; /* White links on red background */
+      text-decoration: underline !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error a:hover {
+      color: #e5e5e5 !important; /* Slightly dimmed white on hover */
+    }
+
+
+
+    /* Dark mode specific adjustments for markdown in alerts */
+    [data-theme="{{settings.site.theme.dark}}"] .alert code {
+      background-color: rgba(0, 0, 0, 0.3) !important;
+      color: #000000 !important; /* Black text for better contrast on colored backgrounds in dark mode */
+      font-weight: 600 !important; /* Bolder for better visibility */
+    }
+
+    [data-theme="{{settings.site.theme.dark}}"] .alert pre {
+      background-color: rgba(0, 0, 0, 0.2) !important;
+      border-color: rgba(0, 0, 0, 0.3) !important;
+    }
+
+    [data-theme="{{settings.site.theme.dark}}"] .alert pre code {
+      color: #000000 !important; /* Black text for better contrast */
+      font-weight: 600 !important;
+      background-color: transparent !important;
+      white-space: pre !important; /* Preserve formatting, no wrapping */
+    }
+
+    /* Error alerts in dark mode: Maintain normal code block styling */
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error pre {
+      background-color: #0d1117 !important; /* Same dark background */
+      color: #c9d1d9 !important;
+      border: 1px solid #30363d !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error pre code {
+      background-color: transparent !important;
+      color: inherit !important;
+      white-space: pre !important;
+    }
+
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error .hljs {
+      background: #0d1117 !important;
+      color: #c9d1d9 !important;
+    }
+
+    /* Inline code in error alerts for dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .alert-error code:not(pre code) {
+      background-color: rgba(0, 0, 0, 0.4) !important;
+      color: #ffffff !important;
+    }
+
+    /* Default/neutral alerts need light text in dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .alert:not(.alert-warning):not(.alert-info):not(.alert-success):not(.alert-error) code,
+    [data-theme="{{settings.site.theme.dark}}"] .alert:not(.alert-warning):not(.alert-info):not(.alert-success):not(.alert-error) pre code {
+      color: #e5e7eb !important; /* Light text for neutral/default alerts */
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      white-space: pre !important; /* Preserve formatting, no wrapping */
+    }
+
+
+
+    /* Fix admonition components if used */
+    [data-theme="{{settings.site.theme.dark}}"] .admonition {
+      color: #1f2937 !important;
+    }
+    
+    [data-theme="{{settings.site.theme.dark}}"] .admonition-title {
+      color: #1f2937 !important;
+      font-weight: 600 !important;
+    }
+  </style>
+
   <script>
     // Define themes for light and dark modes
     const lightTheme = '{{settings.site.theme.light}}';

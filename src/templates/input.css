@@ -591,4 +591,208 @@
     z-index: 10000 !important;
     position: relative;
   }
+
+  /* Alert styling and content handling */
+  .alert {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important; /* Default to horizontal layout for simple alerts */
+    align-items: center !important; /* Center align icon and text */
+    justify-content: flex-start !important;
+    text-align: left !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    min-width: 0 !important;
+    gap: 0.75rem !important; /* Gap between icon and content */
+  }
+
+  /* Switch to vertical layout when alerts contain block elements */
+  .alert pre {
+    width: 100% !important;
+    order: 2 !important; /* Move code blocks after icon/text */
+  }
+
+  /* If alert has pre, ul, ol, or table elements, switch to column layout */
+  .alert:has(pre) {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Remove default margins from first and last elements in alerts */
+  .alert > *:first-child {
+    margin-top: 0 !important;
+  }
+
+  .alert > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* More aggressive content alignment */
+  .alert,
+  .alert *,
+  .alert p,
+  .alert div,
+  .alert span {
+    text-align: left !important;
+  }
+
+  /* Word wrapping for text content, but not code blocks */
+  .alert p,
+  .alert div,
+  .alert span,
+  .alert li,
+  .alert h1,
+  .alert h2,
+  .alert h3,
+  .alert h4,
+  .alert h5,
+  .alert h6 {
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+  }
+
+  /* Override DaisyUI's flex centering for mobile */
+  @media (max-width: 768px) {
+    .alert {
+      display: block !important;
+      text-align: left !important;
+    }
+    
+    .alert > * {
+      display: block !important;
+      text-align: left !important;
+      width: 100% !important;
+    }
+  }
+
+  /* Fix markdown elements inside alerts for both light and dark modes */
+  .alert code {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    color: #1f2937 !important; /* Dark text for better contrast on colored backgrounds */
+    padding: 0.2em 0.4em !important;
+    border-radius: 0.25rem !important;
+    font-size: 0.875em !important;
+    font-weight: 500 !important;
+  }
+
+  .alert pre {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 0.375rem !important;
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    text-align: left !important; /* Ensure code blocks are left-aligned */
+    white-space: pre !important; /* Preserve formatting and allow scrolling */
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    display: block !important;
+    flex-shrink: 1 !important; /* Allow shrinking in flex container */
+  }
+
+  .alert pre code {
+    background-color: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-size: inherit !important;
+    color: #1f2937 !important; /* Dark text for better contrast */
+    font-weight: 500 !important;
+    white-space: pre !important; /* Preserve formatting, no wrapping */
+    display: inline !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  /* Default/neutral alerts in light mode */
+  .alert:not(.alert-warning):not(.alert-info):not(.alert-success):not(.alert-error) code,
+  .alert:not(.alert-warning):not(.alert-info):not(.alert-success):not(.alert-error) pre code {
+    color: #374151 !important; /* Darker text for neutral alerts in light mode */
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    white-space: pre !important; /* Preserve formatting, no wrapping */
+  }
+
+  /* Preserve syntax highlighting in non-error alerts */
+  .alert-info .hljs,
+  .alert-warning .hljs,
+  .alert-success .hljs,
+  .alert:not(.alert-error) .hljs {
+    background: rgba(0, 0, 0, 0.05) !important; /* Subtle background for code blocks */
+  }
+
+  /* Allow syntax highlighting colors in non-error alerts */
+  .alert-info [class*="hljs-"],
+  .alert-warning [class*="hljs-"],
+  .alert-success [class*="hljs-"],
+  .alert:not(.alert-error) [class*="hljs-"] {
+    /* Let syntax highlighting colors show through, but ensure readability */
+    filter: contrast(1.2) brightness(0.8) !important;
+  }
+
+  /* Error alerts: Keep normal code block styling with dark background */
+  .alert-error pre {
+    background-color: #0d1117 !important; /* Dark background for code blocks */
+    color: #c9d1d9 !important; /* Light text for code blocks */
+    border: 1px solid #30363d !important;
+    overflow-x: auto !important; /* Ensure horizontal scrolling */
+    overflow-y: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: pre !important; /* Preserve formatting and allow scrolling */
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    display: block !important;
+    flex-shrink: 1 !important; /* Allow shrinking in flex container */
+  }
+  
+  .alert-error pre code {
+    background-color: transparent !important; /* Transparent background inside pre */
+    color: inherit !important; /* Inherit from pre */
+    white-space: pre !important; /* Preserve formatting, no wrapping */
+    display: inline !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    padding: 0 !important;
+  }
+
+  /* Allow normal syntax highlighting in error alert code blocks */
+  .alert-error .hljs {
+    background: #0d1117 !important; /* Dark background for highlight.js */
+    color: #c9d1d9 !important;
+  }
+
+  /* Inline code in error alerts should be subtle but readable */
+  .alert-error code:not(pre code) {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: #ffffff !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 0.25rem !important;
+  }
+
+  /* Light mode link colors for alerts */
+  .alert a {
+    color: #1f2937 !important;
+    text-decoration: underline !important;
+    font-weight: 600 !important;
+  }
+
+  .alert a:hover {
+    color: #000000 !important;
+  }
+
+  .alert-error a {
+    color: #ffffff !important;
+  }
+
+  .alert-error a:hover {
+    color: #e5e5e5 !important;
+  }
 }
