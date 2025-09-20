@@ -116,6 +116,45 @@
         console.log('OS theme changed to:', theme, '- overriding any manual choice');
       });
     }
+
+    // Function to dynamically calculate and set sidebar height based on footer
+    function updateSidebarHeight() {
+      if (window.innerWidth >= 1024) { // Only on desktop (lg breakpoint)
+        const sidebar = document.getElementById('sidebar-menu');
+        const footer = document.querySelector('footer');
+        
+        if (sidebar && footer) {
+          const navbar = document.querySelector('.navbar');
+          const navbarHeight = navbar ? navbar.offsetHeight : 64; // fallback to 4rem
+          const footerHeight = footer.offsetHeight;
+          
+          const availableHeight = window.innerHeight - navbarHeight - footerHeight;
+          sidebar.style.height = availableHeight + 'px';
+          sidebar.style.minHeight = 'auto';
+        }
+      } else {
+        // Reset for mobile
+        const sidebar = document.getElementById('sidebar-menu');
+        if (sidebar) {
+          sidebar.style.height = '';
+          sidebar.style.minHeight = '';
+        }
+      }
+    }
+
+    // Update sidebar height on load, resize, and when content might change
+    window.addEventListener('load', updateSidebarHeight);
+    window.addEventListener('resize', updateSidebarHeight);
+    
+    // Also update when DOM changes (for dynamic footer content)
+    if (window.MutationObserver) {
+      const observer = new MutationObserver(updateSidebarHeight);
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true, 
+        attributes: false 
+      });
+    }
   </script>
 </head>
 
@@ -249,12 +288,38 @@
       <div class="{{#unless layout.fullWidth}}lg:pl-80{{/unless}}">
         {{#block "main"}}
         {{/block}}
-      </div>      
+      </div>
+      
+      {{#unless layout.hideFooter}}
+      <footer class="footer footer-center bg-base-300 text-base-content p-4">
+        {{#if footer}}
+        <div class="footer-content">
+          {{#each footer}}
+          <div class="footer-section">
+            {{#if title}}<h3 class="footer-title font-bold mb-2">{{title}}</h3>{{/if}}
+            {{#if items}}
+            <nav class="flex flex-wrap gap-4 justify-center">
+              {{#each items}}
+              <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
+              {{/each}}
+            </nav>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+        {{else}}
+        <aside>
+          <p>Copyright © {{copyright.year}} - All rights reserved by <a href="https://jbeejones.github.io/okidoki-website/index.html" class="link link-hover">OkiDoki</a></p>
+        </aside>
+        {{/if}}
+      </footer>
+      {{/unless}}
     </div>
     {{#unless layout.hideMenu}}
-    <div class="drawer-side z-50">
+    <div class="drawer-side">
       <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
-      <ul id="sidebar-menu" class="menu menu-md bg-base-100 min-h-full w-80 lg:mt-6 p-4 lg:pt-0 lg:pb-20 lg:overflow-y-auto lg:fixed lg:top-12 lg:h-[calc(100vh-3rem-4rem)]">
+      <div id="sidebar-menu" class="bg-base-100 w-80 p-4 min-h-full lg:fixed lg:left-0 lg:top-16 lg:overflow-y-auto">
+        <ul class="menu menu-md">
         <!-- Mobile menu items -->
         <div class="lg:hidden mb-4">
           {{#if settings.search.enabled}}
@@ -284,35 +349,11 @@
           {{menuNode this activeDocId=../page.path}}
         {{/each}}
         
-      </ul>
+        </ul>
+      </div>
     </div>
     {{/unless}}
   </div>
-  {{#unless layout.hideFooter}}
-  <footer class="footer footer-center text-base-content p-4">
-    {{#if footer}}
-    <div class="footer-content">
-      {{#each footer}}
-      <div class="footer-section">
-        {{#if title}}<h3 class="footer-title font-bold mb-2">{{title}}</h3>{{/if}}
-        {{#if items}}
-        <nav class="flex flex-wrap gap-4 justify-center">
-          {{#each items}}
-          <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
-          {{/each}}
-        </nav>
-        {{/if}}
-      </div>
-      {{/each}}
-    </div>
-    
-    {{else}}
-    <aside>
-      <p>This site was created with <a href="https://jbeejones.github.io/okidoki-website/index.html" class="link link-hover">OkiDoki</a> - Copyright © {{copyright.year}}</p>
-    </aside>
-    {{/if}}
-  </footer>
-  {{/unless}}
 </body>
 
 </html>
