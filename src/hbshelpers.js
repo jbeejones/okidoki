@@ -225,7 +225,7 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             case 'mobile-navbar':
                 inputId = 'search-mobile-navbar';
                 resultsId = 'search-results-mobile-navbar';
-                inputClasses = 'input input-bordered input-sm w-32';
+                inputClasses = 'input input-sm w-32';
                 resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto';
                 containerClasses = 'dropdown dropdown-end';
                 break;
@@ -233,7 +233,7 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             case 'mobile-sidebar':
                 inputId = 'search-mobile';
                 resultsId = 'search-results-mobile';
-                inputClasses = 'input input-bordered w-full mb-4';
+                inputClasses = 'input w-full mb-4';
                 resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-full p-2 shadow hidden max-h-96 overflow-y-auto';
                 containerClasses = 'dropdown dropdown-top w-full';
                 break;
@@ -242,7 +242,7 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             default:
                 inputId = 'search-desktop';
                 resultsId = 'search-results';
-                inputClasses = `input input-bordered ${width === 'auto' ? 'w-24 md:w-auto' : width}`;
+                inputClasses = `input ${width === 'auto' ? 'w-24 md:w-auto' : width}`;
                 resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-96 p-2 shadow hidden max-h-96 overflow-y-auto';
                 containerClasses = 'dropdown dropdown-end';
                 break;

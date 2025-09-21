@@ -115,7 +115,7 @@ Write the search HTML manually:
         id="search-desktop" 
         type="text" 
         placeholder="Search documentation..." 
-        class="input input-bordered w-24 md:w-auto" 
+        class="input w-24 md:w-auto" 
         tabindex="0"
         oninput="handleSearch(this.value)" 
     />

@@ -1208,13 +1208,20 @@ function setupSearchResultInteractions(container, query) {
     
     // Keyboard handler - attach to the input element
     const keyboardHandler = (e) => {
-        // Only handle if this container is visible and input is focused
+        // Exit immediately if not a navigation key - don't interfere with normal typing
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter' && e.key !== 'Escape') {
+            return; // Let browser handle all other keys normally
+        }
+        
+        // Only handle navigation keys when results are visible and input is focused
         if (!container.classList.contains('hidden') && document.activeElement === inputElement) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 e.stopPropagation();
                 if (selectedIndex < items.length - 1) {
                     selectItem(selectedIndex + 1);
+                } else if (selectedIndex === -1 && items.length > 0) {
+                    selectItem(0);
                 }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
@@ -1316,14 +1323,14 @@ function markActiveMenuItems() {
         const isActive = isHome || normalizedPath === normalizedHref;
         
         if (isActive) {
-            item.classList.add('active');
+            item.classList.add('menu-active');
             // If the item is inside a details element, open it
             const details = item.closest('details');
             if (details) {
                 details.setAttribute('open', '');
             }
         } else {
-            item.classList.remove('active');
+            item.classList.remove('menu-active');
         }
     });
 }
@@ -1331,92 +1338,10 @@ function markActiveMenuItems() {
 // Run on page load
 document.addEventListener('DOMContentLoaded', markActiveMenuItems);
 
-// Safari-specific: Add direct keyboard handlers to search inputs and results
+// Note: Removed duplicate Safari-specific handlers that conflicted with main search navigation
 document.addEventListener('DOMContentLoaded', function() {
-    const setupSearchNavigation = (inputId, resultsId) => {
-        const input = document.getElementById(inputId);
-        const results = document.getElementById(resultsId);
-        
-        if (!input || !results) return;
-        
-        // Handle navigation from search input
-        input.addEventListener('keydown', function(e) {
-            console.log('Safari debug - input keydown:', inputId, 'key:', e.key);
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!results.classList.contains('hidden')) {
-                    const firstLink = results.querySelector('li:first-child a[href]');
-                    if (firstLink) {
-                        firstLink.focus();
-                        console.log('Safari debug - focused first result');
-                    }
-                }
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                results.classList.add('hidden');
-            }
-        });
-        
-        // Handle navigation within search results
-        results.addEventListener('keydown', function(e) {
-            console.log('Safari debug - results keydown:', resultsId, 'key:', e.key);
-            
-            // Prevent horizontal navigation
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-            }
-            
-            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Escape') {
-                return;
-            }
-            
-            const allLinks = Array.from(results.querySelectorAll('li a[href]'));
-            const currentFocus = document.activeElement;
-            const currentIndex = allLinks.indexOf(currentFocus);
-            
-            console.log('Safari debug - current index:', currentIndex, 'total links:', allLinks.length);
-            
-            switch (e.key) {
-                case 'ArrowDown':
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (currentIndex >= 0 && currentIndex < allLinks.length - 1) {
-                        allLinks[currentIndex + 1].focus();
-                        console.log('Safari debug - moved to next item:', currentIndex + 1);
-                    }
-                    break;
-                    
-                case 'ArrowUp':
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (currentIndex > 0) {
-                        allLinks[currentIndex - 1].focus();
-                        console.log('Safari debug - moved to previous item:', currentIndex - 1);
-                    } else if (currentIndex === 0) {
-                        input.focus();
-                        console.log('Safari debug - focused back to input');
-                    }
-                    break;
-                    
-                case 'Escape':
-                    e.preventDefault();
-                    e.stopPropagation();
-                    results.classList.add('hidden');
-                    input.focus();
-                    console.log('Safari debug - escaped to input');
-                    break;
-            }
-        });
-    };
-    
-    // Setup all search contexts
-    setupSearchNavigation('search-desktop', 'search-results');
-    setupSearchNavigation('search-mobile-navbar', 'search-results-mobile-navbar');
-    setupSearchNavigation('search-mobile', 'search-results-mobile');
+    // Safari-specific handlers disabled - they were conflicting with main search navigation
+    // Main search interaction system now handles all keyboard navigation
     
 
 });

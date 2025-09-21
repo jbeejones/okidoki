@@ -82,7 +82,7 @@ function registerTabs(md, handlebarsInstance)  {
     const tabId = `tabs_${Math.random().toString(36).substring(2, 11)}`;
 
     let html = []
-    html.push(`<div class="tabs tabs-bordered">`);
+    html.push(`<div class="tabs tabs-border">`);
     // Generate tab inputs and content with proper DaisyUI structure
     tabs.forEach((tab, index) => {
       const isChecked = index === 0 ? 'checked="checked"' : '';
