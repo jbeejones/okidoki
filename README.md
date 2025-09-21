@@ -1,48 +1,56 @@
-# OkiDoki - Free & Open Source Documentation Generator
+# OkiDoki - Free Static Site Generator for API Documentation & Technical Docs
 
 [![npm version](https://img.shields.io/npm/v/okidoki.svg)](https://www.npmjs.com/package/okidoki)
 [![GitHub license](https://img.shields.io/github/license/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/stargazers)
 
-**OkiDoki** is a **free, open-source** static site generator built for API and technical documentation. Write your docs in standard Markdown and generate fast, searchable documentation sites with minimal configuration. Built for developer workflows with sub-second build times and a lightweight output.
+**OkiDoki** is a **free, open-source static site generator** specifically designed for creating professional **API documentation websites** and **technical documentation sites**. **Automatically generate API docs from OpenAPI/Swagger specs** or transform your **Markdown files** into beautiful, **searchable documentation** with **zero configuration** required. Perfect for **developer teams**, **software projects**, and **API providers** who need **fast documentation builds** (sub-second generation) and **lightweight, responsive websites**.
 
-🌟 **Completely free and open source** - No subscriptions, no limits, no vendor lock-in!
+**Create beautiful API documentation with minimal effort and zero maintenance** - Completely free and open source with no subscriptions, no limits, no vendor lock-in.
 
-Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) | [Contribute on GitHub](https://github.com/jbeejones/okidoki)
+Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
 ![okidoki screenshot](./screenshots/okidoki.png)
 
+<img src="./screenshots/okidoki-responsive.png" alt="okidoki screenshot responsive" width="300">
 
-## Installation
+## Installation & Setup
 
-Install OkiDoki globally using [https://www.npmjs.com/package/okidoki](https://www.npmjs.com/package/okidoki):
+Install the **OkiDoki documentation generator** globally via npm from the [official package](https://www.npmjs.com/package/okidoki):
 
 ```bash
 npm install -g okidoki
 ```
-## Quick Setup
 
-1. **Create a new documentation project:**
+**System Requirements**: Node.js 14+ | **Package Size**: ~2MB | **Installation Time**: < 30 seconds
+## Quick Start Guide - Create Documentation in 4 Steps
+
+1. **Create a new documentation project directory:**
    ```bash
    mkdir mydocs && cd mydocs
    ```
 
-2. **Initialize your project:**
+2. **Initialize your documentation site:**
    ```bash
    okidoki init
    ```
-   This creates the basic structure with configuration files.
+   Automatically creates project structure with **configuration files** and **sample content**.
 
-3. **Generate your documentation:**
+3. **Build your static documentation site:**
    ```bash
    okidoki generate
    ```
+   Generates optimized HTML, CSS, and JavaScript files for deployment.
+   
+   > **Tip**: Use `okidoki openapi -i your-api-spec.yaml` to automatically generate API documentation from OpenAPI/Swagger files.
 
-4. **Serve your docs locally:**
+4. **Preview your documentation locally:**
    ```bash
    npx serve dist
    ```
-   Your documentation will be available at `http://localhost:3000`
+   Your **documentation website** will be available at `http://localhost:3000`
+   
+   **Alternative web servers**: You can use any static file server - `npx node-static dist`, `python -m http.server`, or deploy to GitHub Pages, Netlify, Vercel, etc.
 
 
 ## Project Structure
@@ -87,51 +95,66 @@ Create a new markdown file `start.md` in the `docs/` directory:
 
 This is my first documentation page with **bold text** and `code`.
 
-## Code Example
+## My API Documentation
 
-```javascript
-function hello() {
-  console.log("Hello, OkiDoki!");
+OkiDoki automatically converts your OpenAPI specs into beautiful markdown documentation:
+
+```http
+GET /api/users
+Content-Type: application/json
+
+{
+  "users": [
+    { "id": 1, "name": "John Doe" }
+  ]
 }
 ```
 The run the `okidoki generate` command again and refresh your browser to see the updated documentation site.
 
-## Next Steps
+## Getting Started with Your Documentation Site
 
-- Check out the [Documentation Reference](https://jbeejones.github.io/okidoki-website/reference.html) for advanced features
-- Browse [Examples](https://jbeejones.github.io/okidoki-website/markdown-examples.html) for inspiration  
-- Visit the [Help](https://jbeejones.github.io/okidoki-website/help.html) section if you run into issues
+- **Advanced Configuration**: Explore the [complete documentation reference](https://jbeejones.github.io/okidoki-website/reference.html) for custom themes, search optimization, and advanced features
+- **Documentation Examples**: Browse [real-world Markdown examples](https://jbeejones.github.io/okidoki-website/markdown-examples.html) and templates for API docs, tutorials, and guides
+- **Support & Troubleshooting**: Visit our [comprehensive help guide](https://jbeejones.github.io/okidoki-website/help.html) or [GitHub Issues](https://github.com/jbeejones/okidoki/issues) for community support
 
-## Key Features
+## Why Choose OkiDoki for API Documentation?
 
-- **🆓 Free & Open Source**: No subscriptions, no limits, no vendor lock-in
-- **📝 Markdown First**: Write in standard markdown, no proprietary formats
-- **⚡ Fast Search**: Full-text search across all documentation
-- **🎨 Clean Themes**: Beautiful, responsive themes out of the box
-- **⚡ Quick Build**: Generate docs in under 1 second
-- **💾 Small Footprint**: Generated sites are ~50KB 
+- **Automatic OpenAPI/Swagger Integration**: Generate beautiful API documentation directly from your existing OpenAPI specifications - no manual work required
+- **Zero Configuration Setup**: Works out-of-the-box with sensible defaults - perfect for developers who want great docs without complexity  
+- **100% Free & Open Source**: No subscriptions, no limits, no vendor lock-in - perfect for startups and enterprises
+- **Lightning-Fast Build Process**: Generate complete documentation sites in under 1 second - ideal for CI/CD pipelines and rapid iteration
+- **Markdown-Based Documentation**: Write in standard GitHub-flavored Markdown alongside auto-generated API docs
+- **Advanced Search Functionality**: Built-in full-text search across all documentation pages with instant results
+- **Professional Documentation Themes**: Beautiful, mobile-responsive themes optimized for technical content and API documentation
+- **Developer-Friendly**: Perfect for GitHub workflows, automated deployments, and modern development practices  
+- **Optimized Performance**: Generated sites are ~50KB with excellent Core Web Vitals scores for SEO 
 
-## Contributing
+## Open Source Community & Contributing
 
-OkiDoki is open source and we welcome contributions! Here are ways you can help:
+**OkiDoki** is a **community-driven open source project** and we welcome contributions from developers worldwide. Join our growing community:
 
-- 🐛 **Report bugs** - [Open an issue](https://github.com/jbeejones/okidoki/issues)
-- 💡 **Suggest features** - [Start a discussion](https://github.com/jbeejones/okidoki/discussions) 
-- 📝 **Improve docs** - Submit pull requests for documentation improvements
-- 🔧 **Fix issues** - Check our [open issues](https://github.com/jbeejones/okidoki/issues) for ways to help
-- ⭐ **Star the project** - Help others discover OkiDoki!
+- **Bug Reports & Issues** - [Report bugs](https://github.com/jbeejones/okidoki/issues) to help improve the documentation generator
+- **Feature Requests** - [Suggest new features](https://github.com/jbeejones/okidoki/discussions) for API documentation and technical writing tools
+- **Documentation Improvements** - Submit pull requests to enhance guides, examples, and tutorials
+- **Code Contributions** - Check our [open issues](https://github.com/jbeejones/okidoki/issues) and contribute to the static site generator
+- **GitHub Star** - Help other developers discover this free documentation tool by starring the repository
+- **Community Support** - Help answer questions and support fellow documentation creators
 
 ## License
 
 OkiDoki is released under the [MIT License](https://github.com/jbeejones/okidoki/blob/main/LICENSE). You're free to use, modify, and distribute it for any purpose.
 
-## Similar Tools
+## Documentation Generator Alternatives & Comparisons
 
-Other popular documentation generators you might consider:
+Compare OkiDoki with other popular **API documentation tools** and **static site generators**:
 
-- **[Docusaurus](https://docusaurus.io/)** - React-based, feature-rich
-- **[VitePress](https://vitepress.dev/)** - Vue-powered, very fast
-- **[GitBook](https://www.gitbook.com/)** - Commercial, collaborative
-- **[MkDocs](https://www.mkdocs.org/)** - Python-based, Material theme
-- **[Nextra](https://nextra.site/)** - Next.js powered
-- **[Slate](https://slatedocs.github.io/slate/)** - API-focused, three-column layout
+- **[Docusaurus](https://docusaurus.io/)** - React-based documentation platform with extensive plugins (requires more setup and configuration)
+- **[Slate](https://slatedocs.github.io/slate/)** - API-focused documentation generator with three-column layout (Markdown only, no OpenAPI integration)
+- **[VitePress](https://vitepress.dev/)** - Vue-powered static site generator with excellent performance (requires manual API doc creation)
+- **[GitBook](https://www.gitbook.com/)** - Commercial documentation platform with collaboration features (paid plans, limited OpenAPI support)
+- **[MkDocs](https://www.mkdocs.org/)** - Python-based documentation generator with Material Design theme (requires plugins for OpenAPI)
+- **[Nextra](https://nextra.site/)** - Next.js powered documentation framework with React components (more complex for API docs)
+- **[Redoc](https://redoc.ly/)** - OpenAPI-focused tool (API docs only, no mixed content support)
+- **[Jekyll](https://jekyllrb.com/)** - Ruby-based static site generator popular on GitHub Pages (requires manual setup for API docs)
+
+**Detailed Comparison Guide**: Read our in-depth [documentation generator comparison and feature analysis](https://jbeejones.github.io/okidoki-website/documentation-generator-comparison.html) to find the best tool for your **API documentation** and **technical writing** needs.
