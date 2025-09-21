@@ -26,6 +26,9 @@
   "keywords": [
     "okidoki",
     "documentation",
+    "api-documentation",
+    "openapi",
+    "swagger",
     "markdown",
     "lunr",
     "search",
@@ -34,7 +37,8 @@
     "open-source",
     "free",
     "api-docs",
-    "technical-docs"
+    "technical-docs",
+    "rest-api"
   ],
   "author": "",
   "license": "MIT",
