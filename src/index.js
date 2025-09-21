@@ -301,9 +301,11 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
         siteUrl = baseUrl.replace(/\/$/, '');
     }
     
-    // XML header
+    // XML header with extended namespaces for better SEO and future extensibility
     let sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    sitemapXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    sitemapXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
+    sitemapXml += '        xmlns:xhtml="http://www.w3.org/1999/xhtml"\n';
+    sitemapXml += '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
     
     // Add each document to the sitemap
     for (const doc of docs) {
