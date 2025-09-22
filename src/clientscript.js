@@ -159,7 +159,7 @@ function clearSavedSearchState() {
         console.log('🗑️ Search state cleared');
         
         // Also clear all search inputs on current page
-        const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile, #search-mobile-navbar');
+        const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile-navbar');
         searchInputs.forEach(input => {
             if (input && input.value.trim()) {
                 // Only clear if it's not the input that triggered this clear (to avoid infinite loops)
@@ -203,7 +203,7 @@ function restoreSearchState() {
     console.log('🔄 Restoring search state:', savedState.query);
     
     // Update all search input fields but don't show results immediately
-    const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile, #search-mobile-navbar');
+    const searchInputs = document.querySelectorAll('#search-desktop, #search-mobile-navbar');
     searchInputs.forEach(input => {
         if (input) {
             input.value = savedState.query;
@@ -1124,10 +1124,12 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
                     const escapedPath = escapeHtml(doc.path);
                     
                     return `
-                        <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
-                            <div class="font-medium text-base-content">${escapedTitle}</div>
-                            ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ''}
-                            <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
+                        <li>
+                            <a href="${urlWithSearch}">
+                                <div class="font-medium text-base-content">${escapedTitle}</div>
+                                ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ''}
+                                <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
+                            </a>
                         </li>
                     `;
                 }).join('') + 
@@ -1159,49 +1161,59 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
 
 // Setup interactions for search results
 function setupSearchResultInteractions(container, query) {
-    const items = container.querySelectorAll('li[data-url]');
+    const items = container.querySelectorAll('li > a');
     let selectedIndex = -1;
+    let keyboardMode = false; // Track if we're using keyboard navigation
     
     // Store the input element that triggered this search
     const inputElement = container.parentElement.querySelector('input');
     const dropdownParent = container.closest('.dropdown');
     
-    // Click handlers
-    items.forEach((item) => {
+    // Click and hover handlers
+    items.forEach((item, index) => {
+        // Click handler
         item.addEventListener('click', () => {
-            const url = item.getAttribute('data-url');
             try {
                 sessionStorage.setItem('searchHighlight', query);
             } catch (e) {
                 console.warn('Failed to store search highlight:', e);
             }
-            window.location.href = url;
+            // Let the anchor tag handle navigation
         });
         
-        // Hover effects
+        // Mouse hover handlers
         item.addEventListener('mouseenter', () => {
-            clearSelected();
-            item.classList.add('bg-base-200');
-            selectedIndex = Array.from(items).indexOf(item);
+            // Only respond to mouse if we're not in keyboard mode
+            if (!keyboardMode) {
+                clearSelected();
+                selectedIndex = index;
+                item.classList.add('selected');
+            }
         });
         
         item.addEventListener('mouseleave', () => {
-            if (selectedIndex !== Array.from(items).indexOf(item)) {
-                item.classList.remove('bg-base-200');
+            // Only clear if we're in mouse mode (not keyboard mode)
+            if (!keyboardMode && selectedIndex === index) {
+                item.classList.remove('selected');
+                selectedIndex = -1;
             }
         });
     });
     
-    // Keyboard navigation
+    // Navigation helpers
     function clearSelected() {
-        items.forEach(item => item.classList.remove('bg-base-200'));
+        items.forEach(item => {
+            item.classList.remove('selected');
+        });
     }
     
     function selectItem(index) {
         clearSelected();
         if (index >= 0 && index < items.length) {
             selectedIndex = index;
-            items[index].classList.add('bg-base-200');
+            keyboardMode = true; // Mark as keyboard mode
+            container.classList.add('keyboard-navigation'); // Add CSS class
+            items[index].classList.add('selected');
             items[index].scrollIntoView({ block: 'nearest' });
         }
     }
@@ -1213,35 +1225,42 @@ function setupSearchResultInteractions(container, query) {
             return; // Let browser handle all other keys normally
         }
         
-        // Only handle navigation keys when results are visible and input is focused
-        if (!container.classList.contains('hidden') && document.activeElement === inputElement) {
+        // Only handle navigation keys when results are visible
+        if (!container.classList.contains('hidden') && items.length > 0) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 e.stopPropagation();
-                if (selectedIndex < items.length - 1) {
-                    selectItem(selectedIndex + 1);
-                } else if (selectedIndex === -1 && items.length > 0) {
+                
+                if (selectedIndex === -1) {
+                    // First time pressing down - select first item
                     selectItem(0);
+                } else if (selectedIndex < items.length - 1) {
+                    // Move down if not at last item
+                    selectItem(selectedIndex + 1);
                 }
+                // Do nothing if already at last item (stay there)
+                
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 e.stopPropagation();
-                if (selectedIndex > 0) {
+                
+                if (selectedIndex === -1) {
+                    // No item selected - select last item
+                    selectItem(items.length - 1);
+                } else if (selectedIndex > 0) {
+                    // Move up if not at first item
                     selectItem(selectedIndex - 1);
-                } else if (selectedIndex === 0) {
-                    clearSelected();
-                    selectedIndex = -1;
                 }
+                // Do nothing if already at first item (stay there)
             } else if (e.key === 'Enter' && selectedIndex >= 0) {
                 e.preventDefault();
                 e.stopPropagation();
-                const url = items[selectedIndex].getAttribute('data-url');
                 try {
                     sessionStorage.setItem('searchHighlight', query);
                 } catch (e) {
                     console.warn('Failed to store search highlight:', e);
                 }
-                window.location.href = url;
+                items[selectedIndex].click();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1251,18 +1270,38 @@ function setupSearchResultInteractions(container, query) {
                 }
                 clearSelected();
                 selectedIndex = -1;
+                keyboardMode = false;
+                container.classList.remove('keyboard-navigation');
             }
         }
     };
     
-    // Remove old handler and add new one to input element
+    // Click handler to reset keyboard mode
+    const clickHandler = (e) => {
+        // Switch to mouse mode when user clicks anywhere in the dropdown
+        if (keyboardMode) {
+            keyboardMode = false;
+            container.classList.remove('keyboard-navigation');
+        }
+    };
+    
+    // Remove old handlers and add new ones
     if (inputElement.searchKeyboardHandler) {
         inputElement.removeEventListener('keydown', inputElement.searchKeyboardHandler);
     }
+    if (container.searchClickHandler) {
+        container.removeEventListener('click', container.searchClickHandler);
+    }
+    
+    // Add keyboard handler to input element
     inputElement.searchKeyboardHandler = keyboardHandler;
     inputElement.addEventListener('keydown', keyboardHandler);
     
-    // Also store reference for cleanup
+    // Add click handler to container
+    container.searchClickHandler = clickHandler;
+    container.addEventListener('click', clickHandler);
+    
+    // Store reference for cleanup
     container.keyboardHandler = keyboardHandler;
 }
 
@@ -1274,14 +1313,11 @@ document.addEventListener('keydown', function(e) {
         // Focus the appropriate search input based on screen size and visibility
         const desktopSearch = document.getElementById('search-desktop');
         const mobileNavbarSearch = document.getElementById('search-mobile-navbar');
-        const mobileSearch = document.getElementById('search-mobile');
         
         if (desktopSearch && window.getComputedStyle(desktopSearch).display !== 'none') {
             desktopSearch.focus();
         } else if (mobileNavbarSearch && window.getComputedStyle(mobileNavbarSearch).display !== 'none') {
             mobileNavbarSearch.focus();
-        } else if (mobileSearch) {
-            mobileSearch.focus();
         }
     }
 
@@ -1338,12 +1374,7 @@ function markActiveMenuItems() {
 // Run on page load
 document.addEventListener('DOMContentLoaded', markActiveMenuItems);
 
-// Note: Removed duplicate Safari-specific handlers that conflicted with main search navigation
-document.addEventListener('DOMContentLoaded', function() {
-    // Safari-specific handlers disabled - they were conflicting with main search navigation
-    // Main search interaction system now handles all keyboard navigation
-    
-
-});
+// Note: Layout positioning now handled purely with Tailwind CSS classes
+// No JavaScript needed for sidebar height or footer positioning
 
 

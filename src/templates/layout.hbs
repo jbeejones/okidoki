@@ -315,243 +315,197 @@
       });
     }
 
-    // Function to dynamically calculate and set sidebar height based on footer
-    function updateSidebarHeight() {
-      if (window.innerWidth >= 1024) { // Only on desktop (lg breakpoint)
-        const sidebar = document.getElementById('sidebar-menu');
-        const footer = document.querySelector('footer');
-        
-        if (sidebar && footer) {
-          const navbar = document.querySelector('.navbar');
-          const navbarHeight = navbar ? navbar.offsetHeight : 64; // fallback to 4rem
-          const footerHeight = footer.offsetHeight;
-          
-          const availableHeight = window.innerHeight - navbarHeight - footerHeight;
-          sidebar.style.height = availableHeight + 'px';
-          sidebar.style.minHeight = 'auto';
-        }
-      } else {
-        // Reset for mobile
-        const sidebar = document.getElementById('sidebar-menu');
-        if (sidebar) {
-          sidebar.style.height = '';
-          sidebar.style.minHeight = '';
-        }
-      }
-    }
-
-    // Update sidebar height on load, resize, and when content might change
-    window.addEventListener('load', updateSidebarHeight);
-    window.addEventListener('resize', updateSidebarHeight);
-    
-    // Also update when DOM changes (for dynamic footer content)
-    if (window.MutationObserver) {
-      const observer = new MutationObserver(updateSidebarHeight);
-      observer.observe(document.body, { 
-        childList: true, 
-        subtree: true, 
-        attributes: false 
-      });
-    }
+    // Removed dynamic sidebar height calculation - now handled by CSS sticky footer layout
   </script>
 </head>
 
-<body class="bg-base-100" >
-  <!-- Navbar -->
-  <div class="navbar bg-base-100 border-b border-base-300 w-full sticky top-0 z-40">
-    {{#unless layout.hideMenu}}
-    <div class="flex-none lg:hidden">
-      <label for="my-drawer-menu" aria-label="open sidebar" class="btn btn-square btn-ghost">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </label>
-    </div>
-    {{/unless}}
-    <div class="flex-1 min-w-0 overflow-hidden">
-      <a class="flex items-center min-w-0" href="{{joinUrl baseUrl 'index.html'}}">
-          <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
-          <span class="text-xl font-mono font-bold truncate max-w-[40vw] sm:max-w-[50vw] md:max-w-[60vw] lg:max-w-none">{{title}}</span>
-      </a>
-    </div>
-    
-    {{#if settings.search.enabled}}
-    <!-- Mobile search input - visible on mobile, hidden on desktop -->
-    <div class="flex-none lg:hidden mr-2">
-      <div class="dropdown dropdown-end">
-        <input 
-          id="search-mobile-navbar" 
-          type="text" 
-          placeholder="{{settings.search.placeholder}}" 
-                      class="input input-sm w-32" 
-          tabindex="0"
-          oninput="handleSearch(this.value)" 
-        />
-        <ul id="search-results-mobile-navbar" class="dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto">
-          <!-- Search results will be populated here -->
-        </ul>
-      </div>
-    </div>
-    {{/if}}
-    
-          <!-- Mobile theme switcher -->
-      <div class="flex-none lg:hidden mr-2">
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-square btn-ghost text-base-content theme-toggle-btn" aria-label="Theme">
-            <!-- Sun icon (visible in light theme) -->
-            <svg class="h-6 w-6 fill-current theme-sun-icon transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+<body class="bg-base-100 min-h-screen flex flex-col">
+  <!-- Standard DaisyUI Navbar - full width above everything -->
+  <div class="navbar bg-base-100 border-b border-base-300 px-4 lg:px-8 sticky top-0 z-50">
+        {{#unless layout.hideMenu}}
+        <div class="flex-none lg:hidden">
+          <label for="my-drawer-menu" aria-label="open sidebar" class="btn btn-square btn-ghost">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
-            <!-- Moon icon (visible in dark theme) -->
-            <svg class="h-6 w-6 fill-current theme-moon-icon absolute transition-opacity opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-            </svg>
-          </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          <li><button onclick="setTheme('{{settings.site.theme.light}}')" class="justify-start">
-            <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-            </svg>
-            Light
-          </button></li>
-          <li><button onclick="setTheme('{{settings.site.theme.dark}}')" class="justify-start">
-            <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-            </svg>
-            Dark
-          </button></li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="hidden flex-none lg:flex lg:items-center lg:gap-4">
-      <ul class="menu menu-lg menu-horizontal">
-        <!-- Navbar menu content here -->          
-          {{#each navbar}}
-            <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
-          {{/each}}
-      </ul>
-      {{#if settings.search.enabled}}
-      <div class="dropdown dropdown-end">
-        <input 
-          id="search-desktop" 
-          type="text" 
-          placeholder="{{settings.search.placeholder}}" 
-                      class="input w-24 md:w-auto" 
-          tabindex="0"
-          oninput="handleSearch(this.value)" 
-        />
-        <ul id="search-results" class="dropdown-content bg-base-100 rounded-box z-[1] w-96 p-2 shadow hidden max-h-96 overflow-y-auto">
-          <!-- Search results will be populated here -->
-        </ul>
-      </div>
-      {{/if}}
-      
-      <!-- Desktop theme switcher -->
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-square btn-ghost text-base-content theme-toggle-btn" aria-label="Theme">
-          <!-- Sun icon (visible in light theme) -->
-          <svg class="h-6 w-6 fill-current theme-sun-icon transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-          </svg>
-          <!-- Moon icon (visible in dark theme) -->
-          <svg class="h-6 w-6 fill-current theme-moon-icon absolute transition-opacity opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-          </svg>
+          </label>
         </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          <li><button onclick="setTheme('{{settings.site.theme.light}}')" class="justify-start">
-            <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-            </svg>
-            Light
-          </button></li>
-          <li><button onclick="setTheme('{{settings.site.theme.dark}}')" class="justify-start">
-            <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-            </svg>
-            Dark
-          </button></li>
-        </ul>
-      </div>
-    </div>
-    
-  </div>
-  <div class="drawer {{#unless layout.hideMenu}}lg:drawer-open{{/unless}}">
-    {{#unless layout.hideMenu}}
-    <input id="my-drawer-menu" type="checkbox" class="drawer-toggle" />
-    {{/unless}}
-    <div class="drawer-content flex flex-col">
-      <!-- Page content here -->
-      <div class="{{#unless layout.fullWidth}}lg:pl-80{{/unless}}">
-        {{#block "main"}}
-        {{/block}}
-      </div>
-      
-      {{#unless layout.hideFooter}}
-      <footer class="footer footer-center bg-base-300 text-base-content p-4">
-        {{#if footer}}
-        <div class="footer-content">
-          {{#each footer}}
-          <div class="footer-section">
-            {{#if title}}<h3 class="footer-title font-bold mb-2">{{title}}</h3>{{/if}}
-            {{#if items}}
-            <nav class="flex flex-wrap gap-4 justify-center">
-              {{#each items}}
-              <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
-              {{/each}}
-            </nav>
-            {{/if}}
-          </div>
-          {{/each}}
+        {{/unless}}
+        
+        <div class="flex-1 min-w-0">
+          <a class="flex items-center min-w-0" href="{{joinUrl baseUrl 'index.html'}}">
+              <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
+              <span class="text-xl font-mono font-bold truncate">{{title}}</span>
+          </a>
         </div>
-        {{else}}
-        <aside>
-          <p>Copyright © {{copyright.year}} - All rights reserved by <a href="https://jbeejones.github.io/okidoki-website/index.html" class="link link-hover">OkiDoki</a></p>
-        </aside>
-        {{/if}}
-      </footer>
-      {{/unless}}
-    </div>
-    {{#unless layout.hideMenu}}
-    <div class="drawer-side">
-      <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
-      <div id="sidebar-menu" class="bg-base-100 w-80 p-4 min-h-full lg:fixed lg:left-0 lg:top-16 lg:overflow-y-auto">
-        <ul class="menu menu-md">
-        <!-- Mobile menu items -->
-        <div class="lg:hidden mb-4">
-          {{#if settings.search.enabled}}
-          <div class="dropdown dropdown-top w-full">
+        
+        {{#if settings.search.enabled}}
+        <!-- Mobile search input -->
+        <div class="flex-none lg:hidden mr-2">
+          <div class="dropdown dropdown-end">
             <input 
-              id="search-mobile" 
+              id="search-mobile-navbar" 
               type="text" 
               placeholder="{{settings.search.placeholder}}" 
-              class="input w-full mb-4" 
+              class="input input-sm w-32" 
               tabindex="0"
               oninput="handleSearch(this.value)" 
             />
-            <ul id="search-results-mobile" class="dropdown-content bg-base-100 rounded-box z-[1] w-full p-2 shadow hidden max-h-96 overflow-y-auto">
+            <ul id="search-results-mobile-navbar" class="dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto">
+              <!-- Search results will be populated here -->
+            </ul>
+          </div>
+        </div>
+        {{/if}}
+        
+        <!-- Mobile theme switcher -->
+        <div class="flex-none lg:hidden mr-2">
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-square btn-ghost text-base-content theme-toggle-btn" aria-label="Theme">
+              <!-- Sun icon (visible in light theme) -->
+              <svg class="h-6 w-6 fill-current theme-sun-icon transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+              </svg>
+              <!-- Moon icon (visible in dark theme) -->
+              <svg class="h-6 w-6 fill-current theme-moon-icon absolute transition-opacity opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+              <li><button onclick="setTheme('{{settings.site.theme.light}}')" class="justify-start">
+                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+                </svg>
+                Light
+              </button></li>
+              <li><button onclick="setTheme('{{settings.site.theme.dark}}')" class="justify-start">
+                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1-.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+                </svg>
+                Dark
+              </button></li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Desktop navigation and controls -->
+        <div class="hidden lg:flex lg:items-center lg:gap-4">
+          <ul class="menu menu-horizontal">
+            {{#each navbar}}
+              <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
+            {{/each}}
+          </ul>
+          
+          {{#if settings.search.enabled}}
+          <div class="dropdown dropdown-end">
+            <input 
+              id="search-desktop" 
+              type="text" 
+              placeholder="{{settings.search.placeholder}}" 
+              class="input input-sm w-64" 
+              tabindex="0"
+              oninput="handleSearch(this.value)" 
+            />
+            <ul id="search-results" class="dropdown-content bg-base-100 rounded-box z-[1] w-96 p-2 shadow hidden max-h-96 overflow-y-auto">
               <!-- Search results will be populated here -->
             </ul>
           </div>
           {{/if}}
-          <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
-          <!-- Navbar menu content here -->          
-          {{#each navbar}}
-            <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
-          {{/each}}
-          <div class="divider"></div>
+          
+          <!-- Desktop theme switcher -->
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-square btn-ghost text-base-content theme-toggle-btn" aria-label="Theme">
+              <!-- Sun icon (visible in light theme) -->
+              <svg class="h-6 w-6 fill-current theme-sun-icon transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+              </svg>
+              <!-- Moon icon (visible in dark theme) -->
+              <svg class="h-6 w-6 fill-current theme-moon-icon absolute transition-opacity opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1-.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+              <li><button onclick="setTheme('{{settings.site.theme.light}}')" class="justify-start">
+                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+                </svg>
+                Light
+              </button></li>
+              <li><button onclick="setTheme('{{settings.site.theme.dark}}')" class="justify-start">
+                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1-.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+                </svg>
+                Dark
+              </button></li>
+            </ul>
+          </div>
         </div>
-        <!-- sidebars -->        
-        {{#each sidebars}}
-          {{menuNode this activeDocId=../page.path}}
-        {{/each}}
-        
+              </div>
+  
+  <!-- Main content area with proper DaisyUI drawer layout -->
+  <div class="flex-1 drawer {{#unless layout.hideMenu}}lg:drawer-open{{/unless}}">
+    {{#unless layout.hideMenu}}
+    <input id="my-drawer-menu" type="checkbox" class="drawer-toggle" />
+    {{/unless}}
+    
+    <!-- Main content -->
+    <div class="drawer-content flex flex-col min-h-full">
+      <main class="flex-1 p-4 lg:p-8">
+        {{#block "main"}}
+        {{/block}}
+      </main>
+    </div>
+    
+    {{#unless layout.hideMenu}}
+    <!-- Sidebar -->
+    <div class="drawer-side">
+      <label for="my-drawer-menu" aria-label="close sidebar" class="drawer-overlay"></label>
+      <aside class="min-h-full w-80 bg-base-100">
+        <ul class="menu p-4 text-base-content overflow-y-auto h-full">
+          <!-- Mobile menu items -->
+          <div class="lg:hidden mb-4">
+            <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
+            {{#each navbar}}
+              <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
+            {{/each}}
+            <div class="divider"></div>
+          </div>
+          
+          <!-- Sidebar content -->
+          {{#each sidebars}}
+            {{menuNode this activeDocId=../page.path}}
+          {{/each}}
         </ul>
-      </div>
+      </aside>
     </div>
     {{/unless}}
   </div>
+
+  <!-- Standard DaisyUI footer -->
+  {{#unless layout.hideFooter}}
+  <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-300">
+    {{#if footer}}
+    <div class="footer-content">
+      {{#each footer}}
+      <div class="footer-section">
+        {{#if title}}<h3 class="footer-title font-bold mb-2">{{title}}</h3>{{/if}}
+        {{#if items}}
+        <nav class="flex flex-wrap gap-4 justify-center">
+          {{#each items}}
+          <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
+          {{/each}}
+        </nav>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <aside>
+      <p>Copyright © {{copyright.year}} - All rights reserved by <a href="https://jbeejones.github.io/okidoki-website/index.html" class="link link-hover">OkiDoki</a></p>
+    </aside>
+    {{/if}}
+  </footer>
+  {{/unless}}
 </body>
 
 </html>

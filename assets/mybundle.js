@@ -1867,7 +1867,7 @@
     try {
       localStorage.removeItem("okidoki_last_search");
       console.log("\u{1F5D1}\uFE0F Search state cleared");
-      const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile, #search-mobile-navbar");
+      const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile-navbar");
       searchInputs.forEach((input) => {
         if (input && input.value.trim()) {
           const activeElement = document.activeElement;
@@ -1901,7 +1901,7 @@
     const savedState = loadSearchState();
     if (!savedState || !idx) return;
     console.log("\u{1F504} Restoring search state:", savedState.query);
-    const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile, #search-mobile-navbar");
+    const searchInputs = document.querySelectorAll("#search-desktop, #search-mobile-navbar");
     searchInputs.forEach((input) => {
       if (input) {
         input.value = savedState.query;
@@ -2568,10 +2568,12 @@
           const escapedDescription = doc.description ? escapeHtml(doc.description) : "";
           const escapedPath = escapeHtml(doc.path);
           return `
-                        <li class="p-3 hover:bg-base-200 cursor-pointer border-b border-base-300 last:border-b-0" data-url="${urlWithSearch}">
-                            <div class="font-medium text-base-content">${escapedTitle}</div>
-                            ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ""}
-                            <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
+                        <li>
+                            <a href="${urlWithSearch}">
+                                <div class="font-medium text-base-content">${escapedTitle}</div>
+                                ${escapedDescription ? `<div class="text-sm opacity-70 mt-1">${escapedDescription}</div>` : ""}
+                                <div class="text-xs opacity-50 mt-1">${escapedPath}</div>
+                            </a>
                         </li>
                     `;
         }).join("") + (results.length > MAX_RESULTS ? `
@@ -2596,39 +2598,45 @@
     }
   }
   function setupSearchResultInteractions(container, query) {
-    const items = container.querySelectorAll("li[data-url]");
+    const items = container.querySelectorAll("li > a");
     let selectedIndex = -1;
+    let keyboardMode = false;
     const inputElement = container.parentElement.querySelector("input");
     const dropdownParent = container.closest(".dropdown");
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       item.addEventListener("click", () => {
-        const url = item.getAttribute("data-url");
         try {
           sessionStorage.setItem("searchHighlight", query);
         } catch (e) {
           console.warn("Failed to store search highlight:", e);
         }
-        window.location.href = url;
       });
       item.addEventListener("mouseenter", () => {
-        clearSelected();
-        item.classList.add("bg-base-200");
-        selectedIndex = Array.from(items).indexOf(item);
+        if (!keyboardMode) {
+          clearSelected();
+          selectedIndex = index;
+          item.classList.add("selected");
+        }
       });
       item.addEventListener("mouseleave", () => {
-        if (selectedIndex !== Array.from(items).indexOf(item)) {
-          item.classList.remove("bg-base-200");
+        if (!keyboardMode && selectedIndex === index) {
+          item.classList.remove("selected");
+          selectedIndex = -1;
         }
       });
     });
     function clearSelected() {
-      items.forEach((item) => item.classList.remove("bg-base-200"));
+      items.forEach((item) => {
+        item.classList.remove("selected");
+      });
     }
     function selectItem(index) {
       clearSelected();
       if (index >= 0 && index < items.length) {
         selectedIndex = index;
-        items[index].classList.add("bg-base-200");
+        keyboardMode = true;
+        container.classList.add("keyboard-navigation");
+        items[index].classList.add("selected");
         items[index].scrollIntoView({ block: "nearest" });
       }
     }
@@ -2636,34 +2644,32 @@
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Enter" && e.key !== "Escape") {
         return;
       }
-      if (!container.classList.contains("hidden") && document.activeElement === inputElement) {
+      if (!container.classList.contains("hidden") && items.length > 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
           e.stopPropagation();
-          if (selectedIndex < items.length - 1) {
-            selectItem(selectedIndex + 1);
-          } else if (selectedIndex === -1 && items.length > 0) {
+          if (selectedIndex === -1) {
             selectItem(0);
+          } else if (selectedIndex < items.length - 1) {
+            selectItem(selectedIndex + 1);
           }
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
           e.stopPropagation();
-          if (selectedIndex > 0) {
+          if (selectedIndex === -1) {
+            selectItem(items.length - 1);
+          } else if (selectedIndex > 0) {
             selectItem(selectedIndex - 1);
-          } else if (selectedIndex === 0) {
-            clearSelected();
-            selectedIndex = -1;
           }
         } else if (e.key === "Enter" && selectedIndex >= 0) {
           e.preventDefault();
           e.stopPropagation();
-          const url = items[selectedIndex].getAttribute("data-url");
           try {
             sessionStorage.setItem("searchHighlight", query);
           } catch (e2) {
             console.warn("Failed to store search highlight:", e2);
           }
-          window.location.href = url;
+          items[selectedIndex].click();
         } else if (e.key === "Escape") {
           e.preventDefault();
           e.stopPropagation();
@@ -2673,14 +2679,27 @@
           }
           clearSelected();
           selectedIndex = -1;
+          keyboardMode = false;
+          container.classList.remove("keyboard-navigation");
         }
+      }
+    };
+    const clickHandler = (e) => {
+      if (keyboardMode) {
+        keyboardMode = false;
+        container.classList.remove("keyboard-navigation");
       }
     };
     if (inputElement.searchKeyboardHandler) {
       inputElement.removeEventListener("keydown", inputElement.searchKeyboardHandler);
     }
+    if (container.searchClickHandler) {
+      container.removeEventListener("click", container.searchClickHandler);
+    }
     inputElement.searchKeyboardHandler = keyboardHandler;
     inputElement.addEventListener("keydown", keyboardHandler);
+    container.searchClickHandler = clickHandler;
+    container.addEventListener("click", clickHandler);
     container.keyboardHandler = keyboardHandler;
   }
   document.addEventListener("keydown", function(e) {
@@ -2688,13 +2707,10 @@
       e.preventDefault();
       const desktopSearch = document.getElementById("search-desktop");
       const mobileNavbarSearch = document.getElementById("search-mobile-navbar");
-      const mobileSearch = document.getElementById("search-mobile");
       if (desktopSearch && window.getComputedStyle(desktopSearch).display !== "none") {
         desktopSearch.focus();
       } else if (mobileNavbarSearch && window.getComputedStyle(mobileNavbarSearch).display !== "none") {
         mobileNavbarSearch.focus();
-      } else if (mobileSearch) {
-        mobileSearch.focus();
       }
     }
   });
@@ -2730,8 +2746,6 @@
     });
   }
   document.addEventListener("DOMContentLoaded", markActiveMenuItems);
-  document.addEventListener("DOMContentLoaded", function() {
-  });
 })();
 /*! Bundled license information:
 

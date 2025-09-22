@@ -13,6 +13,15 @@ menu:
     document: /test-api-spec.md
   - title: API Reference
     document: /test-api-converted.md
+  - title: Test Sub Items
+    open: true
+    items:
+      - label: Sub Item 1
+        document: /test-sub-1.md
+      - label: Sub Item 2
+        document: /test-sub-2.md
+      - label: Sub Item 3
+        document: /test-sub-3.md
   - title: API Reference (Fixed)
     document: /test-api-converted-fixed.md
 navbar:
@@ -29,3 +38,7 @@ footer:
         url: https://github.com/jbeejones/okidoki/issues
       - label: Discussions
         url: https://github.com/jbeejones/okidoki/discussions
+  - title: 
+    items:
+      - label: Created with Okidoki
+        url: https://okidoki.dev

@@ -231,54 +231,7 @@
     font-size: 0.875rem !important;
   }
 }
-@utility navbar {
-  /* Ensure consistent navbar height and fonts across all pages */
-  min-height: 4rem !important; /* 64px - matches documentation page */
-
-  /* Fix menu-lg padding in navbar context - prevents extra height on desktop */
-  & .menu-lg :where(li:not(.menu-title) > *:not(ul, details, .menu-title)) {
-    padding-top: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
-    padding-bottom: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
-  }
-  & .menu-lg :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
-    padding-top: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
-    padding-bottom: 0.25rem !important; /* Reduce from 0.75rem to 0.25rem */
-  }
-
-  /* Force consistent navbar padding for all elements */
-  & * {
-    line-height: 1.5 !important; /* Consistent line height */
-  }
-
-  /* Consistent navbar font sizes - using !important to match doc page specificity */
-  & .btn {
-    font-size: 0.875rem !important; /* text-sm equivalent */
-  }
-  & a {
-    font-size: 0.875rem !important; /* text-sm equivalent */
-  }
-
-  & .font-bold {
-    font-size: 1rem !important; /* text-base for logo/title */
-  }
-  z-index: 1000 !important;
-
-  /* Safari-specific focus enhancement */
-
-  /* Layout and navigation fixes */
-
-  & .btn {
-    font-size: 0.875rem !important;
-  }
-
-  & a {
-    font-size: 0.875rem !important;
-  }
-
-  & .font-bold {
-    font-size: 1rem !important;
-  }
-}
+/* Removed empty navbar utility - DaisyUI handles navbar styling */
 @utility menu-lg {
   /* Fix menu-lg padding in navbar context - prevents extra height on desktop */
   .navbar & :where(li:not(.menu-title) > *:not(ul, details, .menu-title)) {
@@ -1311,84 +1264,152 @@
     pointer-events: auto !important; /* Re-enable mouse events for text selection */
   }
 
-  /* Performance and layout optimizations */
-  html, body {
-    overscroll-behavior: none !important;
-    overscroll-behavior-x: none !important;
-    overscroll-behavior-y: none !important;
-  }
-  
+  /* Basic performance optimizations */
   * {
     -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
   }
-  
-  /* Search result styling */
+
+  /* Search result styling - clean single-column layout */
   #search-results,
-  #search-results-mobile,
   #search-results-mobile-navbar {
     display: flex !important;
     flex-direction: column !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    gap: 0 !important;
+
   }
   
-  #search-results > li,
-  #search-results-mobile > li,
-  #search-results-mobile-navbar > li {
-    width: 100% !important;
+  #search-results li,
+  #search-results-mobile-navbar li {
     display: block !important;
-    flex: none !important;
-  }
-  
-  #search-results > li > a,
-  #search-results-mobile > li > a,
-  #search-results-mobile-navbar > li > a {
     width: 100% !important;
-    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
   }
   
-  #search-results > li > a:focus,
-  #search-results-mobile > li > a:focus,
-  #search-results-mobile-navbar > li > a:focus {
-    background-color: rgb(var(--fallback-p,oklch(0.491 0.162 255.701))/0.2) !important;
-    outline: 2px solid rgb(var(--fallback-p,oklch(0.491 0.162 255.701))) !important;
-    outline-offset: -2px !important;
-    border-radius: 0.375rem !important;
+  #search-results a,
+  #search-results-mobile-navbar a {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 0.75rem !important;
+    margin: 0 !important;
+    border-radius: 0.5rem !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    transition: background-color 0.15s ease !important;
+
   }
   
-  [data-theme="dark"] #search-results > li > a:focus,
-  [data-theme="dark"] #search-results-mobile > li > a:focus,
-  [data-theme="dark"] #search-results-mobile-navbar > li > a:focus {
-    background-color: rgb(var(--fallback-p,oklch(0.491 0.162 255.701))/0.3) !important;
-    outline: 2px solid rgb(var(--fallback-p,oklch(0.491 0.162 255.701))) !important;
-  }
-  @supports (-webkit-appearance: none) {
-    #search-results > li > a:focus,
-    #search-results-mobile > li > a:focus,
-    #search-results-mobile-navbar > li > a:focus {
-      background-color: #3b82f6 !important;
-      color: white !important;
-      box-shadow: 0 0 0 2px #3b82f6, inset 0 0 0 1px rgba(255,255,255,0.2) !important;
-    }
-    
-    [data-theme="dark"] #search-results > li > a:focus,
-    [data-theme="dark"] #search-results-mobile > li > a:focus,
-    [data-theme="dark"] #search-results-mobile-navbar > li > a:focus {
-      background-color: #60a5fa !important;
-      color: #1e293b !important;
-      box-shadow: 0 0 0 2px #60a5fa, inset 0 0 0 1px rgba(0,0,0,0.1) !important;
-    }
-  }
-  @media (min-width: 1024px) {
-    #sidebar-menu {
-      top: 4rem !important;
-    }
+  /* Hover states - simple and reliable */
+  #search-results a:hover,
+  #search-results-mobile-navbar a:hover {
+    background-color: #3b82f6 !important; /* Blue background */
+    color: white !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.15s ease !important;
   }
   
-  /* Dropdown and navigation */
+  #search-results a:hover *,
+  #search-results-mobile-navbar a:hover * {
+    color: white !important;
+  }
+  
+  /* Disable hover effects when in keyboard navigation mode */
+  #search-results.keyboard-navigation a:hover,
+  #search-results-mobile-navbar.keyboard-navigation a:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+  
+  #search-results.keyboard-navigation a:hover *,
+  #search-results-mobile-navbar.keyboard-navigation a:hover * {
+    color: inherit !important;
+  }
+  
+  /* Keyboard selection states - bright and obvious */
+  #search-results a.selected,
+  #search-results-mobile-navbar a.selected {
+    background-color: #1d4ed8 !important; /* Darker blue background */
+    color: white !important;
+    border-radius: 0.5rem !important;
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+    transition: all 0.15s ease !important;
+  }
+  
+  #search-results a.selected *,
+  #search-results-mobile-navbar a.selected * {
+    color: white !important;
+  }
+  
+  /* Dark theme adjustments */
+  [data-theme="dark"] #search-results a:hover,
+  [data-theme="dark"] #search-results-mobile-navbar a:hover {
+    background-color: #60a5fa !important; /* Lighter blue for dark theme */
+    color: #1e293b !important; /* Dark text on light background */
+  }
+  
+  [data-theme="dark"] #search-results a:hover *,
+  [data-theme="dark"] #search-results-mobile-navbar a:hover * {
+    color: #1e293b !important;
+  }
+  
+  /* Disable hover effects in keyboard mode for dark theme */
+  [data-theme="dark"] #search-results.keyboard-navigation a:hover,
+  [data-theme="dark"] #search-results-mobile-navbar.keyboard-navigation a:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+  
+  [data-theme="dark"] #search-results.keyboard-navigation a:hover *,
+  [data-theme="dark"] #search-results-mobile-navbar.keyboard-navigation a:hover * {
+    color: inherit !important;
+  }
+  
+  [data-theme="dark"] #search-results a.selected,
+  [data-theme="dark"] #search-results-mobile-navbar a.selected {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    outline-color: #60a5fa !important;
+  }
+  
+  [data-theme="dark"] #search-results a.selected *,
+  [data-theme="dark"] #search-results-mobile-navbar a.selected * {
+    color: white !important;
+  }
+
+  /* Position sidebar below sticky navbar */
+  .drawer-side {
+    top: 4rem !important; /* Height of sticky navbar */
+    height: calc(100vh - 4rem) !important; /* Full height minus navbar */
+    z-index: 40 !important; /* Below navbar z-50 */
+  }
+
+  /* Ensure drawer takes proper height for sticky footer */
+  .drawer {
+    min-height: 0 !important; /* Let flexbox handle the height */
+  }
+  
+  .drawer-content {
+    min-height: inherit !important;
+  }
+  
+  .drawer-content {
+    min-height: inherit !important;
+  }
+
+  /* Navigation and dropdown enhancements */
   details[open] summary svg {
     transform: rotate(180deg);
   }
   
-  /* Fix DaisyUI v5 dropdown arrow rotation for mobile page navigation */
   .dropdown:focus-within [role="button"] svg {
     transform: rotate(180deg);
   }

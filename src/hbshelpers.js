@@ -213,9 +213,15 @@ async function registerHelpers(handlebarsInstance, settings = null) {
         global.okidokiIncludes = new Map();
     }
 
-    // Search component helper - generates search input and results HTML
+        // Search component helper - DISABLED for mobile sidebar
     handlebarsInstance.registerHelper('searchComponent', function(options) {
         const variant = options.hash.variant || 'default';
+        
+        // Block mobile-sidebar variant completely
+        if (variant === 'mobile-sidebar') {
+            return new handlebarsInstance.SafeString('<!-- Mobile sidebar search disabled -->');
+        }
+        
         const placeholder = options.hash.placeholder || 'Search documentation...';
         const width = options.hash.width || 'auto';
         
@@ -228,14 +234,6 @@ async function registerHelpers(handlebarsInstance, settings = null) {
                 inputClasses = 'input input-sm w-32';
                 resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto';
                 containerClasses = 'dropdown dropdown-end';
-                break;
-                
-            case 'mobile-sidebar':
-                inputId = 'search-mobile';
-                resultsId = 'search-results-mobile';
-                inputClasses = 'input w-full mb-4';
-                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-full p-2 shadow hidden max-h-96 overflow-y-auto';
-                containerClasses = 'dropdown dropdown-top w-full';
                 break;
                 
             case 'desktop':
