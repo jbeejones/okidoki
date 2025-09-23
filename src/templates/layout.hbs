@@ -440,7 +440,7 @@
             </ul>
           </div>
         </div>
-              </div>
+  </div>
   
   <!-- Main content area with proper DaisyUI drawer layout -->
   <div class="flex-1 drawer {{#unless layout.hideMenu}}lg:drawer-open{{/unless}}">
@@ -450,10 +450,19 @@
     
     <!-- Main content -->
     <div class="drawer-content flex flex-col min-h-full">
+      {{#if (and layout.hideMenu layout.hideFooter)}}
+      <!-- Full-screen hero layout - no padding -->
+      <main>
+        {{#block "main"}}
+        {{/block}}
+      </main>
+      {{else}}
+      <!-- Standard layout with padding -->
       <main class="flex-1 p-4 lg:p-8">
         {{#block "main"}}
         {{/block}}
       </main>
+      {{/if}}
     </div>
     
     {{#unless layout.hideMenu}}

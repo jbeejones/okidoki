@@ -556,7 +556,13 @@ async function parseMarkdown(markdownContent, filename = null) {
     
     if (shouldUseHandlebars) {
         try {
-            let html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' });
+            // If customHTML is true, skip markdown parsing and use compiled content directly
+            let html;
+            if (props.customHTML) {
+                html = compiledBody; // Use Handlebars-compiled HTML directly
+            } else {
+                html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' }); // Normal markdown processing
+            }
             
             // Post-process HTML img tags to add baseUrl (markdown images are handled by renderer)
             const baseUrl = settings.site.baseUrl || '/';
@@ -603,7 +609,12 @@ async function parseMarkdown(markdownContent, filename = null) {
             const fileContext = filename ? ` in file: ${filename}` : '';
             console.error(`Handlebars compilation error${fileContext}:`, error);
             // Fall back to non-handlebars processing
-            const html = md.render(markdownBody, { baseUrl: settings.site.baseUrl || '/' });
+            let html;
+            if (props.customHTML) {
+                html = markdownBody; // Use raw content directly for custom HTML
+            } else {
+                html = md.render(markdownBody, { baseUrl: settings.site.baseUrl || '/' }); // Normal markdown processing
+            }
             
             // Extract headings from final HTML for navigation
             const headings = extractHeadingsFromHTML(html);
@@ -612,7 +623,13 @@ async function parseMarkdown(markdownContent, filename = null) {
             return { props: mappedProps, md: markdownBody, html };
         }
     } else {
-        let html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' });
+        // If customHTML is true, skip markdown parsing and use content directly
+        let html;
+        if (props.customHTML) {
+            html = compiledBody; // Use HTML content directly
+        } else {
+            html = md.render(compiledBody, { baseUrl: settings.site.baseUrl || '/' }); // Normal markdown processing
+        }
         
         // Post-process HTML img tags to add baseUrl (markdown images are handled by renderer)
         const baseUrl = settings.site.baseUrl || '/';
@@ -739,6 +756,7 @@ function renderPage(templateName, { props, html, page, id }) {
 
     // Determine layout configuration from frontmatter and/or sidebar config
     const layoutConfig = {
+        customHTML: props.customHTML || (sidebarItem && sidebarItem.customHTML) || false,
         hideMenu: props.hideMenu || props.hideSidebar || (sidebarItem && sidebarItem.hideMenu) || false,
         hideBreadcrumbs: props.hideBreadcrumbs || (sidebarItem && sidebarItem.hideBreadcrumbs) || false,
         hideFooter: props.hideFooter || (sidebarItem && sidebarItem.hideFooter) || false,

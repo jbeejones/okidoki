@@ -511,10 +511,16 @@ async function initCommand(argv) {
             logger.info('Created docs directory');
         }
 
-        // Create example markdown file only if it doesn't exist
+        // Copy beautiful homepage template only if it doesn't exist
         const indexPath = 'docs/index.md';
         if (!fs.existsSync(indexPath)) {
-            const exampleContent = `---
+            const templateIndexPath = path.join(packageDir, 'docs', 'index.md');
+            if (fs.existsSync(templateIndexPath)) {
+                fs.copyFileSync(templateIndexPath, indexPath);
+                logger.info('Created beautiful homepage from template');
+            } else {
+                // Fallback to simple content if template doesn't exist
+                const exampleContent = `---
 title: Welcome to Okidoki
 description: Your documentation is now ready
 ---
@@ -529,11 +535,150 @@ This is an example documentation page. Edit this file to get started with your d
 - Search functionality
 - Beautiful UI
 `;
-            fs.writeFileSync(indexPath, exampleContent);
-            logger.info('Created example documentation file');
+                fs.writeFileSync(indexPath, exampleContent);
+                logger.info('Created example documentation file');
+            }
         } else {
-            logger.info('Documentation file already exists, skipping example creation');
+            logger.info('Documentation file already exists, skipping homepage creation');
         }
+
+        // Copy start.md template only if it doesn't exist
+        const startPath = 'docs/start.md';
+        if (!fs.existsSync(startPath)) {
+            const templateStartPath = path.join(packageDir, 'docs', 'start.md');
+            if (fs.existsSync(templateStartPath)) {
+                fs.copyFileSync(templateStartPath, startPath);
+                logger.info('Created start page from template');
+            } else {
+                // Fallback content for start page
+                const startContent = `---
+title: Getting Started with OkiDoki
+description: Complete guide to get started with OkiDoki documentation generator
+---
+
+# Getting Started with OkiDoki
+
+Welcome to **OkiDoki** - an open source, simple, fast documentation generator that turns your markdown files into beautiful documentation sites.
+
+## 🚀 Get Running in 30 Seconds
+
+### 1. Install OkiDoki Globally
+\`\`\`bash
+npm install -g okidoki
+\`\`\`
+
+### 2. Create Your Project Directory
+\`\`\`bash
+mkdir mydocs && cd mydocs
+\`\`\`
+
+### 3. Initialize Your Documentation
+\`\`\`bash
+okidoki init
+\`\`\`
+
+### 4. Generate Your Documentation
+\`\`\`bash
+okidoki generate
+\`\`\`
+
+### 5. Serve and View Your Site
+\`\`\`bash
+npx serve dist
+\`\`\`
+
+## 📚 Learn More
+
+- **[Official Documentation](https://jbeejones.github.io/okidoki-website/index.html)** - Complete reference and examples
+- **[Help & Support](/help)** - Troubleshooting and FAQ
+
+Ready to build amazing documentation? 🚀 Start editing your markdown files!
+`;
+                fs.writeFileSync(startPath, startContent);
+                logger.info('Created start page');
+            }
+        } else {
+            logger.info('Start page already exists, skipping creation');
+        }
+
+        // Create mock files for sidebar links
+        const mockFiles = [
+            {
+                path: 'docs/test.md',
+                content: `---
+title: Test Page
+description: This is a test page
+---
+
+# Test Page
+
+This is a test page to demonstrate the documentation structure.
+
+## Testing Features
+
+- Link navigation
+- Content structure
+- Page layout
+
+Feel free to edit this content to match your needs.
+`
+            },
+            {
+                path: 'docs/blog.md', 
+                content: `---
+title: Blog
+description: Latest updates and news
+---
+
+# Blog
+
+Stay updated with the latest news and updates.
+
+## Recent Posts
+
+- Welcome to our new documentation
+- Getting started guide
+- Feature updates
+
+*More posts coming soon!*
+`
+            },
+            {
+                path: 'docs/help.md',
+                content: `---
+title: Help & Support
+description: Get help and support
+---
+
+# Help & Support
+
+Need help? Here are some resources to get you started.
+
+## Common Questions
+
+### How do I get started?
+Check out our [Getting Started](/start) guide.
+
+### Where can I find more examples?
+Browse our documentation for more examples and tutorials.
+
+## Support
+
+- Check the documentation
+- Search existing issues
+- Create a new issue if needed
+`
+            }
+        ];
+
+        mockFiles.forEach(file => {
+            if (!fs.existsSync(file.path)) {
+                fs.writeFileSync(file.path, file.content);
+                logger.info(`Created ${file.path}`);
+            } else {
+                logger.info(`${file.path} already exists, skipping creation`);
+            }
+        });
 
         // Create okidoki configuration only if it doesn't exist
         if (!fs.existsSync(configPath)) {
@@ -587,10 +732,13 @@ navigation:
 menu:
   - title: Getting Started
     document: /start.md
-  - title: Test
+  - title: Test Page
     document: /test.md 
 
+# Top navigation bar items
 navbar:
+  - title: Home
+    document: /index.html
   - title: Blog
     document: /blog.md
   - title: Help
@@ -606,6 +754,10 @@ footer:
         url: "https://github.com/yourusername/your-repo/issues"
       - label: "Discussions"
         url: "https://github.com/yourusername/your-repo/discussions"
+  - title: ""
+    items:
+      - label: "Created with Okidoki"
+        url: "https://okidoki.dev"
 `;
             fs.writeFileSync(sidebarsPath, sidebarsConfig);
             logger.info(`Created ${sidebarsPath} navigation file`);

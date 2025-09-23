@@ -221,11 +221,3 @@ vercel --prod
 **Firebase Hosting**: Google's hosting solution with easy CLI deployment.
 
 All these platforms support custom domains and HTTPS out of the box. Your documentation will be fast and globally distributed! 🚀
-
-## Why I Built OkiDoki
-
-I got tired of existing documentation tools being either too simple (basic markdown-to-HTML converters) or overly complex (requiring extensive configuration for basic features). Most tools make you choose between beautiful output and simplicity.
-
-When writing API docs, I kept copying the same code examples across multiple language tabs manually. I wanted a tool that could handle frontmatter variables and multi-language code blocks natively, without plugins or complex setup.
-
-The final straw was setting up search functionality - it always required external services, complex indexing, or heavy JavaScript frameworks. I wanted something that just worked out of the box with static files.

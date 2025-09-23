@@ -1,7 +1,16 @@
 {{#extend "layout"}}
 {{#content "main"}}  
+    {{#if layout.customHTML}}
+    <!-- Custom HTML layout - no prose constraints -->
+    {{{html}}}
+    {{else}}
+    {{#if (and layout.hideMenu layout.hideFooter)}}
+    <!-- Full-screen hero layout - no padding or margins -->
+    {{{html}}}
+    {{else}}
+    <!-- Standard page layout -->
     {{#unless layout.hideBreadcrumbs}}
-    <div class="breadcrumbs text-sm pl-4 mt-6 lg:mt-6">
+    <div class="breadcrumbs text-sm pl-4 mt-4 lg:mt-4">
       <ul>
         <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
         {{#each breadcrumbs}}
@@ -14,7 +23,7 @@
     {{#if layout.pagenav}}
     <!-- Mobile dropdown navigation -->
     {{#if pageNavigation}}
-    <div class="lg:hidden mb-6 relative z-50">
+    <div class="lg:hidden mb-4 relative z-50">
       <div class="dropdown dropdown-bottom w-full">
         <div tabindex="0" role="button" class="btn btn-outline w-full justify-between">
           <span class="text-sm font-semibold uppercase tracking-wide">On This Page</span>
@@ -48,20 +57,18 @@
       </div>
     </div>
     {{/if}}
-    
-        <!-- Layout container for content + navigation -->
-    <div class="flex-nav-container" style="display: flex; gap: 24px;">
-      <!-- Main content -->
-      <div style="flex: 1; min-width: 0;">
-        <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-2 lg:m-2 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
+
+    <!-- Content with navigation -->
+    <div class="flex flex-col lg:flex-row lg:gap-6">
+      <div class="flex-1 order-2 lg:order-1">
+        <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-1 lg:m-1 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
           {{{html}}}    
         </div>
       </div>
       
-      <!-- Right column navigation (desktop only) -->
       {{#if pageNavigation}}
-      <div class="desktop-nav-fixed" style="width: 300px; flex-shrink: 0;">
-        <div style="position: sticky; top: 120px; max-height: calc(100vh - 140px); overflow-y: auto;">
+      <div class="order-1 lg:order-2 lg:w-64 lg:flex-shrink-0 hidden lg:block">
+        <div class="sticky top-20">
           <div class="bg-base-100 border-l border-base-300 pl-4">
             <div class="pb-3 border-b border-base-300 mb-4">
               <h3 class="text-sm font-semibold text-base-content mb-0 uppercase tracking-wide">On This Page</h3>
@@ -98,9 +105,11 @@
     </div>
     {{else}}
     <!-- Default layout without navigation -->
-    <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-2 lg:m-2 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
+    <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-1 lg:m-1 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
       {{{html}}}    
     </div>
+    {{/if}}
+    {{/if}}
     {{/if}}
 {{/content}}
 {{/extend}}

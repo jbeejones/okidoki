@@ -36,6 +36,14 @@ async function registerHelpers(handlebarsInstance, settings = null) {
         return a === b ? options.fn(this) : options.inverse(this);
     });
 
+    // Register the and Handlebars helper for conditional logic
+    handlebarsInstance.registerHelper('and', function (...args) {
+        // Remove the options object from the end of the arguments
+        const options = args.pop();
+        // Check if all arguments are truthy
+        return args.every(arg => !!arg);
+    });
+
     // Helpers
     handlebarsInstance.registerHelper('isArray', function (value, options) {
         if (Array.isArray(value)) {
