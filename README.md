@@ -10,7 +10,9 @@
 
 Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
-![okidoki screenshot](./screenshots/okidoki.png)
+![okidoki startpage screenshot](./screenshots/okidoki-startpage.jpeg)
+
+![okidoki api docs screenshot](./screenshots/okidoki.png)
 
 <img src="./screenshots/okidoki-responsive.png" alt="okidoki screenshot responsive" width="300">
 
