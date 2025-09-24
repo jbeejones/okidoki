@@ -59,8 +59,8 @@
     {{/if}}
 
     <!-- Content with navigation -->
-    <div class="flex flex-col lg:flex-row lg:gap-6">
-      <div class="flex-1 order-2 lg:order-1">
+    <div class="flex flex-col lg:flex-row lg:gap-6 min-w-0">
+      <div class="flex-1 order-2 lg:order-1 min-w-0 overflow-hidden">
         <div class="prose dark:prose-invert {{#if layout.fullWidth}}!max-w-none{{else}}!max-w-[920px]{{/if}} p-1 lg:m-1 prose-td:[&[align=right]]:text-right prose-td:[&[align=center]]:text-center prose-th:[&[align=right]]:text-right prose-th:[&[align=center]]:text-center">
           {{{html}}}    
         </div>
