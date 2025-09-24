@@ -61,11 +61,14 @@ After running `okidoki init`, you'll have:
 
 ```
 mydocs/
-├── okidoki.yaml      # Main configuration
-├── sidebars.yaml     # Navigation structure
-├── docs/             # Your markdown files
-│   └── index.md      # Homepage content
-└── dist/             # Generated site (after build)
+├── docs/
+│   ├── index.md        # Beautiful homepage
+│   ├── start.md        # This getting started guide
+│   ├── help.md         # Help and support page
+│   └── test.md         # Sample content page
+├── okidoki.yaml        # Main configuration
+├── sidebars.yaml       # Navigation structure
+└── dist/               # Generated site (after build)
 ```
 
 ## Basic Configuration
