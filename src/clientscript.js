@@ -671,6 +671,93 @@ window.testCacheValidation = async function() {
     return isValid;
 };
 
+// Test search functionality with debugging
+window.testSearch = function(query) {
+    console.log('🧪 Testing search with query:', query);
+    if (!idx) {
+        console.log('❌ Search index not loaded');
+        return null;
+    }
+    
+    const results = updateSearchResults('search-results', query);
+    console.log('🧪 Search test completed');
+    return results;
+};
+
+// Debug function to explore search index contents
+window.exploreSearchIndex = function(searchTerm = '') {
+    console.log('🕵️ Exploring search index...');
+    
+    if (!searchData) {
+        console.log('❌ Search data not loaded');
+        return;
+    }
+    
+    const allDocs = Object.keys(searchData);
+    console.log(`📚 Total documents in search index: ${allDocs.length}`);
+    
+    if (searchTerm) {
+        console.log(`🔍 Searching for documents containing "${searchTerm}":`);
+        allDocs.forEach(docId => {
+            const doc = searchData[docId];
+            const allText = Object.values(doc).join(' ').toLowerCase();
+            if (allText.includes(searchTerm.toLowerCase())) {
+                console.log(`✅ Found in document ${docId}:`, {
+                    title: doc.title,
+                    description: doc.description,
+                    path: doc.path,
+                    contentPreview: (doc.content || '').substring(0, 100) + '...'
+                });
+            }
+        });
+    } else {
+        // Show first 10 documents
+        console.log('📄 First 10 documents:');
+        allDocs.slice(0, 10).forEach(docId => {
+            const doc = searchData[docId];
+            console.log(`  - ${docId}: "${doc?.title || 'NO TITLE'}"`);
+        });
+        
+        if (allDocs.length > 10) {
+            console.log(`  ... and ${allDocs.length - 10} more documents`);
+            console.log('📄 Remaining documents:');
+            allDocs.slice(10).forEach(docId => {
+                const doc = searchData[docId];
+                console.log(`  - ${docId}: "${doc?.title || 'NO TITLE'}"`);
+            });
+        }
+    }
+    
+    return { totalDocs: allDocs.length, allDocIds: allDocs };
+};
+
+// Debug function to examine a specific document
+window.examineDocument = function(docId) {
+    console.log(`🔍 Examining document ${docId}:`);
+    
+    if (!searchData) {
+        console.log('❌ Search data not loaded');
+        return;
+    }
+    
+    const doc = searchData[docId];
+    if (!doc) {
+        console.log(`❌ Document ${docId} not found`);
+        return;
+    }
+    
+    console.log('📄 Document details:');
+    Object.keys(doc).forEach(key => {
+        const value = doc[key];
+        const preview = typeof value === 'string' && value.length > 100 
+            ? value.substring(0, 100) + '...' 
+            : value;
+        console.log(`  ${key}:`, preview);
+    });
+    
+    return doc;
+};
+
 // Force refresh search cache
 window.forceRefreshSearchCache = async function() {
     console.log('Force refreshing search cache...');
@@ -1053,31 +1140,58 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
             results = cachedResults;
         } else {
             // Try multiple search strategies for better matching
+            const words = cleanQuery.split(/\s+/).filter(word => word.length > 0);
+            const isMultiWord = words.length > 1;
             
-            // Strategy 1: Exact match
-            try {
-                results = idx.search(cleanQuery);
-            } catch (e) {
-                // Ignore exact search errors
-            }
+
             
-            // Strategy 2: If no results, try wildcard on each word
-            if (results.length === 0) {
-                const wildcardQuery = cleanQuery.split(' ').map(word => `${word}*`).join(' ');
+            // For multi-word queries, use AND logic by requiring all terms
+            if (isMultiWord) {
+                // Try exact search first with AND requirement
+                const andQuery = words.map(word => `+${word}`).join(' ');
                 try {
-                    results = idx.search(wildcardQuery);
+                    results = idx.search(andQuery);
                 } catch (e) {
-                    // Ignore wildcard search errors
+                    // If AND search fails, fall back to OR search and filter results
+                    try {
+                        results = idx.search(cleanQuery);
+                        // Filter results to ensure all words are present
+                        results = results.filter(result => {
+                            const doc = searchData[result.ref];
+                            if (!doc) return false;
+                            
+                            // Create searchable text from all document fields
+                            const allFields = Object.values(doc).filter(value => 
+                                typeof value === 'string' && value.length > 0
+                            );
+                            const searchableText = allFields.join(' ').toLowerCase();
+                            
+                            // Check if ALL words are present
+                            return words.every(word => 
+                                searchableText.includes(word.toLowerCase())
+                            );
+                        });
+                    } catch (e2) {
+                        // If all else fails, return empty results
+                        results = [];
+                    }
                 }
-            }
-            
-            // Strategy 3: If still no results, try fuzzy matching
-            if (results.length === 0) {
-                const fuzzyQuery = cleanQuery.split(' ').map(word => `${word}~1`).join(' ');
+            } else {
+                // Single word - use normal search with fallbacks
                 try {
-                    results = idx.search(fuzzyQuery);
+                    results = idx.search(cleanQuery);
                 } catch (e) {
-                    // Ignore fuzzy search errors
+                    // Try with wildcard
+                    try {
+                        results = idx.search(cleanQuery + '*');
+                    } catch (e2) {
+                        // Try with fuzzy match
+                        try {
+                            results = idx.search(cleanQuery + '~1');
+                        } catch (e3) {
+                            results = [];
+                        }
+                    }
                 }
             }
         }

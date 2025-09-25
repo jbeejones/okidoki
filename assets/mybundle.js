@@ -2243,6 +2243,74 @@
     console.log("\u{1F9EA} Manual validation result:", isValid ? "VALID" : "INVALID");
     return isValid;
   };
+  window.testSearch = function(query) {
+    console.log("\u{1F9EA} Testing search with query:", query);
+    if (!idx) {
+      console.log("\u274C Search index not loaded");
+      return null;
+    }
+    const results = updateSearchResults("search-results", query);
+    console.log("\u{1F9EA} Search test completed");
+    return results;
+  };
+  window.exploreSearchIndex = function(searchTerm = "") {
+    console.log("\u{1F575}\uFE0F Exploring search index...");
+    if (!searchData) {
+      console.log("\u274C Search data not loaded");
+      return;
+    }
+    const allDocs = Object.keys(searchData);
+    console.log(`\u{1F4DA} Total documents in search index: ${allDocs.length}`);
+    if (searchTerm) {
+      console.log(`\u{1F50D} Searching for documents containing "${searchTerm}":`);
+      allDocs.forEach((docId) => {
+        const doc = searchData[docId];
+        const allText = Object.values(doc).join(" ").toLowerCase();
+        if (allText.includes(searchTerm.toLowerCase())) {
+          console.log(`\u2705 Found in document ${docId}:`, {
+            title: doc.title,
+            description: doc.description,
+            path: doc.path,
+            contentPreview: (doc.content || "").substring(0, 100) + "..."
+          });
+        }
+      });
+    } else {
+      console.log("\u{1F4C4} First 10 documents:");
+      allDocs.slice(0, 10).forEach((docId) => {
+        const doc = searchData[docId];
+        console.log(`  - ${docId}: "${doc?.title || "NO TITLE"}"`);
+      });
+      if (allDocs.length > 10) {
+        console.log(`  ... and ${allDocs.length - 10} more documents`);
+        console.log("\u{1F4C4} Remaining documents:");
+        allDocs.slice(10).forEach((docId) => {
+          const doc = searchData[docId];
+          console.log(`  - ${docId}: "${doc?.title || "NO TITLE"}"`);
+        });
+      }
+    }
+    return { totalDocs: allDocs.length, allDocIds: allDocs };
+  };
+  window.examineDocument = function(docId) {
+    console.log(`\u{1F50D} Examining document ${docId}:`);
+    if (!searchData) {
+      console.log("\u274C Search data not loaded");
+      return;
+    }
+    const doc = searchData[docId];
+    if (!doc) {
+      console.log(`\u274C Document ${docId} not found`);
+      return;
+    }
+    console.log("\u{1F4C4} Document details:");
+    Object.keys(doc).forEach((key) => {
+      const value = doc[key];
+      const preview = typeof value === "string" && value.length > 100 ? value.substring(0, 100) + "..." : value;
+      console.log(`  ${key}:`, preview);
+    });
+    return doc;
+  };
   window.forceRefreshSearchCache = async function() {
     console.log("Force refreshing search cache...");
     clearSearchCache();
@@ -2518,22 +2586,43 @@
       if (cachedResults) {
         results = cachedResults;
       } else {
-        try {
-          results = idx.search(cleanQuery);
-        } catch (e) {
-        }
-        if (results.length === 0) {
-          const wildcardQuery = cleanQuery.split(" ").map((word) => `${word}*`).join(" ");
+        const words = cleanQuery.split(/\s+/).filter((word) => word.length > 0);
+        const isMultiWord = words.length > 1;
+        if (isMultiWord) {
+          const andQuery = words.map((word) => `+${word}`).join(" ");
           try {
-            results = idx.search(wildcardQuery);
+            results = idx.search(andQuery);
           } catch (e) {
+            try {
+              results = idx.search(cleanQuery);
+              results = results.filter((result) => {
+                const doc = searchData[result.ref];
+                if (!doc) return false;
+                const allFields = Object.values(doc).filter(
+                  (value) => typeof value === "string" && value.length > 0
+                );
+                const searchableText = allFields.join(" ").toLowerCase();
+                return words.every(
+                  (word) => searchableText.includes(word.toLowerCase())
+                );
+              });
+            } catch (e2) {
+              results = [];
+            }
           }
-        }
-        if (results.length === 0) {
-          const fuzzyQuery = cleanQuery.split(" ").map((word) => `${word}~1`).join(" ");
+        } else {
           try {
-            results = idx.search(fuzzyQuery);
+            results = idx.search(cleanQuery);
           } catch (e) {
+            try {
+              results = idx.search(cleanQuery + "*");
+            } catch (e2) {
+              try {
+                results = idx.search(cleanQuery + "~1");
+              } catch (e3) {
+                results = [];
+              }
+            }
           }
         }
       }
