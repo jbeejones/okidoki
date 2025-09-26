@@ -10,7 +10,10 @@
 
 Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
-![okidoki startpage screenshot](./screenshots/okidoki-startpage.jpeg)
+<div style="border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)">
+    <img src="./screenshots/okidoki-startpage.jpeg" alt="okidoki start page" style="border-radius: 8px; display: block; width: 100%">
+  </div>
+
 
 ![okidoki api docs screenshot](./screenshots/okidoki.png)
 
