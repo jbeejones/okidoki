@@ -2815,7 +2815,31 @@
   });
   function markActiveMenuItems() {
     const currentPath = window.location.pathname;
-    const menuItems = document.querySelectorAll("#sidebar-menu ul li a");
+    const possibleSelectors = [
+      ".drawer-side a",
+      // Main sidebar container
+      "aside a",
+      // Sidebar aside element  
+      ".menu.p-4 a",
+      // Specific sidebar menu class
+      "#sidebar-menu ul li a",
+      "#sidebar-menu a",
+      ".sidebar a",
+      "nav a",
+      // Fallback to nav (may pick up wrong navigation)
+      ".menu a"
+    ];
+    let menuItems = [];
+    for (const selector of possibleSelectors) {
+      const items = document.querySelectorAll(selector);
+      if (items.length > 0) {
+        menuItems = items;
+        break;
+      }
+    }
+    if (menuItems.length === 0) {
+      return;
+    }
     menuItems.forEach((item) => {
       const href = item.getAttribute("href");
       if (!href) return;
@@ -2835,6 +2859,114 @@
     });
   }
   document.addEventListener("DOMContentLoaded", markActiveMenuItems);
+  function initializePageNavigationSync() {
+    const headings = document.querySelectorAll("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]");
+    const navLinks = document.querySelectorAll('.fixed [href^="#"]');
+    if (headings.length === 0 || navLinks.length === 0) {
+      return;
+    }
+    const navLinkMap = /* @__PURE__ */ new Map();
+    navLinks.forEach((link) => {
+      const href = link.getAttribute("href");
+      if (href && href.startsWith("#")) {
+        const targetId = href.substring(1);
+        navLinkMap.set(targetId, link);
+      }
+    });
+    function updateActiveNavItem(activeHeadingId) {
+      if (!activeHeadingId || !navLinkMap.has(activeHeadingId)) {
+        return;
+      }
+      navLinks.forEach((link) => {
+        link.classList.remove("nav-active");
+        link.style.fontWeight = "";
+        link.style.color = "";
+      });
+      const activeNavLink = navLinkMap.get(activeHeadingId);
+      if (activeNavLink) {
+        activeNavLink.classList.add("nav-active");
+        activeNavLink.style.fontWeight = "bold";
+        activeNavLink.style.color = "hsl(var(--p))";
+        const navContainer = activeNavLink.closest('[style*="overflow-y"]');
+        if (navContainer) {
+          const linkTop = activeNavLink.offsetTop;
+          const linkHeight = activeNavLink.offsetHeight;
+          const containerScrollTop = navContainer.scrollTop;
+          const containerHeight = navContainer.clientHeight;
+          if (linkTop < containerScrollTop || linkTop + linkHeight > containerScrollTop + containerHeight) {
+            navContainer.scrollTop = linkTop - containerHeight / 2 + linkHeight / 2;
+          }
+        }
+      }
+    }
+    let currentActiveId = null;
+    let updateTimer = null;
+    function ensureActiveSelection() {
+      if (!currentActiveId && headings.length > 0) {
+        currentActiveId = headings[0].id;
+        updateActiveNavItem(currentActiveId);
+      }
+    }
+    function debouncedUpdateActiveItem(headingId) {
+      if (updateTimer) clearTimeout(updateTimer);
+      updateTimer = setTimeout(() => {
+        if (headingId && headingId !== currentActiveId && navLinkMap.has(headingId)) {
+          currentActiveId = headingId;
+          updateActiveNavItem(headingId);
+        } else if (!currentActiveId) {
+          ensureActiveSelection();
+        }
+      }, 100);
+    }
+    function findActiveHeading() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const viewportHeight = window.innerHeight;
+      const triggerPoint = scrollTop + viewportHeight * 0.25;
+      let activeHeading = null;
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const heading = headings[i];
+        const rect = heading.getBoundingClientRect();
+        const headingTop = scrollTop + rect.top;
+        if (headingTop <= triggerPoint) {
+          activeHeading = heading;
+          break;
+        }
+      }
+      if (!activeHeading && scrollTop < 100 && headings.length > 0) {
+        activeHeading = headings[0];
+      }
+      return activeHeading;
+    }
+    let scrollTimer = null;
+    function handleScroll() {
+      if (scrollTimer) return;
+      scrollTimer = setTimeout(() => {
+        const activeHeading = findActiveHeading();
+        if (activeHeading && activeHeading.id) {
+          debouncedUpdateActiveItem(activeHeading.id);
+        }
+        scrollTimer = null;
+      }, 50);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    setTimeout(() => {
+      const activeHeading = findActiveHeading();
+      if (activeHeading && activeHeading.id && navLinkMap.has(activeHeading.id)) {
+        currentActiveId = activeHeading.id;
+        updateActiveNavItem(activeHeading.id);
+      } else {
+        ensureActiveSelection();
+      }
+    }, 100);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (updateTimer) clearTimeout(updateTimer);
+      if (scrollTimer) clearTimeout(scrollTimer);
+    };
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(initializePageNavigationSync, 500);
+  });
 })();
 /*! Bundled license information:
 

@@ -68,12 +68,12 @@
       
       {{#if pageNavigation}}
       <div class="order-1 lg:order-2 lg:w-64 lg:flex-shrink-0 hidden lg:block">
-        <div class="sticky top-20">
-          <div class="bg-base-100 border-l border-base-300 pl-4">
+        <div class="fixed top-20 right-4 w-60 h-[calc(100vh-6rem)] bg-base-100 border-l border-base-300 shadow-sm z-10">
+          <div class="p-4">
             <div class="pb-3 border-b border-base-300 mb-4">
               <h3 class="text-sm font-semibold text-base-content mb-0 uppercase tracking-wide">On This Page</h3>
             </div>
-            <div>
+            <div style="height: calc(100vh - 180px); overflow-y: scroll;">
               <ul class="menu menu-sm w-full">
                 {{#each pageNavigation}}
                   <li>

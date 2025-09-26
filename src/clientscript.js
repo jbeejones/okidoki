@@ -1455,7 +1455,30 @@ document.addEventListener('click', function(event) {
 // Function to mark active menu items based on current URL
 function markActiveMenuItems() {
     const currentPath = window.location.pathname;
-    const menuItems = document.querySelectorAll('#sidebar-menu ul li a');
+    // Try multiple selectors to find menu items - prioritize sidebar navigation
+    const possibleSelectors = [
+        '.drawer-side a',  // Main sidebar container
+        'aside a',         // Sidebar aside element  
+        '.menu.p-4 a',     // Specific sidebar menu class
+        '#sidebar-menu ul li a',
+        '#sidebar-menu a',  
+        '.sidebar a',
+        'nav a',           // Fallback to nav (may pick up wrong navigation)
+        '.menu a'
+    ];
+    
+    let menuItems = [];
+    for (const selector of possibleSelectors) {
+        const items = document.querySelectorAll(selector);
+        if (items.length > 0) {
+            menuItems = items;
+            break;
+        }
+    }
+    
+    if (menuItems.length === 0) {
+        return;
+    }
     
     menuItems.forEach(item => {
         const href = item.getAttribute('href');
@@ -1474,6 +1497,7 @@ function markActiveMenuItems() {
         
         if (isActive) {
             item.classList.add('menu-active');
+            
             // If the item is inside a details element, open it
             const details = item.closest('details');
             if (details) {
@@ -1488,7 +1512,164 @@ function markActiveMenuItems() {
 // Run on page load
 document.addEventListener('DOMContentLoaded', markActiveMenuItems);
 
+
+
 // Note: Layout positioning now handled purely with Tailwind CSS classes
 // No JavaScript needed for sidebar height or footer positioning
+
+// Page navigation scroll sync functionality
+function initializePageNavigationSync() {
+    // Find all headings that have IDs (these are the navigable sections)
+    const headings = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+    const navLinks = document.querySelectorAll('.fixed [href^="#"]'); // Page nav links
+    
+    if (headings.length === 0 || navLinks.length === 0) {
+        return; // No headings or nav links to sync
+    }
+    
+    // Create a map of heading IDs to nav links for quick lookup
+    const navLinkMap = new Map();
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+            const targetId = href.substring(1);
+            navLinkMap.set(targetId, link);
+        }
+    });
+    
+    // Function to update active nav item
+    function updateActiveNavItem(activeHeadingId) {
+        if (!activeHeadingId || !navLinkMap.has(activeHeadingId)) {
+            return; // Don't clear selection if we don't have a valid replacement
+        }
+        
+        // Remove active class from all nav links
+        navLinks.forEach(link => {
+            link.classList.remove('nav-active');
+            link.style.fontWeight = '';
+            link.style.color = '';
+        });
+        
+        // Add active class to current nav link
+        const activeNavLink = navLinkMap.get(activeHeadingId);
+        if (activeNavLink) {
+            activeNavLink.classList.add('nav-active');
+            activeNavLink.style.fontWeight = 'bold';
+            activeNavLink.style.color = 'hsl(var(--p))'; // Primary color
+            
+            // Scroll the nav link into view if it's outside the visible area
+            const navContainer = activeNavLink.closest('[style*="overflow-y"]');
+            if (navContainer) {
+                const linkTop = activeNavLink.offsetTop;
+                const linkHeight = activeNavLink.offsetHeight;
+                const containerScrollTop = navContainer.scrollTop;
+                const containerHeight = navContainer.clientHeight;
+                
+                // Check if link is outside visible area
+                if (linkTop < containerScrollTop || linkTop + linkHeight > containerScrollTop + containerHeight) {
+                    // Scroll to center the active link
+                    navContainer.scrollTop = linkTop - containerHeight / 2 + linkHeight / 2;
+                }
+            }
+        }
+    }
+    
+    let currentActiveId = null;
+    let updateTimer = null;
+    
+    // Initialize with first heading to ensure something is always active
+    function ensureActiveSelection() {
+        if (!currentActiveId && headings.length > 0) {
+            currentActiveId = headings[0].id;
+            updateActiveNavItem(currentActiveId);
+        }
+    }
+    
+    // Debounced function to update active navigation
+    function debouncedUpdateActiveItem(headingId) {
+        if (updateTimer) clearTimeout(updateTimer);
+        
+        updateTimer = setTimeout(() => {
+            if (headingId && headingId !== currentActiveId && navLinkMap.has(headingId)) {
+                currentActiveId = headingId;
+                updateActiveNavItem(headingId);
+            } else if (!currentActiveId) {
+                // Fallback: ensure we always have something active
+                ensureActiveSelection();
+            }
+        }, 100); // 100ms debounce
+    }
+    
+    // More stable heading detection based on scroll position
+    function findActiveHeading() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const viewportHeight = window.innerHeight;
+        const triggerPoint = scrollTop + viewportHeight * 0.25; // 25% down from top of viewport
+        
+        // Find the last heading that's above the trigger point
+        let activeHeading = null;
+        
+        for (let i = headings.length - 1; i >= 0; i--) {
+            const heading = headings[i];
+            const rect = heading.getBoundingClientRect();
+            const headingTop = scrollTop + rect.top;
+            
+            if (headingTop <= triggerPoint) {
+                activeHeading = heading;
+                break;
+            }
+        }
+        
+        // For the very top of the page, use the first heading
+        if (!activeHeading && scrollTop < 100 && headings.length > 0) {
+            activeHeading = headings[0];
+        }
+        
+        return activeHeading;
+    }
+    
+    // Use scroll event with throttling instead of Intersection Observer for more stability
+    let scrollTimer = null;
+    function handleScroll() {
+        if (scrollTimer) return;
+        
+        scrollTimer = setTimeout(() => {
+            const activeHeading = findActiveHeading();
+            if (activeHeading && activeHeading.id) {
+                debouncedUpdateActiveItem(activeHeading.id);
+            }
+            // If no active heading found, keep the current selection (better UX)
+            scrollTimer = null;
+        }, 50); // Throttle to every 50ms
+    }
+    
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial sync on page load - ensure something is always active
+    setTimeout(() => {
+        const activeHeading = findActiveHeading();
+        if (activeHeading && activeHeading.id && navLinkMap.has(activeHeading.id)) {
+            currentActiveId = activeHeading.id;
+            updateActiveNavItem(activeHeading.id);
+        } else {
+            // Fallback: activate the first heading if no clear active heading
+            ensureActiveSelection();
+        }
+    }, 100);
+    
+    // Cleanup function for page navigation
+    return () => {
+        window.removeEventListener('scroll', handleScroll);
+        if (updateTimer) clearTimeout(updateTimer);
+        if (scrollTimer) clearTimeout(scrollTimer);
+    };
+}
+
+// Initialize page navigation sync when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for the page to fully load including dynamic content
+    setTimeout(initializePageNavigationSync, 500);
+});
 
 
