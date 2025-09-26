@@ -2887,16 +2887,6 @@
         activeNavLink.classList.add("nav-active");
         activeNavLink.style.fontWeight = "bold";
         activeNavLink.style.color = "hsl(var(--p))";
-        const navContainer = activeNavLink.closest('[style*="overflow-y"]');
-        if (navContainer) {
-          const linkTop = activeNavLink.offsetTop;
-          const linkHeight = activeNavLink.offsetHeight;
-          const containerScrollTop = navContainer.scrollTop;
-          const containerHeight = navContainer.clientHeight;
-          if (linkTop < containerScrollTop || linkTop + linkHeight > containerScrollTop + containerHeight) {
-            navContainer.scrollTop = linkTop - containerHeight / 2 + linkHeight / 2;
-          }
-        }
       }
     }
     let currentActiveId = null;

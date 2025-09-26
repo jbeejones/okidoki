@@ -1556,21 +1556,7 @@ function initializePageNavigationSync() {
             activeNavLink.classList.add('nav-active');
             activeNavLink.style.fontWeight = 'bold';
             activeNavLink.style.color = 'hsl(var(--p))'; // Primary color
-            
-            // Scroll the nav link into view if it's outside the visible area
-            const navContainer = activeNavLink.closest('[style*="overflow-y"]');
-            if (navContainer) {
-                const linkTop = activeNavLink.offsetTop;
-                const linkHeight = activeNavLink.offsetHeight;
-                const containerScrollTop = navContainer.scrollTop;
-                const containerHeight = navContainer.clientHeight;
-                
-                // Check if link is outside visible area
-                if (linkTop < containerScrollTop || linkTop + linkHeight > containerScrollTop + containerHeight) {
-                    // Scroll to center the active link
-                    navContainer.scrollTop = linkTop - containerHeight / 2 + linkHeight / 2;
-                }
-            }
+            // No auto-scrolling - let users navigate the page nav manually
         }
     }
     
