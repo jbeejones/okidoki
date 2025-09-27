@@ -63,7 +63,7 @@
     "daisyui": "^5.1.13",
     "esbuild": "^0.25.1",
     "nodemon": "^3.1.4",
-    "tailwindcss": "^4.1.13"
+    "tailwindcss": "^3.4.17"
   },
   "files": [
     "src/",
