@@ -96,87 +96,99 @@
     }
   }
 
-  /* Dark theme typography overrides */
-  [data-theme='dark'] & h1 {
-    color: #e2e8f0 !important;
-  }
+}
 
-  [data-theme='dark'] & h2 {
-    color: #e2e8f0 !important;
-  }
+/* Dark theme typography overrides */
+[data-theme='dark'] .prose h1 {
+  color: #e2e8f0 !important;
+}
 
-  [data-theme='dark'] & h3 {
-    color: #e2e8f0 !important;
-  }
+[data-theme='dark'] .prose h2 {
+  color: #e2e8f0 !important;
+}
 
-  [data-theme='dark'] & h4 {
-    color: #e2e8f0 !important;
-  }
+[data-theme='dark'] .prose h3 {
+  color: #e2e8f0 !important;
+}
 
-  [data-theme='dark'] & h5 {
-    color: #e2e8f0 !important;
-  }
+[data-theme='dark'] .prose h4 {
+  color: #e2e8f0 !important;
+}
 
-  [data-theme='dark'] & h6 {
-    color: #e2e8f0 !important;
-  }
-  [data-theme='dark'] & p {
-    color: #cbd5e1 !important;
-  }
-  [data-theme='dark'] & ul {
-    color: #cbd5e1 !important;
-  }
+[data-theme='dark'] .prose h5 {
+  color: #e2e8f0 !important;
+}
 
-  [data-theme='dark'] & ol {
-    color: #cbd5e1 !important;
-  }
-  [data-theme='dark'] & li {
-    color: #cbd5e1 !important;
-  }
-  [data-theme='dark'] & table {
-    color: #cbd5e1 !important;
-  }
-  [data-theme='dark'] & th {
-    color: #e2e8f0 !important;
-    border-color: #475569 !important;
-  }
-  [data-theme='dark'] & td {
-    border-color: #475569 !important;
-  }
-  [data-theme='dark'] & a {
-    color: #60a5fa !important;
-  }
-  [data-theme='dark'] & a:hover {
-    color: #93c5fd !important;
-  }
-  [data-theme='dark'] & strong {
-    color: #f8fafc !important;
-  }
-  [data-theme='dark'] & em {
-    color: #e2e8f0 !important;
-  }
-  [data-theme='dark'] & code {
-    color: #f8fafc !important;
-    background-color: #1e293b !important;
-    padding: 0.2em 0.4em !important;
-    border-radius: 0.25rem !important;
-  }
+[data-theme='dark'] .prose h6 {
+  color: #e2e8f0 !important;
+}
 
-  /* Fix code block styling in dark mode */
-  [data-theme='dark'] & pre {
-    background-color: #0d1117 !important;
-    color: #c9d1d9 !important;
-    line-height: 1.45 !important;
-    border: 1px solid #30363d !important;
-  }
+[data-theme='dark'] .prose p {
+  color: #cbd5e1 !important;
+}
 
-  [data-theme='dark'] & pre code {
-    background-color: transparent !important;
-    color: inherit !important;
-    padding: 0 !important;
-    line-height: inherit !important;
-    font-size: inherit !important;
-  }
+[data-theme='dark'] .prose ul {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .prose ol {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .prose li {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .prose table {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .prose th {
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .prose td {
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .prose a {
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .prose a:hover {
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .prose strong {
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .prose em {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .prose code {
+  color: #f8fafc !important;
+  background-color: #1e293b !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Fix code block styling in dark mode */
+[data-theme='dark'] .prose pre {
+  background-color: #0d1117 !important;
+  color: #c9d1d9 !important;
+  line-height: 1.45 !important;
+  border: 1px solid #30363d !important;
+}
+
+[data-theme='dark'] .prose pre code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+  font-size: inherit !important;
 
   /* Fix line height for code blocks in light mode too */
   [data-theme='light'] & pre {
