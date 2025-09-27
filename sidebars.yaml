@@ -25,7 +25,7 @@ menu:
   - title: API Reference (Fixed)
     document: /test-api-converted-fixed.md
 navbar:
-  - title: Documentation
+  - title: Home
     document: /index.html
   - title: About
     document: /about.html
