@@ -692,8 +692,8 @@ site:
   favicon: "/favicon.ico"
   logo: "/okidokilogo.svg"
   theme:
-    light: "fantasy"
-    dark: "forest"
+    light: "light"
+    dark: "dark"
 
 # Build configuration
 build:

@@ -59,7 +59,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
                 logo: "/okidokilogo.svg",
                 theme: {
                     light: "light",
-                    dark: "night"
+                    dark: "dark"
                 },
                 copyright: {
                     name: "Your Company"
