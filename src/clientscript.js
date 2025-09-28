@@ -1177,15 +1177,25 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
                     }
                 }
             } else {
-                // Single word - use normal search with fallbacks
+                // Single word - try multiple search strategies for better partial matching
                 try {
+                    // First try exact search
                     results = idx.search(cleanQuery);
+                    
+                    // If no exact results, immediately try wildcard for partial matching
+                    if (results.length === 0) {
+                        results = idx.search(cleanQuery + '*');
+                        
+                        // If still no results, try fuzzy match
+                        if (results.length === 0) {
+                            results = idx.search(cleanQuery + '~1');
+                        }
+                    }
                 } catch (e) {
-                    // Try with wildcard
+                    // If any search fails, try the fallback sequence
                     try {
                         results = idx.search(cleanQuery + '*');
                     } catch (e2) {
-                        // Try with fuzzy match
                         try {
                             results = idx.search(cleanQuery + '~1');
                         } catch (e3) {

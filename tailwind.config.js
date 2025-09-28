@@ -63,7 +63,15 @@ module.exports = {
     'transition-opacity',
     'absolute',
     'opacity-0',
-    'opacity-100'
+    'opacity-100',
+    // Hero gradient classes
+    'bg-gradient-to-br',
+    'from-purple-200',
+    'to-indigo-200',
+    'dark:from-purple-800/60',
+    'dark:to-indigo-800/60',
+    'mt-8',
+    'py-20'
   ],
   theme: {
     extend: {},

@@ -17,7 +17,7 @@ import logger from './logger.js';
 * Add each file to the index and to a key-value store where the key is the file path and the value is the file content.
 */
 
-// Get package directory path
+// Get package directory path  
 const __filename = fileURLToPath(import.meta.url);
 const packageDir = path.dirname(path.dirname(__filename));
 
@@ -515,6 +515,7 @@ async function initCommand(argv) {
         const indexPath = 'docs/index.md';
         if (!fs.existsSync(indexPath)) {
             const templateIndexPath = path.join(packageDir, 'docs', 'index.md');
+
             if (fs.existsSync(templateIndexPath)) {
                 fs.copyFileSync(templateIndexPath, indexPath);
                 logger.info('Created beautiful homepage from template');

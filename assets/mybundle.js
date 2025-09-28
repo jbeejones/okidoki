@@ -2613,6 +2613,12 @@
         } else {
           try {
             results = idx.search(cleanQuery);
+            if (results.length === 0) {
+              results = idx.search(cleanQuery + "*");
+              if (results.length === 0) {
+                results = idx.search(cleanQuery + "~1");
+              }
+            }
           } catch (e) {
             try {
               results = idx.search(cleanQuery + "*");
