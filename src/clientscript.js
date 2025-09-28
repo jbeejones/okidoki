@@ -1072,16 +1072,25 @@ function escapeRegex(string) {
 
 // Global search function
 window.handleSearch = function(query) {
+    // Clear all dropdowns first if query is too short or empty
+    if (!query || query.trim().length < 2) {
+        updateSearchResults('search-results', query);
+        updateSearchResults('search-results-mobile', query);
+        updateSearchResults('search-results-mobile-navbar', query);
+        clearSavedSearchState();
+        return;
+    }
+    
     // Update all search results containers
     const results = updateSearchResults('search-results', query);
     updateSearchResults('search-results-mobile', query, results);
     updateSearchResults('search-results-mobile-navbar', query, results);
     
     // Save or clear search state based on query
-    if (query && query.trim().length >= 2 && results) {
+    if (results && results.length > 0) {
         saveSearchState(query, results);
     } else {
-        // Clear saved state when input is empty or too short
+        // Clear saved state when no results found
         clearSavedSearchState();
     }
 }
@@ -1209,10 +1218,11 @@ function updateSearchResults(resultsId, query, cachedResults = null) {
         window.searchResults = results; // Store for global access
         
         if (results.length === 0) {
-            // Hide dropdown if no results found
-            searchResultsContainer.classList.add('hidden');
+            // Show "No results found" message instead of hiding completely
+            searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">No results found</li>';
+            searchResultsContainer.classList.remove('hidden');
             if (dropdownParent) {
-                dropdownParent.classList.remove('dropdown-open');
+                dropdownParent.classList.add('dropdown-open');
             }
             return results;
         } else {

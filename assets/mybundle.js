@@ -2537,10 +2537,17 @@
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
   window.handleSearch = function(query) {
+    if (!query || query.trim().length < 2) {
+      updateSearchResults("search-results", query);
+      updateSearchResults("search-results-mobile", query);
+      updateSearchResults("search-results-mobile-navbar", query);
+      clearSavedSearchState();
+      return;
+    }
     const results = updateSearchResults("search-results", query);
     updateSearchResults("search-results-mobile", query, results);
     updateSearchResults("search-results-mobile-navbar", query, results);
-    if (query && query.trim().length >= 2 && results) {
+    if (results && results.length > 0) {
       saveSearchState(query, results);
     } else {
       clearSavedSearchState();
@@ -2634,9 +2641,10 @@
       }
       window.searchResults = results;
       if (results.length === 0) {
-        searchResultsContainer.classList.add("hidden");
+        searchResultsContainer.innerHTML = '<li class="p-4 text-sm opacity-50">No results found</li>';
+        searchResultsContainer.classList.remove("hidden");
         if (dropdownParent) {
-          dropdownParent.classList.remove("dropdown-open");
+          dropdownParent.classList.add("dropdown-open");
         }
         return results;
       } else {

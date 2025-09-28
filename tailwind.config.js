@@ -71,7 +71,13 @@ module.exports = {
     'dark:from-purple-800/60',
     'dark:to-indigo-800/60',
     'mt-8',
-    'py-20'
+    'py-20',
+    // Mobile search classes
+    'mobile-search-input',
+    'z-[60]',
+    // Page navigation classes
+    'z-[40]',
+    'z-[50]'
   ],
   theme: {
     extend: {},

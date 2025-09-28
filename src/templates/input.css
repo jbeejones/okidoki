@@ -1275,6 +1275,18 @@
   .input {
     touch-action: auto !important; /* Restore native text selection behavior */
   }
+  
+  /* Prevent iOS zoom on search input focus */
+  .mobile-search-input {
+    font-size: 16px !important; /* Minimum 16px prevents iOS zoom */
+    -webkit-text-size-adjust: 100% !important;
+    -webkit-appearance: none !important;
+  }
+  
+  /* Higher z-index for mobile search dropdown */
+  .dropdown .dropdown-content[id*="mobile-navbar"] {
+    z-index: 60 !important; /* Above navbar z-50 */
+  }
 
   /* Fix DaisyUI v5 dropdown-open disabling pointer events on search inputs */
   .dropdown.dropdown-open > .input[tabindex] {

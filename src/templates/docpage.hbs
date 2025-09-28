@@ -23,7 +23,7 @@
     {{#if layout.pagenav}}
     <!-- Mobile dropdown navigation -->
     {{#if pageNavigation}}
-    <div class="lg:hidden mb-4 relative z-50">
+    <div class="lg:hidden mb-4 relative z-40">
       <div class="dropdown dropdown-bottom w-full">
         <div tabindex="0" role="button" class="btn btn-outline w-full justify-between">
           <span class="text-sm font-semibold uppercase tracking-wide">On This Page</span>
@@ -31,7 +31,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-        <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1 p-2 z-[9999]">
+        <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1 p-2 z-[50]">
           {{#each pageNavigation}}
             <li>
               <a href="#{{this.slug}}">{{this.title}}</a>

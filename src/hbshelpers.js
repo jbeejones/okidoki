@@ -239,8 +239,8 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             case 'mobile-navbar':
                 inputId = 'search-mobile-navbar';
                 resultsId = 'search-results-mobile-navbar';
-                inputClasses = 'input input-sm w-32';
-                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[1] w-72 p-2 shadow hidden max-h-96 overflow-y-auto';
+                inputClasses = 'input input-sm w-32 mobile-search-input';
+                resultsClasses = 'dropdown-content bg-base-100 rounded-box z-[60] w-72 p-2 shadow hidden max-h-96 overflow-y-auto';
                 containerClasses = 'dropdown dropdown-end';
                 break;
                 
