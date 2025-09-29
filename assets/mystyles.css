@@ -4953,6 +4953,39 @@ video {
   /* Above navbar z-50 */
 }
 
+/* Prevent line breaks in page navigation - catch ALL anchor tags */
+
+.lg\\:hidden .dropdown-content a {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
+  word-break: keep-all !important;
+}
+
+/* Force single line for all text within page navigation */
+
+.lg\\:hidden .dropdown-content * {
+  white-space: nowrap !important;
+}
+
+/* Ensure mobile page nav dropdown has proper width */
+
+.lg\\:hidden .dropdown-bottom .dropdown-content {
+  min-width: 320px !important;
+  max-width: 90vw !important;
+  width: 320px !important;
+}
+
+/* Make sure list items don't cause breaks */
+
+.lg\\:hidden .dropdown-content li {
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+  overflow: hidden !important;
+}
+
 /* Fix DaisyUI v5 dropdown-open disabling pointer events on search inputs */
 
 .\!dropdown.dropdown-open > .input[tabindex] {
@@ -5225,10 +5258,6 @@ summary::marker {
 
 .z-\[60\] {
   z-index: 60;
-}
-
-.z-\[9999\] {
-  z-index: 9999;
 }
 
 .order-1 {
@@ -5554,6 +5583,14 @@ summary::marker {
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+
+.whitespace-nowrap {
   white-space: nowrap;
 }
 

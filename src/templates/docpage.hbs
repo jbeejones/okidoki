@@ -33,17 +33,17 @@
         </div>
         <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 border border-base-300 rounded-lg shadow-lg w-full mt-1 p-2 z-[50]">
           {{#each pageNavigation}}
-            <li>
-              <a href="#{{this.slug}}">{{this.title}}</a>
+            <li class="whitespace-nowrap overflow-hidden">
+              <a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a>
               {{#if this.children}}
               <ul>
                 {{#each this.children}}
-                <li>
-                  <a href="#{{this.slug}}">{{this.title}}</a>
+                <li class="whitespace-nowrap overflow-hidden">
+                  <a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a>
                   {{#if this.children}}
                   <ul>
                     {{#each this.children}}
-                    <li><a href="#{{this.slug}}">{{this.title}}</a></li>
+                    <li class="whitespace-nowrap overflow-hidden"><a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a></li>
                     {{/each}}
                   </ul>
                   {{/if}}
@@ -76,17 +76,17 @@
             <div style="height: calc(100vh - 180px); overflow-y: scroll;">
               <ul class="menu menu-sm w-full">
                 {{#each pageNavigation}}
-                  <li>
-                    <a href="#{{this.slug}}">{{this.title}}</a>
+                  <li class="whitespace-nowrap overflow-hidden">
+                    <a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a>
                     {{#if this.children}}
                     <ul>
                       {{#each this.children}}
-                      <li>
-                        <a href="#{{this.slug}}">{{this.title}}</a>
+                      <li class="whitespace-nowrap overflow-hidden">
+                        <a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a>
                         {{#if this.children}}
                         <ul>
                           {{#each this.children}}
-                          <li><a href="#{{this.slug}}">{{this.title}}</a></li>
+                          <li class="whitespace-nowrap overflow-hidden"><a href="#{{this.slug}}" class="whitespace-nowrap overflow-hidden text-ellipsis block">{{this.title}}</a></li>
                           {{/each}}
                         </ul>
                         {{/if}}

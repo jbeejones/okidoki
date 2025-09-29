@@ -335,7 +335,7 @@
         <div class="flex-1 min-w-0">
           <a class="flex items-center min-w-0" href="{{joinUrl baseUrl 'index.html'}}">
               <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
-              <span class="text-xl font-mono font-bold truncate">{{title}}</span>
+              <span class="text-xl font-mono font-bold truncate">{{#eq settings.site.title title}}{{settings.site.title}}{{else}}{{settings.site.title}} - {{title}}{{/eq}}</span>
           </a>
         </div>
         
