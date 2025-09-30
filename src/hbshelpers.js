@@ -194,7 +194,7 @@ async function registerHelpers(handlebarsInstance, settings = null) {
         
         const alertHtml = '<div role="alert" class="' + alertClass + ' alert-mobile-optimized">' +
             '<div class="alert-icon-container">' + iconSvg + '</div>' +
-            '<div class="alert-content-container"><span>' + parsedContent + '</span></div>' +
+            '<div class="alert-content-container"><div>' + parsedContent + '</div></div>' +
             '</div>\n\n';
         
         return new handlebarsInstance.SafeString(alertHtml);

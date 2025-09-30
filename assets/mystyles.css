@@ -4953,6 +4953,63 @@ video {
   /* Above navbar z-50 */
 }
 
+/* Fix alert container and content overflow for all content types */
+
+.alert,
+  .alert-info,
+  .alert-warning, 
+  .alert-success,
+  .alert-error {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Fix alert content containers */
+
+.alert .alert-content-container,
+  .alert-info .alert-content-container,
+  .alert-warning .alert-content-container,
+  .alert-success .alert-content-container,
+  .alert-error .alert-content-container {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+}
+
+/* Fix alert content divs */
+
+.alert .alert-content-container > div,
+  .alert-info .alert-content-container > div,
+  .alert-warning .alert-content-container > div,
+  .alert-success .alert-content-container > div,
+  .alert-error .alert-content-container > div {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Ensure alert code blocks are scrollable */
+
+.alert pre,
+  .alert-info pre,
+  .alert-warning pre,
+  .alert-success pre,
+  .alert-error pre {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: pre !important;
+  word-break: keep-all !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
 /* Prevent line breaks in page navigation - catch ALL anchor tags */
 
 .lg\\:hidden .dropdown-content a {
@@ -6978,6 +7035,10 @@ summary::marker {
     display: block !important;
     flex-shrink: 1 !important;
     /* Allow shrinking in flex container */
+    -webkit-overflow-scrolling: touch !important;
+    /* Smooth scrolling on mobile */
+    scrollbar-width: thin !important;
+    /* Thin scrollbar */
   }
 
   & pre code {
