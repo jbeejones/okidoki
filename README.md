@@ -1,8 +1,10 @@
+
 # OkiDoki - Free Static Site Generator for API Documentation & Technical Docs
 
 [![npm version](https://img.shields.io/npm/v/okidoki.svg)](https://www.npmjs.com/package/okidoki)
 [![GitHub license](https://img.shields.io/github/license/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/jbeejones/okidoki.svg)](https://github.com/jbeejones/okidoki/stargazers)
+
 
 **OkiDoki** is a **free, open-source static site generator** specifically designed for creating professional **API documentation websites** and **technical documentation sites**. **Automatically generate API docs from OpenAPI/Swagger specs** or transform your **Markdown files** into beautiful, **searchable documentation** with **zero configuration** required. Perfect for **developer teams**, **software projects**, and **API providers** who need **fast documentation builds** (sub-second generation) and **lightweight, responsive websites**.
 
@@ -20,7 +22,7 @@ Visit the full documentation at the [OkiDoki website](https://jbeejones.github.i
 
 **Responsive design:**
 <br/>
-<img src="./screenshots/okidoki-responsive.png" alt="okidoki screenshot responsive" width="300">
+<img src="./screenshots/okidoki-responsive.png" alt="okidoki screenshot responsive" width="250">
 
 ## Installation & Setup
 
