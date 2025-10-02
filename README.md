@@ -10,11 +10,16 @@
 
 Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
-![okidoki start page](./screenshots/okidoki-startpage.jpeg)
+**The default OkiDoki start page:**
 
+![okidoki start page](./screenshots/okidoki-startpage.png)
+
+**Example API documentation page:**
 
 ![okidoki api docs screenshot](./screenshots/okidoki.png)
 
+**Responsive design:**
+<br/>
 <img src="./screenshots/okidoki-responsive.png" alt="okidoki screenshot responsive" width="300">
 
 ## Installation & Setup
