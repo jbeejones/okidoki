@@ -3,6 +3,10 @@ import yaml from 'js-yaml';
 import markdownit from 'markdown-it'
 import markdownItAnchor from 'markdown-it-anchor';
 import markdownItImsize from 'markdown-it-imsize';
+import markdownItToc from 'markdown-it-table-of-contents';
+import markdownItMathjax3 from 'markdown-it-mathjax3';
+import markdownItMermaid from 'markdown-it-mermaid';
+import { full as markdownItEmoji } from 'markdown-it-emoji';
 
 import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
@@ -291,6 +295,22 @@ md.use(markdownItAnchor, {
   }
 })
 md.use(markdownItImsize)
+md.use(markdownItToc, {
+  includeLevel: [1, 2, 3, 4, 5, 6],
+  containerClass: 'table-of-contents',
+  markerPattern: /^\[\[toc\]\]/im,
+  slugify: (s) => {
+    // Use the same slugify function as markdown-it-anchor for consistency
+    let cleanText = s;
+    if (s.includes('{{')) {
+      cleanText = s.replace(/\{\{[^}]+\}\}/g, '').trim();
+    }
+    return slugify(cleanText || s);
+  }
+})
+md.use(markdownItMathjax3)
+md.use(markdownItMermaid.default)
+md.use(markdownItEmoji)
 
 // Register tabs functionality
 registerTabs(md, handlebarsInstance);

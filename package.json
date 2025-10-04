@@ -52,7 +52,11 @@
     "lunr": "^2.3.9",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
+    "markdown-it-emoji": "^3.0.0",
     "markdown-it-imsize": "^2.0.1",
+    "markdown-it-mathjax3": "^5.2.0",
+    "markdown-it-mermaid": "^0.2.5",
+    "markdown-it-table-of-contents": "^1.1.0",
     "marked-highlight": "^2.2.1",
     "yargs": "^17.7.2"
   },

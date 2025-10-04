@@ -1,6 +1,8 @@
 menu:
   - title: About OkiDoki
     document: /about.md
+  - title: Plugin Showcase
+    document: /plugin-showcase.md
   - title: Feature Demo
     document: /demo.md
   - title: Markdown Examples

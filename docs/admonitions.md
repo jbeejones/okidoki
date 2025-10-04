@@ -8,6 +8,9 @@ handlebars: true
 
 This page demonstrates the alert and badge functionality available in OkiDoki using Handlebars helpers.
 
+## TOC
+[[toc]]
+
 ## Alert Helper
 
 Create styled alerts using the `{{alert}}` helper:
