@@ -547,11 +547,14 @@ async function parseMarkdown(markdownContent, filename = null) {
         } else if (key === 'keywords') {
             // Special handling for keywords - support both string and array formats
             if (Array.isArray(value)) {
-                mappedProps[key] = value.join(', ');
+                mappedProps[key] = value.join(', '); // String version for meta tags
+                mappedProps[`${key}_array`] = value; // Array version for Handlebars loops
             } else if (typeof value === 'string') {
                 mappedProps[key] = value;
+                mappedProps[`${key}_array`] = value.split(',').map(k => k.trim()); // Convert string to array
             } else {
                 mappedProps[key] = '';
+                mappedProps[`${key}_array`] = [];
             }
         } else {
             mappedProps[key] = value;

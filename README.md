@@ -10,7 +10,7 @@
 
 **Create beautiful API documentation with minimal effort and zero maintenance** - Completely free and open source with no subscriptions, no limits, no vendor lock-in.
 
-Visit the full documentation at the [OkiDoki website](https://jbeejones.github.io/okidoki-website) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
+Visit the full documentation at the [OkiDoki website](https://okidoki.dev) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
 
 **The default OkiDoki start page:**
 
@@ -126,9 +126,9 @@ The run the `okidoki generate` command again and refresh your browser to see the
 
 ## Getting Started with Your Documentation Site
 
-- **Advanced Configuration**: Explore the [complete documentation reference](https://jbeejones.github.io/okidoki-website/reference.html) for custom themes, search optimization, and advanced features
-- **Documentation Examples**: Browse [real-world Markdown examples](https://jbeejones.github.io/okidoki-website/markdown-examples.html) and templates for API docs, tutorials, and guides
-- **Support & Troubleshooting**: Visit our [comprehensive help guide](https://jbeejones.github.io/okidoki-website/help.html) or [GitHub Issues](https://github.com/jbeejones/okidoki/issues) for community support
+- **Advanced Configuration**: Explore the [complete documentation reference](https://okidoki.dev/reference.html) for custom themes, search optimization, and advanced features
+- **Documentation Examples**: Browse [real-world Markdown examples](https://okidoki.dev/markdown-examples.html) and templates for API docs, tutorials, and guides
+- **Support & Troubleshooting**: Visit our [comprehensive help guide](https://okidoki.dev/help.html) or [GitHub Issues](https://github.com/jbeejones/okidoki/issues) for community support
 
 ## Why Choose OkiDoki for API Documentation?
 
@@ -170,4 +170,4 @@ Compare OkiDoki with other popular **API documentation tools** and **static site
 - **[Redoc](https://redoc.ly/)** - OpenAPI-focused tool (API docs only, no mixed content support)
 - **[Jekyll](https://jekyllrb.com/)** - Ruby-based static site generator popular on GitHub Pages (requires manual setup for API docs)
 
-**Detailed Comparison Guide**: Read our in-depth [documentation generator comparison and feature analysis](https://jbeejones.github.io/okidoki-website/documentation-generator-comparison.html) to find the best tool for your **API documentation** and **technical writing** needs.
+**Detailed Comparison Guide**: Read our in-depth [documentation generator comparison and feature analysis](https://okidoki.dev/documentation-generator-comparison.html) to find the best tool for your **API documentation** and **technical writing** needs.
