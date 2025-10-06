@@ -294,7 +294,8 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
         siteUrl = settings.site.url.replace(/\/$/, '');
     } else if (baseUrl.startsWith('http')) {
         // If baseUrl is already absolute, use it
-        siteUrl = baseUrl.replace(/\/$/, '');
+        // Remove index.html if present (e.g., https://okidoki.dev/index.html -> https://okidoki.dev)
+        siteUrl = baseUrl.replace(/\/index\.html$/, '').replace(/\/$/, '');
     } else {
         // For relative baseUrls, we can't generate absolute URLs
         // Use the baseUrl as-is (this will need manual configuration)
@@ -322,16 +323,16 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
             // Full absolute URL - combine site URL with base URL and clean path
             const baseUrlPath = baseUrl === '/' ? '' : baseUrl.replace(/\/$/, '');
             
-            if (isIndexPage && baseUrl !== '/') {
-                // For index page when baseUrl is not '/', use baseUrl with trailing slash
-                fullUrl = `${siteUrl}${baseUrlPath}/`;
+            if (isIndexPage) {
+                // For index page, use siteUrl with trailing slash (no index.html in URL)
+                fullUrl = `${siteUrl}/`;
             } else {
                 fullUrl = `${siteUrl}${baseUrlPath}/${cleanPath}`;
             }
         } else {
             // Relative URL (fallback for when site.url is not configured)
-            if (isIndexPage && baseUrl !== '/') {
-                // For index page when baseUrl is not '/', use baseUrl with trailing slash
+            if (isIndexPage) {
+                // For index page, use siteUrl with trailing slash (no index.html in URL)
                 fullUrl = `${siteUrl}/`.replace(/\/+/g, '/');
             } else {
                 fullUrl = `${siteUrl}/${cleanPath}`.replace(/\/+/g, '/');
