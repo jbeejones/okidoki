@@ -5,7 +5,7 @@ site:
   title: "My docs"
   description: "OkiDoki is a modern documentation site builder."
   #baseUrl: "/okidoki-website/"
-  #url: "https://jbeejones.github.io"  # Full domain for absolute sitemap URLs
+  url: "https://okidoki.dev"  # Full domain for absolute sitemap URLs
   favicon: "/favicon.ico"
   theme:
     light: "lemonade"

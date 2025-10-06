@@ -320,14 +320,13 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
         // Build absolute URL
         let fullUrl;
         if (siteUrl.startsWith('http')) {
-            // Full absolute URL - combine site URL with base URL and clean path
-            const baseUrlPath = baseUrl === '/' ? '' : baseUrl.replace(/\/$/, '');
-            
+            // Full absolute URL - combine site URL with page path
             if (isIndexPage) {
                 // For index page, use siteUrl with trailing slash (no index.html in URL)
                 fullUrl = `${siteUrl}/`;
             } else {
-                fullUrl = `${siteUrl}${baseUrlPath}/${cleanPath}`;
+                // For other pages, use the full path with filename
+                fullUrl = `${siteUrl}/${cleanPath}`;
             }
         } else {
             // Relative URL (fallback for when site.url is not configured)

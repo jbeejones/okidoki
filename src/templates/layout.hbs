@@ -16,20 +16,20 @@
   <!-- ✅ Canonical points to this page -->
   {{#if settings.site.url}}
     {{#eq page.path '/index.html'}}
-      {{#eq baseUrl '/'}}
-  <link rel="canonical" href="{{settings.site.url}}{{page.path}}">
-      {{else}}
-  <link rel="canonical" href="{{settings.site.url}}{{baseUrl}}">
-      {{/eq}}
+      <!-- For index page, use clean URL without index.html -->
+  <link rel="canonical" href="{{settings.site.url}}/">
     {{else}}
-      {{#eq baseUrl '/'}}
+      <!-- For other pages, use the full path with filename (remove leading slash from page.path) -->
   <link rel="canonical" href="{{settings.site.url}}{{page.path}}">
-   {{else}}
-  <link rel="canonical" href="{{joinUrl settings.site.url (joinUrl baseUrl page.path)}}">
-      {{/eq}}
     {{/eq}}
   {{else}}
+    {{#eq page.path '/index.html'}}
+      <!-- For index page without site.url, use clean URL -->
+  <link rel="canonical" href="{{baseUrl}}">
+    {{else}}
+      <!-- For other pages without site.url, use relative path -->
   <link rel="canonical" href="{{baseUrl}}{{page.path}}">
+    {{/eq}}
   {{/if}}
 
   <!-- Open Graph / Facebook -->
