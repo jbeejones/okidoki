@@ -7,6 +7,7 @@ import markdownItToc from 'markdown-it-table-of-contents';
 import markdownItMathjax3 from 'markdown-it-mathjax3';
 import markdownItMermaid from 'markdown-it-mermaid';
 import { full as markdownItEmoji } from 'markdown-it-emoji';
+import markdownItAttrs from 'markdown-it-attrs';
 
 import slugify from '@sindresorhus/slugify';
 //import { Marked } from 'marked';
@@ -281,6 +282,9 @@ function createSlug(text, handlebarsInstance = null) {
 // Add support for image size syntax in markdown
 // Example: ![alt text](image.jpg =100x200)
 // This allows specifying width and height directly in markdown
+
+// Use markdown-it-attrs first to avoid conflicts with other plugins
+md.use(markdownItAttrs)
 
 md.use(markdownItAnchor, { 
   slugify: (s) => {

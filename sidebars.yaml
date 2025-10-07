@@ -9,6 +9,8 @@ menu:
     document: /demo.md
   - title: Markdown Examples
     document: /markdown-examples.md
+  - title: Markdown Attributes
+    document: /markdown-attrs-example.md
   - title: Admonitions Demo
     document: /admonitions.md
   - title: Tabs Demo
