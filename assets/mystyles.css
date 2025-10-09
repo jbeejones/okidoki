@@ -3535,7 +3535,7 @@ video {
 
 .alert {
   display: grid;
-  align-items: center;
+  align-items: start;
   gap: calc(0.25rem * 4);
   border-radius: var(--radius-box);
   padding-inline: calc(0.25rem * 4);
