@@ -123,6 +123,28 @@ async function registerHelpers(handlebarsInstance, settings = null) {
         return cleanBase + '/' + cleanPath;
     });
 
+    // Helper to transform URLs based on friendlyUrl setting
+    handlebarsInstance.registerHelper('transformUrl', function(path, settings) {
+        if (!path) return path;
+        if (typeof path === 'string' && path.startsWith('http')) return path; // External URL
+        
+        const friendlyUrl = settings?.site?.friendlyUrl || false;
+        
+        if (friendlyUrl) {
+            // Remove .html extension if present
+            if (path.endsWith('.html')) {
+                return path.replace('.html', '');
+            }
+        } else {
+            // Ensure .html extension is present
+            if (!path.endsWith('.html') && !path.includes('#')) {
+                return path + '.html';
+            }
+        }
+        
+        return path;
+    });
+
     handlebarsInstance.registerHelper('alert', function (text, type, options) {
         let alertType = '';
         let content = '';

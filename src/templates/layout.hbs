@@ -13,22 +13,30 @@
   
   <meta name="keywords" content="{{keywords}}">
   <title>{{title}}</title>
-  <!-- ✅ Canonical points to this page -->
+  <!-- ✅ Canonical and alternate language links -->
   {{#if settings.site.url}}
     {{#eq page.path '/index.html'}}
       <!-- For index page, use clean URL without index.html -->
-  <link rel="canonical" href="{{settings.site.url}}/">
+  <link data-rh="true" rel="canonical" href="{{settings.site.url}}/">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="x-default">
     {{else}}
-      <!-- For other pages, use the full path with filename (remove leading slash from page.path) -->
-  <link rel="canonical" href="{{settings.site.url}}{{page.path}}">
+      <!-- For other pages, use the full path with filename -->
+  <link data-rh="true" rel="canonical" href="{{settings.site.url}}{{transformUrl page.path settings}}">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{else}}
     {{#eq page.path '/index.html'}}
       <!-- For index page without site.url, use clean URL -->
-  <link rel="canonical" href="{{baseUrl}}">
+  <link data-rh="true" rel="canonical" href="{{baseUrl}}">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="x-default">
     {{else}}
       <!-- For other pages without site.url, use relative path -->
-  <link rel="canonical" href="{{baseUrl}}{{page.path}}">
+  <link data-rh="true" rel="canonical" href="{{baseUrl}}{{transformUrl page.path settings}}">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{/if}}
 
@@ -351,7 +359,7 @@
         {{/unless}}
         
         <div class="flex-1 min-w-0">
-          <a class="flex items-center min-w-0" href="{{joinUrl baseUrl 'index.html'}}">
+          <a class="flex items-center min-w-0" href="{{joinUrl baseUrl (transformUrl 'index.html' settings)}}">
               <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
               <span class="text-xl font-mono font-bold truncate">{{#eq settings.site.title title}}{{settings.site.title}}{{else}}{{settings.site.title}} - {{title}}{{/eq}}</span>
           </a>
@@ -410,7 +418,7 @@
         <div class="hidden lg:flex lg:items-center lg:gap-4">
           <ul class="menu menu-horizontal">
             {{#each navbar}}
-              <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
+              <li><a href="{{#if this.url}}{{joinUrl baseUrl (transformUrl this.url ../settings)}}{{else}}{{joinUrl baseUrl (transformUrl this.document ../settings)}}{{/if}}">{{this.title}}</a></li>
             {{/each}}
           </ul>
           
@@ -491,9 +499,9 @@
         <ul class="menu p-4 text-base-content overflow-y-auto h-full">
           <!-- Mobile menu items -->
           <div class="lg:hidden mb-4">
-            <li><a href="{{joinUrl baseUrl 'index.html'}}">Home</a></li>
+            <li><a href="{{joinUrl baseUrl (transformUrl 'index.html' settings)}}">Home</a></li>
             {{#each navbar}}
-              <li><a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}">{{this.title}}</a></li>
+              <li><a href="{{#if this.url}}{{joinUrl baseUrl (transformUrl this.url ../settings)}}{{else}}{{joinUrl baseUrl (transformUrl this.document ../settings)}}{{/if}}">{{this.title}}</a></li>
             {{/each}}
             <div class="divider"></div>
           </div>
@@ -519,7 +527,7 @@
         {{#if items}}
         <nav class="flex flex-wrap gap-4 justify-center">
           {{#each items}}
-          <a href="{{#if this.url}}{{joinUrl baseUrl this.url}}{{else}}{{joinUrl baseUrl this.document}}{{/if}}" class="link link-hover">{{this.label}}</a>
+          <a href="{{#if this.url}}{{joinUrl baseUrl (transformUrl this.url ../../settings)}}{{else}}{{joinUrl baseUrl (transformUrl this.document ../../settings)}}{{/if}}" class="link link-hover">{{this.label}}</a>
           {{/each}}
         </nav>
         {{/if}}

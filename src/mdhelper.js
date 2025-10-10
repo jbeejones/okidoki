@@ -54,7 +54,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
     }
     // Default configuration
     const defaultConfig = {
-        settings: {
+            settings: {
             site: {
                 title: "Documentation",
                 description: "Documentation generated with Okidoki",
@@ -62,6 +62,7 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
                 url: "", // Full site URL for absolute links in sitemap (e.g., "https://example.com")
                 favicon: "/favicon.ico",
                 logo: "/okidokilogo.svg",
+                friendlyUrl: false, // If true, URLs will not end with .html extension
                 theme: {
                     light: "light",
                     dark: "dark"
@@ -133,17 +134,35 @@ function loadConfig(configPath = 'okidoki.yaml', sidebarsPath = 'sidebars.yaml')
 function transformDocumentPath(path) {
     if (!path) return path;
     
+    // Get configuration to check friendlyUrl setting
+    const { settings } = loadConfig();
+    const friendlyUrl = settings?.site?.friendlyUrl || false;
+    
     // Split the path into base path and anchor
     const [basePath, anchor] = path.split('#');
     
     // Transform the base path
     let transformedPath = basePath;
-    // If path already has .html extension, return as is
-    if (transformedPath.endsWith('.html')) transformedPath = transformedPath;
-    // If path has .md extension, replace with .html
-    else if (transformedPath.endsWith('.md')) transformedPath = transformedPath.replace('.md', '.html');
-    // If path has no extension, add .html
-    else transformedPath = `${transformedPath}.html`;
+    
+    if (friendlyUrl) {
+        // Friendly URLs: remove .html extension if present, don't add it
+        if (transformedPath.endsWith('.html')) {
+            transformedPath = transformedPath.replace('.html', '');
+        }
+        // If path has .md extension, remove it (no .html replacement)
+        else if (transformedPath.endsWith('.md')) {
+            transformedPath = transformedPath.replace('.md', '');
+        }
+        // If path has no extension, leave as is
+    } else {
+        // Standard URLs: ensure .html extension
+        // If path already has .html extension, return as is
+        if (transformedPath.endsWith('.html')) transformedPath = transformedPath;
+        // If path has .md extension, replace with .html
+        else if (transformedPath.endsWith('.md')) transformedPath = transformedPath.replace('.md', '.html');
+        // If path has no extension, add .html
+        else transformedPath = `${transformedPath}.html`;
+    }
     
     // Reattach the anchor if it exists
     return anchor ? `${transformedPath}#${anchor}` : transformedPath;
@@ -336,13 +355,29 @@ md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
     const href = token.attrs[hrefIndex][1];
     let newHref = href;
     
-    // Convert .md links to .html (for internal documentation links)
+    // Get configuration to check friendlyUrl setting
+    const { settings } = loadConfig();
+    const friendlyUrl = settings?.site?.friendlyUrl || false;
+    
+    // Convert .md links based on friendlyUrl setting
     if (href.endsWith('.md')) {
-      newHref = href.replace(/\.md$/, '.html');
+      if (friendlyUrl) {
+        // Remove .md extension (no .html replacement)
+        newHref = href.replace(/\.md$/, '');
+      } else {
+        // Replace .md with .html
+        newHref = href.replace(/\.md$/, '.html');
+      }
     }
     // Also handle .md links with hash fragments (e.g., file.md#section)
     else if (href.includes('.md#')) {
-      newHref = href.replace(/\.md#/, '.html#');
+      if (friendlyUrl) {
+        // Remove .md extension (no .html replacement)
+        newHref = href.replace(/\.md#/, '#');
+      } else {
+        // Replace .md with .html
+        newHref = href.replace(/\.md#/, '.html#');
+      }
     }
     
     // For internal links (starting with /), prepend baseUrl if available from env

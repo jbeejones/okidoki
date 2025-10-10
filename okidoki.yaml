@@ -7,6 +7,7 @@ site:
   #baseUrl: "/okidoki-website/"
   url: "https://okidoki.dev"  # Full domain for absolute sitemap URLs
   favicon: "/favicon.ico"
+  # friendlyUrl: true  # If true, URLs will not end with .html extension
   theme:
     light: "lemonade"
     dark: "coffee"

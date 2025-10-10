@@ -286,6 +286,7 @@ function generateContentHash(data) {
 // Function to generate sitemap.xml for all processed documents
 function generateSitemap(docs, settings, sourceDir = 'docs') {
     const baseUrl = settings.site.baseUrl || '/';
+    const friendlyUrl = settings.site.friendlyUrl || false;
     
     // Build the full site URL for absolute URLs in sitemap
     let siteUrl = '';
@@ -311,27 +312,34 @@ function generateSitemap(docs, settings, sourceDir = 'docs') {
     // Add each document to the sitemap
     for (const doc of docs) {
         // Clean up the path - remove leading slash
-        const cleanPath = doc.path.startsWith('/') ? doc.path.slice(1) : doc.path;
+        let cleanPath = doc.path.startsWith('/') ? doc.path.slice(1) : doc.path;
         
-        // Special handling for index.html when baseUrl is not '/'
-        // Use the baseUrl with trailing slash instead of index.html
-        const isIndexPage = cleanPath === 'index.html' || doc.path === '/index.html';
+        // Apply friendlyUrl transformation to the path
+        if (friendlyUrl) {
+            // Remove .html extension if present
+            if (cleanPath.endsWith('.html')) {
+                cleanPath = cleanPath.replace('.html', '');
+            }
+        }
+        
+        // Special handling for index page
+        const isIndexPage = cleanPath === 'index' || cleanPath === 'index.html' || doc.path === '/index.html';
         
         // Build absolute URL
         let fullUrl;
         if (siteUrl.startsWith('http')) {
             // Full absolute URL - combine site URL with page path
             if (isIndexPage) {
-                // For index page, use siteUrl with trailing slash (no index.html in URL)
+                // For index page, use siteUrl with trailing slash
                 fullUrl = `${siteUrl}/`;
             } else {
-                // For other pages, use the full path with filename
+                // For other pages, use the full path
                 fullUrl = `${siteUrl}/${cleanPath}`;
             }
         } else {
             // Relative URL (fallback for when site.url is not configured)
             if (isIndexPage) {
-                // For index page, use siteUrl with trailing slash (no index.html in URL)
+                // For index page, use siteUrl with trailing slash
                 fullUrl = `${siteUrl}/`.replace(/\/+/g, '/');
             } else {
                 fullUrl = `${siteUrl}/${cleanPath}`.replace(/\/+/g, '/');
