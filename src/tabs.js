@@ -63,7 +63,8 @@ function registerTabs(md, handlebarsInstance)  {
   handlebarsInstance.registerHelper('tabs', function (options) {
     // Ensure this is called as a block helper
     if (!options || typeof options.fn !== 'function') {
-      console.warn('tabs helper must be used as a block helper: {{#tabs}}...{{/tabs}}');
+      const filename = this.__currentFile || 'unknown file';
+      console.warn(`[${filename}] tabs helper must be used as a block helper: {{#tabs}}...{{/tabs}}`);
       return '';
     }
     
@@ -104,7 +105,8 @@ function registerTabs(md, handlebarsInstance)  {
   handlebarsInstance.registerHelper('tab', function (options) {
     // Ensure this is called as a block helper
     if (!options || typeof options.fn !== 'function') {
-      console.warn('tab helper must be used as a block helper: {{#tab title="..."}}...{{/tab}}');
+      const filename = this.__currentFile || 'unknown file';
+      console.warn(`[${filename}] tab helper must be used as a block helper: {{#tab title="..."}}...{{/tab}}`);
       return '';
     }
     

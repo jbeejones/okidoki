@@ -8,9 +8,13 @@ You can add HTML attributes to markdown elements using curly braces syntax:
 
 ### Headers with Classes
 
+Headers can have classes and IDs applied to them. Here are examples in code blocks:
+
+```markdown
 # Header with class {.my-header}
 ## Header with ID {#header-id}
 ### Header with both class and ID {.my-class #header-with-id}
+```
 
 ### Paragraphs with Attributes
 

@@ -189,7 +189,14 @@ function createSearchIndex(documents) {
             return false;
         };
         
-        return checkSidebarItems(sidebars.menu) || checkSidebarItems(sidebars.navbar);
+        // Check all sidebar sections (not just menu and navbar)
+        for (const sectionKey of Object.keys(sidebars)) {
+            if (checkSidebarItems(sidebars[sectionKey])) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     // Build lunr index

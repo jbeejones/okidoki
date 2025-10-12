@@ -5,7 +5,7 @@ description: "Learn how to create tabbed content using Handlebars helpers"
 
 # Tabs Demo
 
-This page demonstrates how to create tabbed content using OkiDoki's Handlebars `{{tabs}}` and `{{tab}}` helpers.
+This page demonstrates how to create tabbed content using OkiDoki's Handlebars `\{{tabs}}` and `\{{tab}}` helpers.
 
 ## Basic Tabs Example
 

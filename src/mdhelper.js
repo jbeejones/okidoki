@@ -611,7 +611,12 @@ async function parseMarkdown(markdownContent, filename = null) {
     if (shouldUseHandlebars) {
         // Compile with Handlebars
         const handlebarsCompiled = handlebarsInstance.compile(markdownBody);
-        compiledBody = handlebarsCompiled(mappedProps);
+        // Add filename to context for error reporting
+        const contextWithFilename = {
+            ...mappedProps,
+            __currentFile: filename || 'unknown file'
+        };
+        compiledBody = handlebarsCompiled(contextWithFilename);
     } else {
         compiledBody = markdownBody;
     }
@@ -736,21 +741,32 @@ async function parseMarkdown(markdownContent, filename = null) {
 function renderPage(templateName, { props, html, page, id }) {
     const { settings, sidebars } = loadConfig();
     const baseUrl = settings.site.baseUrl || '/';
-    const transformedSidebars = {
-        menu: transformSidebarItems(sidebars.menu, baseUrl)
-    };
-    const transformedSidebarsNavbar = {
-        navbar: transformSidebarItems(sidebars.navbar, baseUrl)
-    };
-    const transformedFooter = transformSidebarItems(sidebars.footer, baseUrl);
-    //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
-    //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
+    
+    // Reserved section names that shouldn't be treated as content sections
+    const reservedSections = ['navbar', 'footer'];
+    
     // Find sidebar configuration for current page by recursively searching menu items
     const findSidebarConfig = (items, currentPath) => {
         if (!items) return null;
         for (const item of items) {
-            if (item.document && transformDocumentPath(item.document) === currentPath) {
-                return item;
+            if (item.document) {
+                const itemPath = transformDocumentPath(item.document);
+                
+                // Direct match
+                if (itemPath === currentPath) {
+                    return item;
+                }
+                
+                // Handle directory-style paths: /blog should match /blog/index.html
+                const normalizedItemPath = itemPath.replace(/\/$/, '').replace(/\.html$/, '');
+                const normalizedCurrentPath = currentPath.replace(/\/$/, '').replace(/\.html$/, '');
+                
+                // Check if item path is a directory path that should resolve to index
+                // e.g., /blog matches /blog/index or /blog.html matches /blog/index.html
+                if (normalizedCurrentPath === `${normalizedItemPath}/index` ||
+                    normalizedCurrentPath === normalizedItemPath) {
+                    return item;
+                }
             }
             if (item.items) {
                 const found = findSidebarConfig(item.items, currentPath);
@@ -760,9 +776,96 @@ function renderPage(templateName, { props, html, page, id }) {
         return null;
     };
 
-    // Check both menu and navbar for matching configuration
-    const sidebarItem = findSidebarConfig(sidebars.menu, page.path) || 
-                       findSidebarConfig(sidebars.navbar, page.path);
+    // Helper to check if a page belongs to a section based on path prefix
+    const checkSectionByPath = (sectionItems, pagePath) => {
+        if (!sectionItems || sectionItems.length === 0) return false;
+        
+        // Get all document paths in this section
+        const getAllPaths = (items) => {
+            const paths = [];
+            for (const item of items) {
+                if (item.document) {
+                    const itemPath = transformDocumentPath(item.document);
+                    const normalizedPath = itemPath.replace(/\/$/, '');
+                    paths.push(normalizedPath);
+                    
+                    // Also add the directory path if this is an index file
+                    if (normalizedPath.endsWith('/index.html')) {
+                        paths.push(normalizedPath.replace('/index.html', ''));
+                    } else if (normalizedPath.endsWith('/index')) {
+                        paths.push(normalizedPath.replace('/index', ''));
+                    }
+                }
+                if (item.items) {
+                    paths.push(...getAllPaths(item.items));
+                }
+            }
+            return paths;
+        };
+        
+        const sectionPaths = getAllPaths(sectionItems);
+        const normalizedPagePath = pagePath.replace(/\/$/, '');
+        
+        // Check if page path starts with any section path
+        for (const sectionPath of sectionPaths) {
+            if (normalizedPagePath === sectionPath || 
+                normalizedPagePath.startsWith(sectionPath + '/')) {
+                return true;
+            }
+        }
+        return false;
+    };
+    
+    // Detect which sidebar section this page belongs to
+    let activeSidebarSection = 'menu'; // Default to menu
+    let sidebarItem = null;
+    
+    // First, try to find exact match in any section
+    for (const sectionKey of Object.keys(sidebars)) {
+        if (reservedSections.includes(sectionKey)) {
+            continue; // Skip navbar and footer
+        }
+        
+        const foundItem = findSidebarConfig(sidebars[sectionKey], page.path);
+        if (foundItem) {
+            activeSidebarSection = sectionKey;
+            sidebarItem = foundItem;
+            logger.log(`Page ${page.path} belongs to section: ${activeSidebarSection} (exact match)`);
+            break;
+        }
+    }
+    
+    // If not found by exact match, try path-based matching
+    if (!sidebarItem) {
+        for (const sectionKey of Object.keys(sidebars)) {
+            if (reservedSections.includes(sectionKey)) {
+                continue; // Skip navbar and footer
+            }
+            
+            if (checkSectionByPath(sidebars[sectionKey], page.path)) {
+                activeSidebarSection = sectionKey;
+                logger.log(`Page ${page.path} belongs to section: ${activeSidebarSection} (path match)`);
+                break;
+            }
+        }
+    }
+    
+    // If still not found in any section, check navbar as fallback
+    if (!sidebarItem) {
+        sidebarItem = findSidebarConfig(sidebars.navbar, page.path);
+    }
+    
+    // Transform the active sidebar section items
+    const transformedSidebars = {
+        menu: transformSidebarItems(sidebars[activeSidebarSection], baseUrl) || []
+    };
+    
+    const transformedSidebarsNavbar = {
+        navbar: transformSidebarItems(sidebars.navbar, baseUrl)
+    };
+    const transformedFooter = transformSidebarItems(sidebars.footer, baseUrl);
+    //console.log(`transformedSidebars: ${JSON.stringify(transformedSidebars, null, 2)}`);
+    //console.log(`context: props: ${JSON.stringify(props, null, 2)}, html:  ${JSON.stringify(html, null, 2)}`);
 
     // Process pagenav configuration
     const pagenavConfig = props.pagenav || (sidebarItem && sidebarItem.pagenav) || false;

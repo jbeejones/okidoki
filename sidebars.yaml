@@ -15,6 +15,8 @@ menu:
     document: /admonitions.md
   - title: Tabs Demo
     document: /tabs-demo.md
+  - title: Multi-Section Navigation
+    document: /multi-section-navigation.md
   - title: Test API Documentation
     document: /test-api-spec.md
   - title: API Reference
@@ -30,9 +32,18 @@ menu:
         document: /test-sub-3.md
   - title: API Reference (Fixed)
     document: /test-api-converted-fixed.md
+blog:
+  - title: Blog Home
+    document: /blog
+  - title: Getting Started with OkiDoki
+    document: /blog/getting-started.md
+  - title: Advanced Features
+    document: /blog/advanced-features.md
 navbar:
   - title: Home
     document: /index.html
+  - title: Blog
+    document: /blog
   - title: About
     document: /about.html
 footer:

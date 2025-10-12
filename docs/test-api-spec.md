@@ -379,7 +379,7 @@ Get a list of projects with filtering options
 
 ## Data Models
 
-### User {#user}
+### User
 
 ```json
 {
@@ -449,7 +449,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### UserDetailed {#userdetailed}
+### UserDetailed
 
 ```json
 {
@@ -475,7 +475,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### UserProfile {#userprofile}
+### UserProfile
 
 ```json
 {
@@ -513,7 +513,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### UserSettings {#usersettings}
+### UserSettings
 
 ```json
 {
@@ -562,7 +562,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### UserStats {#userstats}
+### UserStats
 
 ```json
 {
@@ -585,7 +585,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### CreateUserRequest {#createuserrequest}
+### CreateUserRequest
 
 ```json
 {
@@ -620,7 +620,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### UpdateUserRequest {#updateuserrequest}
+### UpdateUserRequest
 
 ```json
 {
@@ -651,7 +651,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### Project {#project}
+### Project
 
 ```json
 {
@@ -712,7 +712,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### PaginationInfo {#paginationinfo}
+### PaginationInfo
 
 ```json
 {
@@ -746,7 +746,7 @@ Get a list of projects with filtering options
 }
 ```
 
-### ErrorResponse {#errorresponse}
+### ErrorResponse
 
 ```json
 {

@@ -324,7 +324,8 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             }
             
             if (!assetsDir || !fs.existsSync(assetsDir)) {
-                console.warn(`Include helper: Assets directory not found. Looked for: ${assetsDir || 'assets'}`);
+                const currentFile = context.__currentFile || 'unknown file';
+                console.warn(`[${currentFile}] Include helper: Assets directory not found. Looked for: ${assetsDir || 'assets'}`);
                 return '';
             }
             
@@ -335,13 +336,15 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             const resolvedPath = path.resolve(filePath);
             const resolvedAssetsDir = path.resolve(assetsDir);
             if (!resolvedPath.startsWith(resolvedAssetsDir)) {
-                console.warn(`Include helper: File ${filename} is outside assets directory`);
+                const currentFile = context.__currentFile || 'unknown file';
+                console.warn(`[${currentFile}] Include helper: File ${filename} is outside assets directory`);
                 return '';
             }
             
             // Check if file exists
             if (!fs.existsSync(filePath)) {
-                console.warn(`Include helper: File not found: ${filePath}`);
+                const currentFile = context.__currentFile || 'unknown file';
+                console.warn(`[${currentFile}] Include helper: File not found: ${filePath}`);
                 return '';
             }
             
@@ -364,7 +367,8 @@ async function registerHelpers(handlebarsInstance, settings = null) {
             return new handlebarsInstance.SafeString(token);
             
         } catch (error) {
-            console.error(`Include helper error for file ${filename}:`, error.message);
+            const currentFile = context.__currentFile || 'unknown file';
+            console.error(`[${currentFile}] Include helper error for file ${filename}:`, error.message);
             return '';
         }
     });

@@ -119,17 +119,17 @@ Project: {{badge "OkiDoki" "primary"}} {{badge "Open Source" "accent"}}
 
 ### API Endpoint Documentation
 
-#### {{badge "GET" "primary"}} `/users`
-Retrieve a list of all users in the system.
+#### GET /users
+{{badge "GET" "primary"}} Retrieve a list of all users in the system.
 
-#### {{badge "POST" "success"}} `/users`
-Create a new user account.
+#### POST /users
+{{badge "POST" "success"}} Create a new user account.
 
-#### {{badge "PUT" "warning"}} `/users/{id}`
-Update an existing user's information.
+#### PUT /users/:id
+{{badge "PUT" "warning"}} Update an existing user's information.
 
-#### {{badge "DELETE" "error"}} `/users/{id}`
-Remove a user from the system.
+#### DELETE /users/:id
+{{badge "DELETE" "error"}} Remove a user from the system.
 
 ### Version Information
 
