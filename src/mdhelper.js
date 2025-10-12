@@ -942,7 +942,7 @@ function renderPage(templateName, { props, html, page, id }) {
         title: props.title || settings.site.title,
         baseUrl: settings.site.baseUrl || '/',
         keywords: props.keywords || '', // Add keywords to top-level context
-        language: props.language || '', // Add language to top-level context
+        language: props.language || settings.site.language || '', // Add language to top-level context (page language overrides site default)
         html,
         props,
         page,

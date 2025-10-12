@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{#if language}}{{language}}{{else}}en{{/if}}" data-base-url="{{baseUrl}}">
+<html lang="{{#if language}}{{language}}{{else}}{{#if settings.site.language}}{{settings.site.language}}{{else}}en{{/if}}{{/if}}" data-base-url="{{baseUrl}}">
 
 <head>
   <meta charset="UTF-8">
@@ -18,24 +18,24 @@
     {{#eq page.path '/index.html'}}
       <!-- For index page, use clean URL without index.html -->
   <link data-rh="true" rel="canonical" href="{{settings.site.url}}/">
-  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="{{#if language}}{{language}}{{else}}{{#if settings.site.language}}{{settings.site.language}}{{else}}en{{/if}}{{/if}}">
   <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="x-default">
     {{else}}
       <!-- For other pages, use the full path with filename -->
   <link data-rh="true" rel="canonical" href="{{settings.site.url}}{{transformUrl page.path settings}}">
-  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}{{#if settings.site.language}}{{settings.site.language}}{{else}}en{{/if}}{{/if}}">
   <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{else}}
     {{#eq page.path '/index.html'}}
       <!-- For index page without site.url, use clean URL -->
   <link data-rh="true" rel="canonical" href="{{baseUrl}}">
-  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="{{#if language}}{{language}}{{else}}{{#if settings.site.language}}{{settings.site.language}}{{else}}en{{/if}}{{/if}}">
   <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="x-default">
     {{else}}
       <!-- For other pages without site.url, use relative path -->
   <link data-rh="true" rel="canonical" href="{{baseUrl}}{{transformUrl page.path settings}}">
-  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}{{#if settings.site.language}}{{settings.site.language}}{{else}}en{{/if}}{{/if}}">
   <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{/if}}
