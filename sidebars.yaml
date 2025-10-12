@@ -21,6 +21,8 @@ menu:
     document: /test-api-spec.md
   - title: API Reference
     document: /test-api-converted.md
+  - title: Spanish page
+    document: /prueba-espanol.md
   - title: Test Sub Items
     open: true
     items:

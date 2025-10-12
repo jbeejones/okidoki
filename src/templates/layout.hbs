@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-base-url="{{baseUrl}}">
+<html lang="{{#if language}}{{language}}{{else}}en{{/if}}" data-base-url="{{baseUrl}}">
 
 <head>
   <meta charset="UTF-8">
@@ -18,24 +18,24 @@
     {{#eq page.path '/index.html'}}
       <!-- For index page, use clean URL without index.html -->
   <link data-rh="true" rel="canonical" href="{{settings.site.url}}/">
-  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
   <link data-rh="true" rel="alternate" href="{{settings.site.url}}/" hreflang="x-default">
     {{else}}
       <!-- For other pages, use the full path with filename -->
   <link data-rh="true" rel="canonical" href="{{settings.site.url}}{{transformUrl page.path settings}}">
-  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
   <link data-rh="true" rel="alternate" href="{{settings.site.url}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{else}}
     {{#eq page.path '/index.html'}}
       <!-- For index page without site.url, use clean URL -->
   <link data-rh="true" rel="canonical" href="{{baseUrl}}">
-  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
   <link data-rh="true" rel="alternate" href="{{baseUrl}}" hreflang="x-default">
     {{else}}
       <!-- For other pages without site.url, use relative path -->
   <link data-rh="true" rel="canonical" href="{{baseUrl}}{{transformUrl page.path settings}}">
-  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="en">
+  <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="{{#if language}}{{language}}{{else}}en{{/if}}">
   <link data-rh="true" rel="alternate" href="{{baseUrl}}{{transformUrl page.path settings}}" hreflang="x-default">
     {{/eq}}
   {{/if}}
@@ -359,7 +359,7 @@
         {{/unless}}
         
         <div class="flex-1 min-w-0">
-          <a class="flex items-center min-w-0" href="{{joinUrl baseUrl (transformUrl 'index.html' settings)}}">
+          <a class="flex items-center min-w-0" href="{{#if settings.site.friendlyUrl}}{{baseUrl}}{{else}}{{joinUrl baseUrl (transformUrl 'index.html' settings)}}{{/if}}">
               <img src="{{settings.site.logo}}" alt="{{settings.site.title}} Logo" class="w-5 h-5 mr-3 flex-shrink-0">
               <span class="text-xl font-mono font-bold truncate">{{#eq settings.site.title title}}{{settings.site.title}}{{else}}{{settings.site.title}} - {{title}}{{/eq}}</span>
           </a>
@@ -499,7 +499,7 @@
         <ul class="menu p-4 text-base-content overflow-y-auto h-full">
           <!-- Mobile menu items -->
           <div class="lg:hidden mb-4">
-            <li><a href="{{joinUrl baseUrl (transformUrl 'index.html' settings)}}">Home</a></li>
+            <li><a href="{{#if settings.site.friendlyUrl}}{{baseUrl}}{{else}}{{joinUrl baseUrl (transformUrl 'index.html' settings)}}{{/if}}">Home</a></li>
             {{#each navbar}}
               <li><a href="{{#if this.url}}{{joinUrl baseUrl (transformUrl this.url ../settings)}}{{else}}{{joinUrl baseUrl (transformUrl this.document ../settings)}}{{/if}}">{{this.title}}</a></li>
             {{/each}}
