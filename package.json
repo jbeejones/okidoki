@@ -38,11 +38,14 @@
     "free",
     "api-docs",
     "technical-docs",
-    "rest-api"
+    "rest-api",
+    "docs",
+    "tailwind",
+    "daisyui"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Free, open-source static site generator for beautiful API and technical documentation from markdown",
+  "description": "OkiDoki – convert Markdown to beautiful docs with Tailwind/DaisyUI. Docs: okidoki.dev",
   "dependencies": {
     "@sindresorhus/slugify": "^2.2.1",
     "handlebars": "^4.7.8",
