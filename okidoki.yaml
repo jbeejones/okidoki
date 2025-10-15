@@ -10,8 +10,8 @@ site:
   friendlyUrl: true  # If true, URLs will not end with .html extension
   language: "en"  # Default language for all pages (can be overridden per page with frontmatter)
   theme:
-    light: "lemonade"
-    dark: "coffee"
+    light: "light"
+    dark: "dark"
 
 # Build configuration
 build:

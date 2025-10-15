@@ -134,6 +134,21 @@
       line-height: 1.45 !important;
     }
     
+    /* Code block title styles for dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .code-block-title {
+      background-color: #161b22 !important;
+      border: 1px solid #30363d !important;
+      border-bottom: none !important;
+      color: #c9d1d9 !important;
+    }
+    
+    /* Highlighted line styles for dark mode */
+    [data-theme="{{settings.site.theme.dark}}"] .highlighted-line {
+      background-color: rgba(245, 158, 11, 0.15) !important; /* More visible amber highlight for dark mode */
+      border-left-color: rgba(251, 191, 36, 0.6) !important; /* amber-400 - more visible */
+      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.05) !important; /* Subtle inner glow */
+    }
+    
     /* Fix line height for code blocks in light mode too */
     [data-theme="{{settings.site.theme.light}}"] .prose pre {
       line-height: 1.45 !important; /* Better line height for code */

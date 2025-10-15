@@ -46,7 +46,7 @@ This creates:
 
 Edit `okidoki.yaml` for the docs title and global variables.
 
-```yaml
+```yaml{3} title='okidoki.yaml'
 # Okidoki Configuration
 site:
   title: "My Docs"

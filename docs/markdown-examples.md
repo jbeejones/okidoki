@@ -237,6 +237,57 @@ const example = "Hello World!";
 
 🎨 [**See rendered markdown examples →**](demo.md#standard-markdown-features)
 
+## Code Block Line Highlighting & Titles
+
+Highlight specific lines in your code blocks and add descriptive titles:
+
+### Line Highlighting
+
+Use `{line-numbers}` syntax to highlight specific lines:
+
+````markdown
+```js{1,3}
+const greeting = "Hello";  // Line 1 highlighted
+const name = "World";
+console.log(greeting);     // Line 3 highlighted
+```
+````
+
+Supports ranges and multiple selections:
+- Single line: `{3}`
+- Multiple lines: `{1,3,5}`
+- Ranges: `{2-5}`
+- Combined: `{1,3-5,8}`
+
+### Code Block Titles
+
+Add a title to provide context for your code examples:
+
+````markdown
+```javascript title="app.js"
+function initializeApp() {
+    console.log("App initialized!");
+}
+```
+````
+
+### Combined Features
+
+Use both line highlighting and titles together:
+
+````markdown
+```typescript{1,4-5} title="user.ts"
+interface User {
+    name: string;
+    email: string;
+    isActive: boolean;  // Lines 4-5 highlighted
+    lastLogin: Date;
+}
+```
+````
+
+🎨 [**See live examples →**](code-highlighting-demo.md)
+
 ## Complete API Documentation Example
 
 Here's how all OkiDoki features work together for real API documentation:

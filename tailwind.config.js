@@ -77,7 +77,11 @@ module.exports = {
     'z-[60]',
     // Page navigation classes
     'z-[40]',
-    'z-[50]'
+    'z-[50]',
+    // Code highlighting classes
+    'highlighted-line',
+    'code-block-title',
+    'code-block-container'
   ],
   theme: {
     extend: {},

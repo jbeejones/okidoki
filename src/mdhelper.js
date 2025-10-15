@@ -247,25 +247,69 @@ const templates = {
     docpage: handlebarsInstance.compile(docpageTemplate)
 };
 
+// Helper function to parse line numbers from syntax like {1,3-5,7}
+function parseHighlightLines(lineSpec) {
+    const lines = new Set();
+    if (!lineSpec) return lines;
+    
+    const parts = lineSpec.split(',');
+    for (const part of parts) {
+        const trimmed = part.trim();
+        if (trimmed.includes('-')) {
+            // Range like "3-5"
+            const [start, end] = trimmed.split('-').map(n => parseInt(n.trim(), 10));
+            if (!isNaN(start) && !isNaN(end)) {
+                for (let i = start; i <= end; i++) {
+                    lines.add(i);
+                }
+            }
+        } else {
+            // Single line number
+            const num = parseInt(trimmed, 10);
+            if (!isNaN(num)) {
+                lines.add(num);
+            }
+        }
+    }
+    return lines;
+}
+
+// Helper function to parse code fence metadata (line numbers and title)
+// Example: js{1,3-5} title="index.js"
+function parseCodeFenceInfo(langString) {
+    if (!langString) return { lang: '', highlightLines: new Set(), title: null };
+    
+    let lang = langString;
+    let highlightLines = new Set();
+    let title = null;
+    
+    // Extract title using regex: title="..." or title='...'
+    const titleMatch = langString.match(/title=["']([^"']*)["']/);
+    if (titleMatch) {
+        title = titleMatch[1];
+        lang = lang.replace(titleMatch[0], '').trim();
+    }
+    
+    // Extract highlight lines: {1,3-5}
+    const lineMatch = lang.match(/\{([^}]+)\}/);
+    if (lineMatch) {
+        highlightLines = parseHighlightLines(lineMatch[1]);
+        lang = lang.replace(lineMatch[0], '').trim();
+    }
+    
+    return { lang, highlightLines, title };
+}
+
 // Initialize Markdown-it with plugins and custom configuration
 // - html: true - enables HTML tags in source
 // - linkify: true - converts URL-like text to links
 // - typographer: true - enables language-neutral replacement + quotes beautification
-// - highlight: uses highlight.js for syntax highlighting of code blocks
+// - highlight: uses highlight.js for syntax highlighting of code blocks with line highlighting support
 
 const md = markdownit({
     html: true,
     linkify: true,
-    typographer: true,
-    highlight: function (str, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-            try {
-                return hljs.highlight(str, { language: lang }).value;
-            } catch (__) { }
-        }
-
-        return ''; // use external default escaping
-    }
+    typographer: true
 });
 
 // Helper function to decode HTML entities
@@ -338,9 +382,66 @@ md.use(markdownItEmoji)
 // Register tabs functionality
 registerTabs(md, handlebarsInstance);
 
-
-
-
+// Override the fence renderer to handle full info string (including title and line numbers)
+// This must be done AFTER all plugins are registered to ensure our override is final
+const defaultFenceRenderer = md.renderer.rules.fence;
+md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
+    const token = tokens[idx];
+    const info = token.info ? md.utils.unescapeAll(token.info).trim() : '';
+    const content = token.content;
+    
+    // First, parse the info string for lang and title
+    let { lang, highlightLines, title } = parseCodeFenceInfo(info);
+    
+    // If markdown-it-attrs processed line numbers, they'll be in token.attrs
+    // Format: [['1,3', '']] or [['2-4', '']]
+    if (token.attrs && token.attrs.length > 0 && highlightLines.size === 0) {
+        // The first attribute key is the line spec (e.g., '1,3' or '2-4')
+        const lineSpec = token.attrs[0][0];
+        // Check if it looks like line numbers (contains digits, commas, or hyphens)
+        if (/^[\d,\-\s]+$/.test(lineSpec)) {
+            highlightLines = parseHighlightLines(lineSpec);
+            // Remove the attrs so they don't get added to the output HTML
+            token.attrs = null;
+        }
+    }
+    
+    // Apply syntax highlighting
+    let highlightedCode = '';
+    if (lang && hljs.getLanguage(lang)) {
+        try {
+            highlightedCode = hljs.highlight(content, { language: lang }).value;
+        } catch (__) {
+            highlightedCode = md.utils.escapeHtml(content);
+        }
+    } else {
+        highlightedCode = md.utils.escapeHtml(content);
+    }
+    
+    // Apply line highlighting if specified
+    if (highlightLines.size > 0) {
+        const lines = highlightedCode.split('\n');
+        highlightedCode = lines.map((line, index) => {
+            const lineNumber = index + 1;
+            if (highlightLines.has(lineNumber)) {
+                return `<span class="highlighted-line">${line}</span>`;
+            }
+            return line;
+        }).join('\n');
+    }
+    
+    // Build the language class attribute
+    const langClass = lang ? ` class="language-${md.utils.escapeHtml(lang)}"` : '';
+    
+    // Add metadata comment if title exists (will be processed in post-processing)
+    let codeWithMeta = highlightedCode;
+    if (title) {
+        codeWithMeta = `<!--CODE_BLOCK_META:title=${JSON.stringify(title)}-->` + highlightedCode;
+    }
+    
+    // Return the complete code block HTML
+    return `<pre><code${langClass}>${codeWithMeta}</code></pre>\n`;
+};
 
 // Custom renderer for links to convert .md to .html
 const defaultLinkOpen = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
@@ -642,18 +743,37 @@ async function parseMarkdown(markdownContent, filename = null) {
                 });
             }
             
-            // Add copy-to-clipboard buttons to code blocks
+            // Add copy-to-clipboard buttons and titles to code blocks
             html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, codeAttrs, codeContent) => {
                 const copyId = `copy-${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Extract title from metadata comment
+                let title = null;
+                let cleanContent = codeContent;
+                const metaMatch = codeContent.match(/<!--CODE_BLOCK_META:title=(".*?"|'.*?')-->/);
+                if (metaMatch) {
+                    try {
+                        title = JSON.parse(metaMatch[1]);
+                        // Remove the metadata comment from the content
+                        cleanContent = codeContent.replace(metaMatch[0], '');
+                    } catch (e) {
+                        // If parsing fails, ignore the title
+                    }
+                }
+                
+                // Build the title header if present
+                const titleHtml = title ? `<div class="code-block-title">${md.utils.escapeHtml(title)}</div>` : '';
+                
                 return `<div class="code-block-container relative">
-                    <button class="copy-button absolute top-2 right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                    ${titleHtml}
+                    <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
                             onclick="copyCodeToClipboard('${copyId}')" 
                             title="Copy to clipboard">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
                     </button>
-                    <pre id="${copyId}"><code${codeAttrs}>${codeContent}</code></pre>
+                    <pre id="${copyId}"><code${codeAttrs}>${cleanContent}</code></pre>
                 </div>`;
             });
             
@@ -709,18 +829,37 @@ async function parseMarkdown(markdownContent, filename = null) {
             });
         }
         
-        // Add copy-to-clipboard buttons to code blocks
+        // Add copy-to-clipboard buttons and titles to code blocks
         html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, codeAttrs, codeContent) => {
             const copyId = `copy-${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Extract title from metadata comment
+            let title = null;
+            let cleanContent = codeContent;
+            const metaMatch = codeContent.match(/<!--CODE_BLOCK_META:title=(".*?"|'.*?')-->/);
+            if (metaMatch) {
+                try {
+                    title = JSON.parse(metaMatch[1]);
+                    // Remove the metadata comment from the content
+                    cleanContent = codeContent.replace(metaMatch[0], '');
+                } catch (e) {
+                    // If parsing fails, ignore the title
+                }
+            }
+            
+            // Build the title header if present
+            const titleHtml = title ? `<div class="code-block-title">${md.utils.escapeHtml(title)}</div>` : '';
+            
             return `<div class="code-block-container relative">
-                <button class="copy-button absolute top-2 right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                ${titleHtml}
+                <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
                         onclick="copyCodeToClipboard('${copyId}')" 
                         title="Copy to clipboard">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                     </svg>
                 </button>
-                <pre id="${copyId}"><code${codeAttrs}>${codeContent}</code></pre>
+                <pre id="${copyId}"><code${codeAttrs}>${cleanContent}</code></pre>
             </div>`;
         });
         
