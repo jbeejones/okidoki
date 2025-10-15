@@ -8,9 +8,11 @@
 
 **OkiDoki** is a **free, open-source static site generator** specifically designed for creating professional **API documentation websites** and **technical documentation sites**. **Automatically generate API docs from OpenAPI/Swagger specs** or transform your **Markdown files** into beautiful, **searchable documentation** with **zero configuration** required. Perfect for **developer teams**, **software projects**, and **API providers** who need **fast documentation builds** (sub-second generation) and **lightweight, responsive websites**.
 
-**Create beautiful API documentation with minimal effort and zero maintenance** - Completely free and open source with no subscriptions, no limits, no vendor lock-in.
+**Create beautiful API documentation with minimal effort and zero maintenance**.
 
-Visit the full documentation at the [OkiDoki website](https://okidoki.dev) or [Contribute on GitHub](https://github.com/jbeejones/okidoki)
+Visit the full documentation at the [OkiDoki website](https://okidoki.dev).
+
+
 
 **The default OkiDoki start page:**
 
@@ -32,7 +34,7 @@ Install the **OkiDoki documentation generator** globally via npm from the [offic
 npm install -g okidoki
 ```
 
-**System Requirements**: Node.js 14+ | **Package Size**: ~2MB | **Installation Time**: < 30 seconds
+
 ## Quick Start Guide - Create Documentation in 4 Steps
 
 1. **Create a new documentation project directory:**
@@ -110,7 +112,9 @@ This is my first documentation page with **bold text** and `code`.
 
 ## My API Documentation
 
-OkiDoki automatically converts your OpenAPI specs into beautiful markdown documentation:
+OkiDoki converts Markdown documents into beautiful documentation:
+
+**example code:**
 
 ```http
 GET /api/users
@@ -170,4 +174,4 @@ Compare OkiDoki with other popular **API documentation tools** and **static site
 - **[Redoc](https://redoc.ly/)** - OpenAPI-focused tool (API docs only, no mixed content support)
 - **[Jekyll](https://jekyllrb.com/)** - Ruby-based static site generator popular on GitHub Pages (requires manual setup for API docs)
 
-**Detailed Comparison Guide**: Read our in-depth [documentation generator comparison and feature analysis](https://okidoki.dev/documentation-generator-comparison.html) to find the best tool for your **API documentation** and **technical writing** needs.
+**Detailed Comparison Guide**: Read our in-depth [documentation generator comparison and feature analysis](https://okidoki.dev/documentation-generator-comparison) to find the best tool for your **API documentation** and **technical writing** needs.
