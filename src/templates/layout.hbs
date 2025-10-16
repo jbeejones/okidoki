@@ -345,17 +345,38 @@
   <!-- Mermaid.js for diagram rendering -->
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ 
-      startOnLoad: true,
-      theme: 'base',
-      themeVariables: {
-        primaryColor: 'hsl(var(--p))',
-        primaryTextColor: 'hsl(var(--bc))',
-        primaryBorderColor: 'hsl(var(--b3))',
-        lineColor: 'hsl(var(--bc))',
-        secondaryColor: 'hsl(var(--s))',
-        tertiaryColor: 'hsl(var(--a))'
-      }
+    
+    // Convert code.language-mermaid to mermaid divs
+    document.addEventListener('DOMContentLoaded', function() {
+      const mermaidBlocks = document.querySelectorAll('code.language-mermaid');
+      mermaidBlocks.forEach((block) => {
+        const pre = block.parentElement;
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = block.textContent;
+        
+        // Replace the pre/code block with the mermaid div
+        if (pre && pre.tagName === 'PRE') {
+          pre.parentNode.replaceChild(mermaidDiv, pre);
+        }
+      });
+      
+      // Initialize mermaid after conversion
+      mermaid.initialize({ 
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          primaryColor: 'hsl(var(--p))',
+          primaryTextColor: 'hsl(var(--bc))',
+          primaryBorderColor: 'hsl(var(--b3))',
+          lineColor: 'hsl(var(--bc))',
+          secondaryColor: 'hsl(var(--s))',
+          tertiaryColor: 'hsl(var(--a))'
+        }
+      });
+      
+      // Manually trigger mermaid rendering
+      mermaid.run();
     });
   </script>
 </head>

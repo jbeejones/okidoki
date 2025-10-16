@@ -5,7 +5,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 import markdownItImsize from 'markdown-it-imsize';
 import markdownItToc from 'markdown-it-table-of-contents';
 import markdownItMathjax3 from 'markdown-it-mathjax3';
-import markdownItMermaid from 'markdown-it-mermaid';
+// import markdownItMermaid from 'markdown-it-mermaid'; // Disabled - using client-side mermaid.js instead
 import { full as markdownItEmoji } from 'markdown-it-emoji';
 import markdownItAttrs from 'markdown-it-attrs';
 
@@ -376,7 +376,7 @@ md.use(markdownItToc, {
   }
 })
 md.use(markdownItMathjax3)
-md.use(markdownItMermaid.default)
+// md.use(markdownItMermaid.default) // Disabled - using client-side mermaid.js instead
 md.use(markdownItEmoji)
 
 // Register tabs functionality
@@ -766,7 +766,7 @@ async function parseMarkdown(markdownContent, filename = null) {
                 
                 return `<div class="code-block-container relative">
                     ${titleHtml}
-                    <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                    <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-neutral" 
                             onclick="copyCodeToClipboard('${copyId}')" 
                             title="Copy to clipboard">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -852,7 +852,7 @@ async function parseMarkdown(markdownContent, filename = null) {
             
             return `<div class="code-block-container relative">
                 ${titleHtml}
-                <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-ghost opacity-70 hover:opacity-100" 
+                <button class="copy-button absolute ${title ? 'top-10' : 'top-2'} right-2 btn btn-xs btn-neutral" 
                         onclick="copyCodeToClipboard('${copyId}')" 
                         title="Copy to clipboard">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

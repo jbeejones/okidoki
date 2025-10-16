@@ -92,12 +92,17 @@ function fallbackCopyToClipboard(text, button) {
     }
 }
 
-// Show copy success feedback
+// Show copy success feedback using DaisyUI tooltip
 function showCopySuccess(button) {
     if (button) {
-        button.classList.add('copied');
+        // Add DaisyUI tooltip classes and data attribute
+        button.classList.add('tooltip', 'tooltip-open', 'tooltip-success');
+        button.setAttribute('data-tip', 'Copied!');
+        
+        // Remove tooltip after 2 seconds
         setTimeout(() => {
-            button.classList.remove('copied');
+            button.classList.remove('tooltip', 'tooltip-open', 'tooltip-success');
+            button.removeAttribute('data-tip');
         }, 2000);
     }
 }

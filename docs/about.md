@@ -19,7 +19,16 @@ OkiDoki is a minimal-config static site generator focused on developer documenta
 
 **Static output**: Generates plain HTML/CSS/JS files that work on any web server or CDN. No runtime dependencies.
 
-
+```mermaid
+graph TD
+    A[Code Commit] --> B{Build & Test};
+    B -- Success --> C[Package Artifact];
+    B -- Failure --> D(Notify Developer);
+    C --> E[Deploy to Staging];
+    E -- Tests Pass --> F[Deploy to Production];
+    E -- Tests Fail --> D;
+    F --> G(Monitor & Feedback);
+```
 
 ## Quick Start
 

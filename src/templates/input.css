@@ -831,63 +831,21 @@
   }
 }
 @utility copy-button {
+  /* Let DaisyUI btn-neutral handle theming */
   z-index: 10 !important;
-  transition: opacity 0.2s ease !important;
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.7
-  ) !important; /* Dark background for visibility */
-  color: white !important; /* White text/icon for contrast */
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.2s ease !important;
+  
+  /* Enhance visibility with shadow */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.9) !important;
-    opacity: 1 !important;
-  }
-
-  .code-block-container:hover & {
-    opacity: 1 !important;
-  }
-
-  /* Success state for copy button */
-  &.copied {
-    background-color: rgb(34 197 94) !important; /* green-500 */
-    color: white !important;
-  }
-
-  &.copied svg {
-    display: none;
-  }
-
-  &.copied::after {
-    content: '✓';
-    font-size: 0.875rem;
-    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   }
 
   @media (max-width: 1023px) {
     z-index: 1 !important;
   }
   z-index: 10 !important;
-}
-@utility copied {
-  /* Success state for copy button */
-  &.copy-button {
-    background-color: rgb(34 197 94) !important; /* green-500 */
-    color: white !important;
-  }
-
-  &.copy-button svg {
-    display: none;
-  }
-
-  &.copy-button::after {
-    content: '✓';
-    font-size: 0.875rem;
-    font-weight: bold;
-  }
 }
 /* Code block title styles */
 .code-block-title {

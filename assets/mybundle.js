@@ -1819,9 +1819,11 @@
   }
   function showCopySuccess(button) {
     if (button) {
-      button.classList.add("copied");
+      button.classList.add("tooltip", "tooltip-open", "tooltip-success");
+      button.setAttribute("data-tip", "Copied!");
       setTimeout(() => {
-        button.classList.remove("copied");
+        button.classList.remove("tooltip", "tooltip-open", "tooltip-success");
+        button.removeAttribute("data-tip");
       }, 2e3);
     }
   }

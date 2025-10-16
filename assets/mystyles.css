@@ -1286,6 +1286,92 @@ video {
   margin-bottom: 0;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  --tt-bg: var(--color-neutral);
+  --tt-off: calc(100% + 0.5rem);
+  --tt-tail: calc(100% + 1px + 0.25rem);
+}
+
+.tooltip > :where(.tooltip-content), .tooltip:where([data-tip]):before {
+  position: absolute;
+  max-width: 20rem;
+  border-radius: var(--radius-field);
+  padding-inline: calc(0.25rem * 2);
+  padding-block: calc(0.25rem * 1);
+  text-align: center;
+  white-space: normal;
+  color: var(--color-neutral-content);
+  opacity: 0%;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  background-color: var(--tt-bg);
+  width: -moz-max-content;
+  width: max-content;
+  pointer-events: none;
+  z-index: 2;
+  --tw-content: attr(data-tip);
+  content: var(--tw-content);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tooltip > :where(.tooltip-content), .tooltip:where([data-tip]):before {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
+  }
+
+  .tooltip:after {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
+  }
+}
+
+.tooltip:after {
+  position: absolute;
+  opacity: 0%;
+  background-color: var(--tt-bg);
+  content: "";
+  pointer-events: none;
+  width: 0.625rem;
+  height: 0.25rem;
+  display: block;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: -1px 0;
+          mask-position: -1px 0;
+  --mask-tooltip: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 8 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.500009 1C3.5 1 3.00001 4 5.00001 4C7 4 6.5 1 9.5 1C10 1 10 0.499897 10 0H0C-1.99338e-08 0.5 0 1 0.500009 1Z' fill='black'/%3E%3C/svg%3E%0A");
+  -webkit-mask-image: var(--mask-tooltip);
+          mask-image: var(--mask-tooltip);
+}
+
+.tooltip.tooltip-open > .tooltip-content, .tooltip.tooltip-open[data-tip]:before, .tooltip.tooltip-open:after, .tooltip[data-tip]:not([data-tip=""]):hover > .tooltip-content, .tooltip[data-tip]:not([data-tip=""]):hover[data-tip]:before, .tooltip[data-tip]:not([data-tip=""]):hover:after, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover > .tooltip-content, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover[data-tip]:before, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover:after, .tooltip:has(:focus-visible) > .tooltip-content, .tooltip:has(:focus-visible)[data-tip]:before, .tooltip:has(:focus-visible):after {
+  opacity: 100%;
+  --tt-pos: 0rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tooltip.tooltip-open > .tooltip-content, .tooltip.tooltip-open[data-tip]:before, .tooltip.tooltip-open:after, .tooltip[data-tip]:not([data-tip=""]):hover > .tooltip-content, .tooltip[data-tip]:not([data-tip=""]):hover[data-tip]:before, .tooltip[data-tip]:not([data-tip=""]):hover:after, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover > .tooltip-content, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover[data-tip]:before, .tooltip:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover:after, .tooltip:has(:focus-visible) > .tooltip-content, .tooltip:has(:focus-visible)[data-tip]:before, .tooltip:has(:focus-visible):after {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  }
+}
+
+.tooltip > .tooltip-content, .tooltip[data-tip]:before, .tooltip-top > .tooltip-content, .tooltip-top[data-tip]:before {
+  transform: translateX(-50%) translateY(var(--tt-pos, 0.25rem));
+  inset: auto auto var(--tt-off) 50%;
+}
+
+.tooltip:after, .tooltip-top:after {
+  transform: translateX(-50%) translateY(var(--tt-pos, 0.25rem));
+  inset: auto auto var(--tt-tail) 50%;
+}
+
+.tooltip-success {
+  --tt-bg: var(--color-success);
+}
+
+.tooltip-success > .tooltip-content, .tooltip-success[data-tip]:before {
+  color: var(--color-success-content);
+}
+
 .\!dropdown {
   position: relative !important;
   display: inline-block !important;
@@ -4387,6 +4473,11 @@ video {
   --btn-fg: var(--color-secondary-content);
 }
 
+.btn-neutral {
+  --btn-color: var(--color-neutral);
+  --btn-fg: var(--color-neutral-content);
+}
+
 .btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible) {
   --btn-shadow: "";
   --btn-bg: #0000;
@@ -7126,50 +7217,18 @@ summary::marker {
 }
 
 @utility copy-button {
+  /* Let DaisyUI btn-neutral handle theming */
+
   z-index: 10 !important;
 
-  transition: opacity 0.2s ease !important;
+  transition: all 0.2s ease !important;
 
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.7
-  ) !important;
+  /* Enhance visibility with shadow */
 
-  /* Dark background for visibility */
-
-  color: white !important;
-
-  /* White text/icon for contrast */
-
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.9) !important;
-    opacity: 1 !important;
-  }
-
-  .code-block-container:hover & {
-    opacity: 1 !important;
-  }
-
-  /* Success state for copy button */
-
-  &.copied {
-    background-color: rgb(34 197 94) !important;
-    /* green-500 */
-    color: white !important;
-  }
-
-  &.copied svg {
-    display: none;
-  }
-
-  &.copied::after {
-    content: '✓';
-    font-size: 0.875rem;
-    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   }
 
   @media (max-width: 1023px) {
@@ -7177,26 +7236,6 @@ summary::marker {
   }
 
   z-index: 10 !important;
-}
-
-@utility copied {
-  /* Success state for copy button */
-
-  &.copy-button {
-    background-color: rgb(34 197 94) !important;
-    /* green-500 */
-    color: white !important;
-  }
-
-  &.copy-button svg {
-    display: none;
-  }
-
-  &.copy-button::after {
-    content: '✓';
-    font-size: 0.875rem;
-    font-weight: bold;
-  }
 }
 
 /* Code block title styles */
@@ -7775,10 +7814,6 @@ summary::marker {
 
 .hover\:text-primary:hover {
   color: var(--color-primary);
-}
-
-.hover\:opacity-100:hover {
-  opacity: 1;
 }
 
 .hover\:shadow-xl:hover {
